@@ -8,10 +8,7 @@ body {
   font-family: sans-serif;
   min-height: 100vh;
   line-height: 1.5;
-}
-
-#root {
-  padding: 20px;
+  background-color: blue;
 }
 
 button {

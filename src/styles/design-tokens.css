@@ -1,0 +1,180 @@
+/**
+ * Design Tokens - StreamLayer
+ * Variables CSS centralisées pour une cohérence visuelle
+ */
+
+:root {
+    /* ========== COULEURS ========== */
+
+    /* Palette Principale */
+    --color-primary: #6366f1;
+    --color-primary-light: #818cf8;
+    --color-primary-dark: #4f46e5;
+    --color-secondary: #8b5cf6;
+    --color-accent: #d946ef;
+
+    /* Gradients Prédéfinis */
+    --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --gradient-primary-vibrant: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+    --gradient-accent: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+    --gradient-text: linear-gradient(to right, #fff, #818cf8);
+    --gradient-text-primary: linear-gradient(135deg, #fff 30%, #6366f1 100%);
+    --gradient-dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-red: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+
+    /* Couleurs Neutres */
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+
+    /* Couleurs de Fond */
+    --bg-primary: #F9F9F9;
+    --bg-secondary: #ffffff;
+    --bg-dark: #030712;
+    --bg-card: #111827;
+
+    /* Couleurs de Texte */
+    --text-primary: #222222;
+    --text-secondary: #666666;
+    --text-tertiary: #888888;
+    --text-light: #9ca3af;
+    --text-white: #f9fafb;
+
+    /* Couleurs d'État */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* Couleurs Spotify-style */
+    --color-spotify-green: #1db954;
+    --color-spotify-green-hover: #1ed760;
+
+    /* ========== ESPACEMENTS ========== */
+
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+    --spacing-3xl: 32px;
+    --spacing-4xl: 48px;
+
+    /* ========== BORDER-RADIUS ========== */
+
+    --radius-none: 0;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+    --radius-3xl: 24px;
+    --radius-round: 50%;
+    --radius-pill: 99px;
+
+    /* ========== OMBRES PORTÉES ========== */
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
+    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+    /* Ombres colorées */
+    --shadow-primary: 0 6px 16px rgba(99, 102, 241, 0.35);
+    --shadow-primary-hover: 0 10px 24px rgba(99, 102, 241, 0.5);
+    --shadow-accent: 0 6px 16px rgba(239, 68, 68, 0.3);
+    --shadow-accent-hover: 0 8px 20px rgba(239, 68, 68, 0.5);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+
+    /* ========== TRANSITIONS ========== */
+
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s ease;
+    --transition-slower: 0.4s ease;
+
+    /* Transitions spécifiques */
+    --transition-transform: transform 0.2s ease;
+    --transition-opacity: opacity 0.2s ease;
+    --transition-colors: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    --transition-all: all 0.3s ease;
+
+    /* ========== TYPOGRAPHIE ========== */
+
+    /* Tailles de police */
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
+    --font-size-3xl: 1.875rem;
+    /* 30px */
+    --font-size-4xl: 2.25rem;
+    /* 36px */
+    --font-size-5xl: 3rem;
+    /* 48px */
+
+    /* Poids de police */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* Hauteur de ligne */
+    --line-height-tight: 1.1;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.8;
+
+    /* ========== DIMENSIONS SPÉCIFIQUES ========== */
+
+    /* Player */
+    --player-width-desktop: 60vw;
+    --player-collapsed-height: 72px;
+    --player-expanded-height: 600px;
+    --player-cover-sm: 56px;
+    --player-cover-md: 48px;
+
+    /* Hitbox (zones cliquables élargies) */
+    --hitbox-padding: 8px;
+
+    /* Z-index */
+    --z-player: 9999;
+    --z-modal: 2001;
+    --z-overlay: 2000;
+    --z-header: 1000;
+    --z-back-to-top: 1500;
+
+    /* ========== ANIMATIONS ========== */
+
+    /* Durées */
+    --animation-duration-fast: 200ms;
+    --animation-duration-base: 300ms;
+    --animation-duration-slow: 500ms;
+
+    /* Easing */
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}

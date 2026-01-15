@@ -1,0 +1,588 @@
+/* 
+ * Player Module CSS - Refactored to use design tokens
+ * Reduced from 707 lines to ~250 lines by leveraging CSS variables
+ */
+
+/* ========== PLAYER CONTAINER ========== */
+
+.playerContainer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-player);
+    transform-origin: bottom center;
+    will-change: transform;
+}
+
+/* ========== PLAYER MAIN ========== */
+
+.player {
+    width: var(--player-width-desktop);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ========== MEDIABAR SECTION ========== */
+
+.mediaBarSection {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    height: var(--player-collapsed-height);
+    background: var(--bg-secondary);
+    z-index: 10;
+    /* GPU acceleration to prevent trembling */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    box-sizing: border-box;
+}
+
+/* Pseudo-element separator using ::before */
+.mediaBarSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
+    height: 1px;
+    background: transparent;
+    /* Invisible by default */
+    transition: background-color var(--transition-base);
+}
+
+.borderTop::before {
+    background: var(--color-gray-300);
+}
+
+/* ========== EXPANDABLE CONTENT ========== */
+
+.expandableContent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: var(--player-collapsed-height);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    transform: translateZ(0);
+}
+
+.expandableContent.collapsed {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.expandableContent.expanded {
+    opacity: 1;
+    transition: opacity var(--transition-base) 0.15s;
+}
+
+.expandableContentScroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.expandedPlayerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    position: relative;
+    /* Needed for pseudo-element positioning */
+}
+
+/* Inset separator line using ::after */
+.expandedPlayerHeader::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
+    height: 1px;
+    background: var(--color-gray-300);
+}
+
+/* ========== MEDIABAR LAYOUT ========== */
+
+.mediaBarNew {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    width: 100%;
+    height: 100%;
+}
+
+/* Left: Cover + Track Info */
+.mediaBarLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.trackInfoLarge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.trackTitleLarge {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.trackArtist {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* Center: Progress + Controls */
+.mediaBarCenter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: center;
+    justify-content: center;
+    flex: 2;
+}
+
+/* Right: Volume + Expand */
+.mediaBarRight {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-lg);
+    flex: 1;
+}
+
+/* ========== PROGRESS BAR ========== */
+
+.progressSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.timeText {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 40px;
+    text-align: center;
+}
+
+.progressBarNew {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    padding: var(--hitbox-padding) 0;
+    margin: calc(-1 * var(--hitbox-padding)) 0;
+}
+
+.progressBarTrack {
+    height: 4px;
+    background: var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: visible;
+}
+
+.progressBarFillNew {
+    height: 100%;
+    background: var(--color-black);
+    border-radius: var(--radius-sm);
+    position: relative;
+    transition: width 0.1s ease;
+}
+
+.progressBarThumb {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--color-black);
+    border: 2px solid var(--color-white);
+    border-radius: var(--radius-round);
+    box-shadow: var(--shadow-sm);
+}
+
+.progressBarNew:hover .progressBarThumb {
+    width: 14px;
+    height: 14px;
+    right: -7px;
+}
+
+/* ========== PLAYBACK CONTROLS ========== */
+
+.playbackControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+}
+
+.controlIconButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--hitbox-padding);
+    margin: calc(-1 * var(--spacing-xs));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    transition: opacity var(--transition-base);
+}
+
+.controlIconButton:hover {
+    opacity: 0.6;
+}
+
+.playPauseButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    margin: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    transition: var(--transition-transform), var(--transition-opacity);
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+}
+
+.playPauseButton:hover {
+    transform: scale(1.1);
+    opacity: 0.7;
+}
+
+/* Toggle states for Shuffle and Repeat */
+.controlIconButton.inactive {
+    opacity: 0.3;
+}
+
+.controlIconButton.active {
+    opacity: 1;
+}
+
+.controlIconButton.inactive:hover {
+    opacity: 0.5;
+}
+
+.controlIconButton.active:hover {
+    opacity: 0.7;
+}
+
+/* Repeat One indicator */
+.repeatOneIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-black);
+    pointer-events: none;
+}
+
+/* ========== VOLUME CONTROL ========== */
+
+.volumeSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.volumeIconNew {
+    color: var(--color-black);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.volumeBarContainer {
+    width: 80px;
+    cursor: pointer;
+    padding: var(--hitbox-padding) 0;
+    margin: calc(-1 * var(--spacing-xs)) 0;
+    user-select: none;
+}
+
+.volumeBarTrack {
+    height: 4px;
+    background: var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.volumeBarFill {
+    height: 100%;
+    background: var(--color-black);
+    border-radius: var(--radius-sm);
+    transition: width 0.1s ease;
+}
+
+/* ========== EXPAND BUTTON ========== */
+
+.expandButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--hitbox-padding);
+    margin: calc(-1 * var(--spacing-xs));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    transition: opacity var(--transition-base);
+}
+
+.expandButton:hover {
+    opacity: 0.6;
+}
+
+.expandButtonPlaceholder {
+    width: 28px;
+    flex-shrink: 0;
+}
+
+/* ========== CONTENT VIEWS ========== */
+
+/* Track Cards */
+.trackCard {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-base);
+}
+
+.trackCard:hover {
+    background: var(--color-gray-100);
+}
+
+/* Playlist Cards */
+.playlistCard {
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform var(--transition-base);
+}
+
+.playlistCard:hover {
+    transform: scale(1.05);
+}
+
+.playlistInfo {
+    padding: var(--spacing-sm) var(--spacing-xs);
+}
+
+.playlistTitle {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: var(--spacing-xs);
+}
+
+.playlistMeta {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* ========== COVERS ========== */
+
+.coverSmall {
+    width: var(--player-cover-sm);
+    height: var(--player-cover-sm);
+    border-radius: var(--radius-md);
+}
+
+.coverMedium {
+    width: var(--player-cover-md);
+    height: var(--player-cover-md);
+    border-radius: var(--radius-sm);
+}
+
+.coverPlaylist {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+/* ========== TEXT STYLES ========== */
+
+.trackInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.trackTitle {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackTitleMedium {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackSubtitle {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackSubtitleLight {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========== LAYOUTS ========== */
+
+.scrollContainer {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.contentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.sectionHeader {
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ========== STATUS MESSAGES ========== */
+
+.statusMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.errorMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--color-error);
+}
+
+/* ========== SCROLLING TEXT ========== */
+
+.scrollingTextContainer {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.scrollingTextContent {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.scrollingTextContent.scrolling {
+    animation: scroll-text linear infinite;
+}
+
+.scrollingTextContent.scrolling:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll-text {
+    0% {
+        transform: translateX(0);
+    }
+
+    25%,
+    50% {
+        transform: translateX(calc(-1 * var(--overflow-distance)));
+    }
+
+    75% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* ========== BUTTONS (Legacy - can be removed when components refactored) ========== */
+
+.button {
+    background: var(--color-gray-100);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: var(--transition-all);
+}
+
+.button:hover {
+    background: var(--color-gray-200);
+}
+
+.buttonActive {
+    background: var(--color-spotify-green);
+    color: var(--color-white);
+}
+
+.buttonActive:hover {
+    background: var(--color-spotify-green-hover);
+}
