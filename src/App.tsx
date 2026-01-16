@@ -3,7 +3,7 @@ import { Player } from './components/Player/Player';
 
 function App() {
   // TODO: Récupérer le projectId depuis les props ou la config
-  const projectId = '34';
+  const projectId = '35';
 
   return (
     <PlayerProvider projectId={projectId}>
