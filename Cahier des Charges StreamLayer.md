@@ -243,3 +243,5 @@ Paramètres principaux :
 - Pas de gestion pour playlist vide
 - Etat du player non synchronisé (scroll dans une playlist)
 - Remettre à zéro la musique lorsqu'on lance une nouvelle musique
+- Seeking lag quand playing
+- Bug barre de son laisse des points gris 
