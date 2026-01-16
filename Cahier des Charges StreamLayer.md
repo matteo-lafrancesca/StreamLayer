@@ -238,3 +238,8 @@ Paramètres principaux :
 - `apiBaseUrl` 
 - `theme` : couleurs personnalisées
 - `position` : placement du lecteur 
+
+### Bugs rencontrés
+- Pas de gestion pour playlist vide
+- Etat du player non synchronisé (scroll dans une playlist)
+- Remettre à zéro la musique lorsqu'on lance une nouvelle musique
