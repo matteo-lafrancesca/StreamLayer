@@ -1,6 +1,6 @@
-import { useAlbumCover } from '../../hooks/useAlbumCover';
-import { usePlaylistCover } from '../../hooks/usePlaylistCover';
-import type { CoverSize } from '../../services/api/covers';
+import { useAlbumCover } from '@hooks/useAlbumCover';
+import { usePlaylistCover } from '@hooks/usePlaylistCover';
+import type { ImageSize } from '@definitions/player';
 
 interface AuthenticatedImageProps {
     alt: string;
@@ -8,7 +8,7 @@ interface AuthenticatedImageProps {
     className?: string;
     type: 'album' | 'playlist';
     id: number;
-    size?: CoverSize;
+    size?: ImageSize;
 }
 
 /**
@@ -41,3 +41,4 @@ export function AuthenticatedImage({
 
     return <img src={blobUrl} alt={alt} style={style} className={className} />;
 }
+

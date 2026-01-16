@@ -1,14 +1,15 @@
-import { usePlayer } from '../../context/PlayerContext';
-import { usePlaylistTracks } from '../../hooks/usePlaylistTracks';
-import { useAlbum } from '../../hooks/useAlbum';
-import { getTrackDisplayInfo } from '../../utils/track';
-import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
-import { usePreloadAlbumCovers } from '../../hooks/usePreloadAlbumCovers';
+import { useCallback } from 'react';
+import { usePlayer } from '@context/PlayerContext';
+import { usePlaylistTracks } from '@hooks/usePlaylistTracks';
+import { usePreloadAlbumCovers } from '@hooks/usePreloadAlbumCovers';
 import { useMemo } from 'react';
-import styles from '../../styles/PlayerViews.module.css';
+import { PlaylistHeader } from './PlaylistHeader';
+import { PlaylistTableHeader } from './PlaylistTableHeader';
+import { PlaylistTrackRow } from './PlaylistTrackRow';
+import styles from '@styles/PlayerViews.module.css';
 
 export function PlaylistView() {
-    const { selectedPlaylist, setPlayingTrack } = usePlayer();
+    const { selectedPlaylist, setPlayingTrack, playbackControls } = usePlayer();
     const { tracks, loading, error } = usePlaylistTracks(selectedPlaylist?.id);
 
     // Extraire les IDs d'albums uniques pour le préchargement
@@ -21,6 +22,22 @@ export function PlaylistView() {
     // Précharger toutes les covers
     const { loading: loadingCovers } = usePreloadAlbumCovers(albumIds, 's');
 
+    // Handler pour lire tous les titres
+    const handlePlayAll = useCallback(() => {
+        if (tracks && tracks.length > 0) {
+            setPlayingTrack(tracks[0]);
+        }
+    }, [tracks, setPlayingTrack]);
+
+    // Handler pour lecture aléatoire
+    const handleShufflePlay = useCallback(() => {
+        if (tracks && tracks.length > 0) {
+            // Active le shuffle puis lance le premier track
+            playbackControls.onShuffle();
+            setPlayingTrack(tracks[0]);
+        }
+    }, [tracks, setPlayingTrack, playbackControls]);
+
     if (!selectedPlaylist) {
         return (
             <div className={styles.statusMessage}>
@@ -30,7 +47,6 @@ export function PlaylistView() {
     }
 
     // Écran de chargement vide pendant le chargement des tracks OU des covers
-    // Combine les deux états pour éviter tout flash
     if (loading || loadingCovers) {
         return (
             <div className={styles.scrollContainerLoading} />
@@ -45,61 +61,35 @@ export function PlaylistView() {
         );
     }
 
+    if (!tracks || tracks.length === 0) {
+        return (
+            <div className={styles.statusMessage}>
+                Cette playlist est vide
+            </div>
+        );
+    }
+
     return (
         <div className={styles.scrollContainer}>
+            <PlaylistHeader
+                playlist={selectedPlaylist}
+                tracks={tracks}
+                onPlayAll={handlePlayAll}
+                onShufflePlay={handleShufflePlay}
+            />
 
+            <PlaylistTableHeader />
 
-            <div className={styles.contentList}>
-                {tracks?.map((track) => {
-                    const displayInfo = getTrackDisplayInfo(track, 's');
-
-                    return (
-                        <div
-                            key={track.id}
-                            onClick={() => setPlayingTrack(track)}
-                            className={styles.trackCard}
-                        >
-                            {/* Cover */}
-                            <AuthenticatedImage
-                                type="album"
-                                id={track.id_album}
-                                size="s"
-                                alt={displayInfo.title}
-                                className={styles.coverMedium}
-                            />
-
-                            {/* Track Info */}
-                            <div className={styles.trackInfo}>
-                                <div className={styles.trackTitleMedium}>
-                                    {displayInfo.title}
-                                </div>
-                                <div className={styles.trackSubtitle}>
-                                    {displayInfo.artist}
-                                </div>
-                            </div>
-
-                            {/* Album Name - will be loaded separately */}
-                            <TrackAlbumName albumId={track.id_album} />
-
-                            {/* Duration */}
-                            <div className={styles.durationDisplay}>
-                                {displayInfo.duration}
-                            </div>
-                        </div>
-                    );
-                })}
+            <div className={styles.tracksList}>
+                {tracks.map((track, index) => (
+                    <PlaylistTrackRow
+                        key={track.id}
+                        track={track}
+                        index={index + 1}
+                        onClick={() => setPlayingTrack(track)}
+                    />
+                ))}
             </div>
-        </div>
-    );
-}
-
-// Sous-composant pour charger le nom de l'album
-function TrackAlbumName({ albumId }: { albumId: number }) {
-    const { album } = useAlbum(albumId);
-
-    return (
-        <div className={styles.trackSubtitleLight} style={{ minWidth: '120px' }}>
-            {album?.title || 'Chargement...'}
         </div>
     );
 }

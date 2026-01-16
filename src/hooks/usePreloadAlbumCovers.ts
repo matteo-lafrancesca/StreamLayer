@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { usePlayer } from '../context/PlayerContext';
-import { fetchAlbumCover, type CoverSize } from '../services/api/covers';
+import { usePlayer } from '@context/PlayerContext';
+import { fetchAlbumCover, type CoverSize } from '@services/api/covers';
 import { hasCachedImage, setCachedImage } from '../cache/imageCache';
 
 /**
@@ -65,3 +65,4 @@ export function usePreloadAlbumCovers(
 
     return { loading, error };
 }
+

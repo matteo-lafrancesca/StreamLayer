@@ -37,3 +37,4 @@ export function useSlider(onChange: (value: number) => void): UseSliderReturn {
         handleMouseDown,
     };
 }
+

@@ -1,5 +1,5 @@
-import type { Track } from '../types/track';
-import { getAlbumCoverUrl, type CoverSize } from '../services/api/covers';
+import type { Track } from '@definitions/track';
+import { getAlbumCoverUrl, type CoverSize } from '@services/api/covers';
 import { formatDuration } from './time';
 
 /**
@@ -49,3 +49,4 @@ export function getTrackDisplayInfo(track: Track, coverSize: CoverSize = 'm') {
         // albumName: track.album?.name || 'Album inconnu', // À ajouter quand disponible
     };
 }
+

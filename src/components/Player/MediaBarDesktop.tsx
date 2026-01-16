@@ -1,12 +1,12 @@
-import { usePlayer } from '../../context/PlayerContext';
+import { usePlayer } from '@context/PlayerContext';
 import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
-import { IconButton } from '../UI';
-import { ChevronUp, ChevronDown } from 'lucide-react';
-import styles from '../../styles/MediaBarDesktop.module.css';
-import type { MediaBarProps } from '../../types/player';
+import { IconButton } from '@components/UI';
+import { ChevronUp } from 'lucide-react';
+import styles from '@styles/MediaBarDesktop.module.css';
+import type { MediaBarProps } from '@definitions/player';
 
 /**
  * Desktop MediaBar component
@@ -55,14 +55,17 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
                     volume={volume}
                     onVolumeChange={setVolume}
                 />
-                <IconButton
-                    icon={isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-                    onClick={onExpandToggle}
-                    className={styles.expandButton}
-                    title={isExpanded ? 'Réduire' : 'Agrandir'}
-                    enlargeHitbox
-                />
+                <div style={{ opacity: isExpanded ? 0 : 1, pointerEvents: isExpanded ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                    <IconButton
+                        icon={<ChevronUp size={20} />}
+                        onClick={onExpandToggle}
+                        className={styles.expandButton}
+                        title="Agrandir"
+                        enlargeHitbox
+                    />
+                </div>
             </div>
         </div>
     );
 }
+

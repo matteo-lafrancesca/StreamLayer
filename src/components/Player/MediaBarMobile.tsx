@@ -1,9 +1,9 @@
-import { usePlayer } from '../../context/PlayerContext';
+import { usePlayer } from '@context/PlayerContext';
 import { TrackDisplay } from './TrackDisplay';
-import { IconButton } from '../UI';
+import { IconButton } from '@components/UI';
 import { Play, Pause } from 'lucide-react';
-import styles from '../../styles/MediaBarMobile.module.css';
-import type { MediaBarProps } from '../../types/player';
+import styles from '@styles/MediaBarMobile.module.css';
+import type { MediaBarProps } from '@definitions/player';
 
 /**
  * Mobile MediaBar component
@@ -39,3 +39,4 @@ export function MediaBarMobile({ onExpandToggle }: Omit<MediaBarProps, 'isExpand
         </div>
     );
 }
+

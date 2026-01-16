@@ -1,0 +1,44 @@
+/* Playlist Table Header Component */
+
+.header {
+    display: grid;
+    grid-template-columns: 40px 1fr 200px 80px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-gray-200);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.indexColumn {
+    text-align: center;
+}
+
+.albumColumn {
+    display: block;
+}
+
+.durationColumn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.clockIcon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive: masquer la colonne album en dessous de 700px */
+@container (max-width: 700px) {
+    .header {
+        grid-template-columns: 40px 1fr 80px;
+    }
+
+    .albumColumn {
+        display: none;
+    }
+}

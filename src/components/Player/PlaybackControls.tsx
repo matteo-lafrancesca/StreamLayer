@@ -1,8 +1,8 @@
 import { Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Repeat1 } from 'lucide-react';
-import { IconButton } from '../UI';
-import styles from '../../styles/PlaybackControls.module.css';
-import type { PlaybackControlsProps } from '../../types/player';
-import { usePlayer } from '../../context/PlayerContext';
+import { IconButton } from '@components/UI';
+import styles from '@styles/PlaybackControls.module.css';
+import type { PlaybackControlsProps } from '@definitions/player';
+import { usePlayer } from '@context/PlayerContext';
 
 export function PlaybackControls({
     isPlaying,
@@ -59,3 +59,4 @@ export function PlaybackControls({
         </div>
     );
 }
+

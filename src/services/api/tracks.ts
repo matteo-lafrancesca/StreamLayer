@@ -1,4 +1,4 @@
-import type { Track } from '../../types/track';
+import type { Track } from '@definitions/track';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -30,3 +30,4 @@ export async function getTrackInfo(trackId: number, accessToken?: string): Promi
 
     return await response.json();
 }
+

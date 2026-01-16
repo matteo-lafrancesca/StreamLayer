@@ -20,3 +20,4 @@ export interface Album {
     artists: Artist[];
     rights: Rights;
 }
+

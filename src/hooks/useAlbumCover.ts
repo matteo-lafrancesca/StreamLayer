@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { usePlayer } from '../context/PlayerContext';
-import { fetchAlbumCover, type CoverSize } from '../services/api/covers';
+import { usePlayer } from '@context/PlayerContext';
+import { fetchAlbumCover, type CoverSize } from '@services/api/covers';
 import { getCachedImage, setCachedImage } from '../cache/imageCache';
 
 /**
@@ -44,3 +44,4 @@ export function useAlbumCover(
 
     return blobUrl;
 }
+

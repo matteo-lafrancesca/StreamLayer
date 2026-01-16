@@ -60,3 +60,4 @@ export function useProgressTimer({
         };
     }, [isPlaying, progress, duration, onProgressChange]);
 }
+

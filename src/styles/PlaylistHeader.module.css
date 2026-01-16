@@ -1,0 +1,54 @@
+/* Playlist Header Component */
+
+.header {
+    display: flex;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.coverContainer {
+    flex-shrink: 0;
+}
+
+.cover {
+    width: 192px;
+    height: 192px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    flex: 1;
+}
+
+.title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.metadata {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.metadataSeparator {
+    color: var(--text-tertiary);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}

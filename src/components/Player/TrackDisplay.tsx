@@ -1,8 +1,8 @@
-import { usePlayer } from '../../context/PlayerContext';
-import { getTrackDisplayInfo } from '../../utils/track';
-import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
+import { usePlayer } from '@context/PlayerContext';
+import { getTrackDisplayInfo } from '@utils/track';
+import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
 import { ScrollingText } from './ScrollingText';
-import styles from '../../styles/TrackDisplay.module.css';
+import styles from '@styles/TrackDisplay.module.css';
 
 /**
  * TrackDisplay - Shared component for displaying album cover and track info
@@ -47,3 +47,4 @@ export function TrackDisplay() {
         </div>
     );
 }
+

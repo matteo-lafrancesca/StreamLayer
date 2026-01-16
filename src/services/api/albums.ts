@@ -1,4 +1,4 @@
-import type { Album } from '../../types/album';
+import type { Album } from '@definitions/album';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -30,3 +30,4 @@ export async function getAlbumInfo(albumId: number, accessToken?: string): Promi
 
     return await response.json();
 }
+

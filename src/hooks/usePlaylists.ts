@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getPlaylists } from '../services/api/playlists';
-import type { Playlist } from '../types/playlist';
-import { usePlayer } from '../context/PlayerContext';
+import { getPlaylists } from '@services/api/playlists';
+import type { Playlist } from '@definitions/playlist';
+import { usePlayer } from '@context/PlayerContext';
+import { useApi } from './useApi';
 
 // Cache simple en mémoire pour les playlists
 const playlistsCache = new Map<string, Playlist[]>();
@@ -12,13 +13,9 @@ interface UsePlaylistsResult {
     error: Error | null;
 }
 
-/**
- * Hook pour récupérer toutes les playlists d'un projet
- * @param projectId - L'ID du projet
- * @returns Playlists, état de chargement et erreur éventuelle
- */
 export function usePlaylists(projectId: string): UsePlaylistsResult {
     const { accessToken } = usePlayer();
+    const { authenticatedCall } = useApi();
     const [playlists, setPlaylists] = useState<Playlist[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
@@ -42,7 +39,10 @@ export function usePlaylists(projectId: string): UsePlaylistsResult {
         setLoading(true);
         setError(null);
 
-        getPlaylists({ projectId, limit: 100, offset: 0, accessToken })
+        // Utiliser authenticatedCall pour gérer le refresh token
+        authenticatedCall(async (token) => {
+            return await getPlaylists({ projectId, limit: 100, offset: 0, accessToken: token });
+        })
             .then((response) => {
                 setPlaylists(response.items);
                 // Mettre en cache
@@ -54,7 +54,8 @@ export function usePlaylists(projectId: string): UsePlaylistsResult {
             .finally(() => {
                 setLoading(false);
             });
-    }, [projectId, accessToken]);
+    }, [projectId, accessToken, authenticatedCall]); // authenticatedCall is stable or changes with tokens
 
     return { playlists, loading, error };
 }
+

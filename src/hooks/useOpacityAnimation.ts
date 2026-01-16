@@ -97,3 +97,4 @@ export function useOpacityAnimation({
 
     return opacity;
 }
+

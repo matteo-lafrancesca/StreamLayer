@@ -1,8 +1,8 @@
 import { Volume2, VolumeX } from 'lucide-react';
-import { Slider, IconButton } from '../UI';
-import { useVolumeControl } from '../../hooks/useVolumeControl';
-import styles from '../../styles/VolumeControl.module.css';
-import type { VolumeControlProps } from '../../types/player';
+import { Slider, IconButton } from '@components/UI';
+import { useVolumeControl } from '@hooks/useVolumeControl';
+import styles from '@styles/VolumeControl.module.css';
+import type { VolumeControlProps } from '@definitions/player';
 
 export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
     const { isMuted, toggleMute, setVolume: handleVolumeChange } = useVolumeControl(volume, onVolumeChange);
@@ -27,3 +27,4 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
         </div>
     );
 }
+

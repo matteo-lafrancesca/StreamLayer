@@ -1,5 +1,5 @@
-import type { Playlist } from '../types/playlist';
-import { getPlaylistCoverUrl, type CoverSize } from '../services/api/covers';
+import type { Playlist } from '@definitions/playlist';
+import { getPlaylistCoverUrl, type CoverSize } from '@services/api/covers';
 
 /**
  * Récupère les informations d'affichage d'une playlist
@@ -36,3 +36,4 @@ export function getPlaylistTitle(playlist: Playlist): string {
 export function getPlaylistCover(playlist: Playlist, size: CoverSize = 'm'): string {
     return getPlaylistCoverUrl(playlist.id, size);
 }
+

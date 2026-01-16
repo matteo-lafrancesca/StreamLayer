@@ -25,3 +25,23 @@ export function formatDurationLong(seconds: number): string {
 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
+
+/**
+ * Formate l'affichage du temps pour le player (temps écoulé et temps restant)
+ * @param progress - Progression en pourcentage (0-100)
+ * @param trackDuration - Durée totale de la track en secondes
+ * @returns Objet avec le temps écoulé et le temps restant formatés
+ */
+export function formatTimeDisplay(progress: number, trackDuration: number): { currentTime: string; duration: string } {
+    if (trackDuration <= 0) {
+        return { currentTime: '0:00', duration: '0:00' };
+    }
+
+    const currentSeconds = Math.floor((progress / 100) * trackDuration);
+    const remainingSeconds = trackDuration - currentSeconds;
+
+    return {
+        currentTime: formatDuration(currentSeconds),
+        duration: formatDuration(remainingSeconds),
+    };
+}

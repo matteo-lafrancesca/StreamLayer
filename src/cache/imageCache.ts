@@ -33,3 +33,4 @@ export function clearImageCache(): void {
     });
     imageBlobCache.clear();
 }
+

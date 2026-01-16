@@ -20,3 +20,4 @@ export interface Track {
     rights: Rights;
     explicit: boolean;
 }
+

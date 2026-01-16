@@ -83,3 +83,4 @@ export async function fetchPlaylistCover(
 
     return await response.blob();
 }
+

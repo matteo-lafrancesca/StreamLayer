@@ -16,37 +16,38 @@
 
 .playlistCard {
     cursor: pointer;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: transform var(--transition-base);
+    background: var(--color-white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: var(--spacing-sm);
+    width: 160px;
 }
 
 .playlistCard:hover {
-    transform: scale(1.05);
+    background: var(--color-gray-300);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .playlistInfo {
-    padding: var(--spacing-sm) var(--spacing-xs);
+    padding: var(--spacing-sm) 0 0 0;
 }
 
 .playlistTitle {
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-sm);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
 }
 
 .playlistMeta {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-}
-
-.coverMedium {
-    width: var(--player-cover-md);
-    height: var(--player-cover-md);
-    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
 }
 
 .coverPlaylist {
@@ -54,6 +55,17 @@
     aspect-ratio: 1/1;
     object-fit: cover;
     border-radius: var(--radius-md);
+    transition: filter 0.3s ease;
+}
+
+.playlistCard:hover .coverPlaylist {
+    filter: brightness(0.97);
+}
+
+.coverMedium {
+    width: var(--player-cover-md);
+    height: var(--player-cover-md);
+    border-radius: var(--radius-sm);
 }
 
 .trackInfo {
@@ -97,6 +109,8 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-lg);
+    container-type: inline-size;
+    container-name: playlist-container;
 }
 
 .contentList {
@@ -106,9 +120,23 @@
 }
 
 .contentGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+}
+
+/* Responsive: layout en colonne unique quand pas assez de place */
+@media (max-width: 400px) {
+    .contentGrid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+.tracksList {
+    display: flex;
+    flex-direction: column;
 }
 
 .sectionHeader {
@@ -127,4 +155,9 @@
     padding: var(--spacing-xl);
     text-align: center;
     color: var(--color-error);
+}
+
+.scrollContainerLoading {
+    flex: 1;
+    overflow: hidden;
 }

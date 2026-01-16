@@ -1,41 +1,26 @@
-import { useState } from 'react';
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { PlaylistView } from './PlaylistView';
 import { ProjectView } from './ProjectView';
-import { ArrowLeft } from 'lucide-react';
-import { useHeightAnimation } from '../../hooks/useHeightAnimation';
-import { useOpacityAnimation } from '../../hooks/useOpacityAnimation';
-import { usePlayer } from '../../context/PlayerContext';
-import styles from '../../styles/PlayerDesktop.module.css';
+import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
+import { useExpandablePlayer } from '@hooks/useExpandablePlayer';
+import { usePlayer } from '@context/PlayerContext';
+import styles from '@styles/PlayerDesktop.module.css';
 
 /**
  * Desktop Player Component
  * Full-featured player with expandable content area
  */
 export function PlayerDesktop() {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [currentView, setCurrentView] = useState<'playlist' | 'project'>('project');
-    const { selectedPlaylist } = usePlayer();
-
-    // Height animation (300ms)
-    const playerRef = useHeightAnimation({
+    const {
         isExpanded,
-        collapsedHeight: 72,
-        expandedHeight: 600,
-        duration: 300,
-    });
+        currentView,
+        setCurrentView,
+        playerRef,
+        contentOpacity,
+        onExpandToggle
+    } = useExpandablePlayer();
 
-    // Opacity animation for content
-    const contentOpacity = useOpacityAnimation({
-        isVisible: isExpanded,
-        duration: 300,
-        delay: 200,
-    });
-
-    // Handler for expand toggle
-    const onExpandToggle = () => {
-        setIsExpanded(!isExpanded);
-    };
+    const { selectedPlaylist } = usePlayer();
 
     return (
         <div className={styles.playerContainer}>
@@ -53,26 +38,12 @@ export function PlayerDesktop() {
                     }}
                 >
                     {/* Header */}
-                    <div className={styles.expandedPlayerHeader}>
-                        {currentView === 'playlist' ? (
-                            <div className={styles.headerTitleRow}>
-                                <button
-                                    onClick={() => setCurrentView('project')}
-                                    className={styles.backButton}
-                                    title="Retour aux projets"
-                                >
-                                    <ArrowLeft size={24} />
-                                </button>
-                                <h2 className={styles.headerTitle}>
-                                    {selectedPlaylist?.metadata.title || 'Playlist'}
-                                </h2>
-                            </div>
-                        ) : (
-                            <h2 className={styles.headerTitle}>
-                                Playlists du projet
-                            </h2>
-                        )}
-                    </div>
+                    <ExpandedPlayerHeader
+                        currentView={currentView}
+                        setCurrentView={setCurrentView}
+                        selectedPlaylist={selectedPlaylist}
+                        onExpandToggle={onExpandToggle}
+                    />
 
                     {/* Content Area */}
                     <div className={styles.expandableContentScroll}>
@@ -95,3 +66,4 @@ export function PlayerDesktop() {
         </div>
     );
 }
+

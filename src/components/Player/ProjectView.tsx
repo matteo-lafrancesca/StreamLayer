@@ -1,9 +1,9 @@
-import { usePlayer } from '../../context/PlayerContext';
-import { usePlaylists } from '../../hooks/usePlaylists';
-import { getPlaylistDisplayInfo } from '../../utils/playlist';
-import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
-import type { Playlist } from '../../types/playlist';
-import styles from '../../styles/PlayerViews.module.css';
+import { usePlayer } from '@context/PlayerContext';
+import { usePlaylists } from '@hooks/usePlaylists';
+import { getPlaylistDisplayInfo } from '@utils/playlist';
+import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import type { Playlist } from '@definitions/playlist';
+import styles from '@styles/PlayerViews.module.css';
 
 interface ProjectViewProps {
     onPlaylistSelect: () => void;
@@ -73,3 +73,4 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
         </div>
     );
 }
+

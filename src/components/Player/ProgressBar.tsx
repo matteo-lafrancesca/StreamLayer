@@ -1,6 +1,6 @@
-import { Slider } from '../UI';
-import styles from '../../styles/ProgressBar.module.css';
-import type { ProgressBarProps } from '../../types/player';
+import { Slider } from '@components/UI';
+import styles from '@styles/ProgressBar.module.css';
+import type { ProgressBarProps } from '@definitions/player';
 
 export function ProgressBar({ progress, currentTime, duration, onProgressChange }: ProgressBarProps) {
     return (
@@ -16,3 +16,4 @@ export function ProgressBar({ progress, currentTime, duration, onProgressChange 
         </div>
     );
 }
+

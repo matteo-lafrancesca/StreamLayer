@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getAlbumInfo } from '../services/api/albums';
-import type { Album } from '../types/album';
-import { usePlayer } from '../context/PlayerContext';
+import { getAlbumInfo } from '@services/api/albums';
+import type { Album } from '@definitions/album';
+import { usePlayer } from '@context/PlayerContext';
+import { useApi } from './useApi';
 
 // Cache simple en mémoire pour les albums
 const albumsCache = new Map<number, Album>();
@@ -19,6 +20,7 @@ interface UseAlbumResult {
  */
 export function useAlbum(albumId: number | null | undefined): UseAlbumResult {
     const { accessToken } = usePlayer();
+    const { authenticatedCall } = useApi();
     const [album, setAlbum] = useState<Album | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -43,7 +45,10 @@ export function useAlbum(albumId: number | null | undefined): UseAlbumResult {
         setLoading(true);
         setError(null);
 
-        getAlbumInfo(albumId, accessToken)
+        // Utiliser authenticatedCall pour gérer le refresh token
+        authenticatedCall(async (token) => {
+            return await getAlbumInfo(albumId, token);
+        })
             .then((albumData) => {
                 setAlbum(albumData);
                 // Mettre en cache
@@ -55,7 +60,8 @@ export function useAlbum(albumId: number | null | undefined): UseAlbumResult {
             .finally(() => {
                 setLoading(false);
             });
-    }, [albumId, accessToken]);
+    }, [albumId, accessToken, authenticatedCall]);
 
     return { album, loading, error };
 }
+

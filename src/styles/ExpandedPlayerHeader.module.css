@@ -1,0 +1,58 @@
+/* Expanded Player Header Styles */
+
+.expandedPlayerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    position: relative;
+    height: var(--player-header-height);
+    /* Fixed header height */
+}
+
+.expandedPlayerHeader::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
+    height: 1px;
+    background: var(--color-gray-300);
+}
+
+.headerTitleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.headerTitle {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeButtonWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-round);
+    color: var(--text-primary);
+    transition: background var(--transition-base);
+}
+
+.backButton:hover {
+    background: var(--color-gray-100);
+}

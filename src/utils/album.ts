@@ -1,4 +1,4 @@
-import type { Album } from '../types/album';
+import type { Album } from '@definitions/album';
 import { getAlbumCoverUrl, type CoverSize } from '../services/api/covers';
 
 /**
@@ -46,3 +46,4 @@ export function getAlbumDisplayInfo(album: Album, coverSize: CoverSize = 'm') {
         genre: album.genre.title,
     };
 }
+

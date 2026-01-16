@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getPlaylistTracks } from '../services/api/playlists';
-import type { Track } from '../types/track';
-import { usePlayer } from '../context/PlayerContext';
+import { getPlaylistTracks } from '@services/api/playlists';
+import type { Track } from '@definitions/track';
+import { usePlayer } from '@context/PlayerContext';
+import { useApi } from './useApi';
 
 // Cache simple en mémoire pour les tracks par playlist
 const tracksCache = new Map<number, Track[]>();
@@ -19,6 +20,7 @@ interface UsePlaylistTracksResult {
  */
 export function usePlaylistTracks(playlistId: number | null | undefined): UsePlaylistTracksResult {
     const { accessToken } = usePlayer();
+    const { authenticatedCall } = useApi();
     const [tracks, setTracks] = useState<Track[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -43,7 +45,10 @@ export function usePlaylistTracks(playlistId: number | null | undefined): UsePla
         setLoading(true);
         setError(null);
 
-        getPlaylistTracks({ playlistId, limit: 100, offset: 0, accessToken })
+        // Utiliser authenticatedCall pour gérer le refresh token
+        authenticatedCall(async (token) => {
+            return await getPlaylistTracks({ playlistId, limit: 100, offset: 0, accessToken: token });
+        })
             .then((response) => {
                 setTracks(response.items);
                 // Mettre en cache
@@ -55,7 +60,8 @@ export function usePlaylistTracks(playlistId: number | null | undefined): UsePla
             .finally(() => {
                 setLoading(false);
             });
-    }, [playlistId, accessToken]);
+    }, [playlistId, accessToken, authenticatedCall]);
 
     return { tracks, loading, error };
 }
+

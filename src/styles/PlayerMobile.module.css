@@ -31,16 +31,10 @@
 }
 
 .mediaBarSection {
-    /* Mobile overrides merged */
-    /* position: relative (from media query) */
-    position: relative;
+    position: absolute;
     bottom: 0;
-    /* from base */
     left: 0;
-    /* from base */
     right: 0;
-    /* from base */
-    /* Padding changed in media query */
     padding: var(--spacing-md) var(--spacing-lg);
     height: var(--player-collapsed-height);
     background: var(--bg-secondary);
@@ -49,7 +43,6 @@
     will-change: transform;
     backface-visibility: hidden;
     box-sizing: border-box;
-    /* Mobile specific */
     cursor: pointer;
 }
 
@@ -96,55 +89,7 @@
     padding: 0;
 }
 
-.expandedPlayerHeader {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: var(--spacing-lg);
-    position: relative;
-    height: 60px;
-    /* Fixed header height */
-}
-
-.headerTitleRow {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
-.headerTitle {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.backButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--spacing-xs);
-    border-radius: var(--radius-round);
-    color: var(--text-primary);
-    transition: background var(--transition-base);
-}
-
-.backButton:hover {
-    background: var(--color-gray-100);
-}
-
-.expandedPlayerHeader::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: var(--spacing-lg);
-    right: var(--spacing-lg);
-    height: 1px;
-    background: var(--color-gray-300);
-}
+/* Header styles moved to ExpandedPlayerHeader.module.css */
 
 /* Mobile progress slider - positioned at the absolute bottom of player */
 .mobileProgressSlider {

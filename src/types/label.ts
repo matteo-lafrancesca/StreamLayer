@@ -12,3 +12,4 @@ export interface Label {
     name: string;
     company_group: CompanyGroup;
 }
+

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import styles from '../../styles/ScrollingText.module.css';
-import type { ScrollingTextProps } from '../../types/player';
+import styles from '@styles/ScrollingText.module.css';
+import type { ScrollingTextProps } from '@definitions/player';
 
 export function ScrollingText({ text, className = '', speed = 30 }: ScrollingTextProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -117,3 +117,4 @@ export function ScrollingText({ text, className = '', speed = 30 }: ScrollingTex
         </div>
     );
 }
+

@@ -157,6 +157,7 @@
     --player-width-desktop: min(1140px, 95vw);
     --player-collapsed-height: 72px;
     --player-expanded-height: 600px;
+    --player-header-height: 60px;
     --player-cover-sm: 56px;
     --player-cover-md: 48px;
 

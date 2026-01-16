@@ -46,3 +46,4 @@ export interface PaginatedResponse<T> {
 
 export type PlaylistsResponse = PaginatedResponse<Playlist>;
 export type PlaylistTracksResponse = PaginatedResponse<Track>;
+

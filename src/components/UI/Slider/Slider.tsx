@@ -1,5 +1,5 @@
-import { useSlider } from '../../../hooks/useSlider';
-import styles from '../../../styles/Slider.module.css';
+import { useSlider } from '@hooks/useSlider';
+import styles from '@styles/Slider.module.css';
 
 export interface SliderProps {
     value: number;
@@ -46,3 +46,4 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         </div>
     );
 }
+
