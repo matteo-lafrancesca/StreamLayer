@@ -4,7 +4,7 @@ import styles from './Slider.module.css';
 export interface SliderProps {
     value: number;
     onChange: (value: number) => void;
-    variant?: 'default' | 'spotify';
+    variant?: 'default' | 'spotify' | 'thin';
     showThumb?: boolean;
     className?: string;
 }
@@ -20,7 +20,7 @@ export interface SliderProps {
 export function Slider({ value, onChange, variant = 'default', showThumb = true, className = '' }: SliderProps) {
     const { ref, handleMouseDown } = useSlider(onChange);
 
-    const fillClasses = [styles.sliderFill, variant === 'spotify' ? styles.spotify : '']
+    const fillClasses = [styles.sliderFill, variant === 'spotify' ? styles.spotify : '', variant === 'thin' ? styles.thin : '']
         .filter(Boolean)
         .join(' ');
 
@@ -28,9 +28,17 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         .filter(Boolean)
         .join(' ');
 
+    const containerClasses = [styles.sliderContainer, variant === 'thin' ? styles.thinContainer : '', className]
+        .filter(Boolean)
+        .join(' ');
+
+    const trackClasses = [styles.sliderTrack, variant === 'thin' ? styles.thinTrack : '']
+        .filter(Boolean)
+        .join(' ');
+
     return (
-        <div ref={ref} className={`${styles.sliderContainer} ${className}`} onMouseDown={handleMouseDown}>
-            <div className={styles.sliderTrack}>
+        <div ref={ref} className={containerClasses} onMouseDown={handleMouseDown}>
+            <div className={trackClasses}>
                 <div className={fillClasses} style={{ width: `${value}%` }}>
                     {showThumb && <div className={thumbClasses} />}
                 </div>

@@ -1,0 +1,63 @@
+.mediaBarNew {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    width: 100%;
+    height: 100%;
+}
+
+.mediaBarCenter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: center;
+    justify-content: center;
+    flex: 2;
+}
+
+.mediaBarRight {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-lg);
+    flex: 1;
+}
+
+.expandButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--hitbox-padding);
+    margin: calc(-1 * var(--spacing-xs));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    transition: opacity var(--transition-base);
+}
+
+.expandButton:hover {
+    opacity: 0.6;
+}
+
+/* TABLET */
+@media (max-width: 1200px) {
+    .mediaBarNew {
+        gap: var(--spacing-md);
+    }
+
+    .mediaBarRight {
+        gap: var(--spacing-md);
+    }
+}
+
+/* TABLET COMPACT */
+@media (max-width: 992px) {
+    .mediaBarNew {
+        gap: var(--spacing-sm);
+    }
+
+    .mediaBarRight {
+        gap: var(--spacing-sm);
+    }
+}

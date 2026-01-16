@@ -1,0 +1,94 @@
+.mediaBarLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.coverSmall {
+    width: var(--player-cover-sm);
+    height: var(--player-cover-sm);
+    border-radius: var(--radius-md);
+}
+
+.trackInfoLarge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    max-width: 200px;
+    /* Constraint only for desktop */
+    overflow: hidden;
+}
+
+.trackTitleLarge {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.trackArtist {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* TABLET COMPACT */
+@media (max-width: 992px) {
+    .trackInfoLarge {
+        max-width: 150px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 750px) {
+
+    /* Left section */
+    .mediaBarLeft {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        /* Reduced gap */
+        flex: 1;
+        min-width: 0;
+    }
+
+    .coverSmall {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+
+    .trackInfoLarge {
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        /* Remove width constraint for mobile */
+        gap: 2px;
+    }
+
+    .trackTitleLarge {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+    }
+
+    .trackArtist {
+        font-size: 13px;
+    }
+}
+
+/* EXTRA SMALL MOBILE */
+@media (max-width: 400px) {
+    .coverSmall {
+        width: 40px;
+        height: 40px;
+    }
+
+    .trackTitleLarge {
+        font-size: var(--font-size-sm);
+    }
+
+    .trackArtist {
+        font-size: 11px;
+    }
+}

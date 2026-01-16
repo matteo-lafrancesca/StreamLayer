@@ -1,0 +1,41 @@
+.volumeSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.volumeIcon {
+    color: var(--color-black);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.volumeBarContainer {
+    width: 80px;
+    cursor: pointer;
+    padding: var(--hitbox-padding) 0;
+    margin: calc(-1 * var(--spacing-xs)) 0;
+    user-select: none;
+}
+
+/* TABLET: Reduce button spacing */
+@media (max-width: 1200px) {
+    .volumeBarContainer {
+        width: 60px;
+    }
+}
+
+/* TABLET COMPACT: Further reduce spacing */
+@media (max-width: 992px) {
+    .volumeBarContainer {
+        width: 50px;
+    }
+}
+
+/* MOBILE: Hide volume control */
+@media (max-width: 750px) {
+    .volumeSection {
+        display: none;
+    }
+}

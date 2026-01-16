@@ -1,7 +1,5 @@
 import { usePlayer } from '../../context/PlayerContext';
-import { getTrackDisplayInfo } from '../../utils/track';
-import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
-import { ScrollingText } from './ScrollingText';
+import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
@@ -10,9 +8,12 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 import styles from '../../styles/Player.module.css';
 import type { MediaBarProps } from '../../types/player';
 
-export function MediaBar({ isExpanded, onExpandToggle }: MediaBarProps) {
+/**
+ * Desktop MediaBar component
+ * Full-featured player bar with all controls
+ */
+export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
     const {
-        playingTrack,
         isPlaying,
         setIsPlaying,
         volume,
@@ -24,42 +25,10 @@ export function MediaBar({ isExpanded, onExpandToggle }: MediaBarProps) {
         playbackControls
     } = usePlayer();
 
-    const displayInfo = playingTrack
-        ? getTrackDisplayInfo(playingTrack, 's')
-        : { title: '', artist: '' };
-
     return (
         <div className={styles.mediaBarNew}>
             {/* Left Section: Cover + Track Info */}
-            <div className={styles.mediaBarLeft}>
-                {playingTrack ? (
-                    <AuthenticatedImage
-                        type="album"
-                        id={playingTrack.id_album}
-                        size="s"
-                        alt={displayInfo.title}
-                        className={styles.coverSmall}
-                    />
-                ) : (
-                    <img
-                        src="/img/placeholder.png"
-                        alt="No track"
-                        className={styles.coverSmall}
-                    />
-                )}
-                <div className={styles.trackInfoLarge}>
-                    <ScrollingText
-                        text={displayInfo.title}
-                        className={styles.trackTitleLarge}
-                        speed={20}
-                    />
-                    <ScrollingText
-                        text={displayInfo.artist}
-                        className={styles.trackArtist}
-                        speed={16}
-                    />
-                </div>
-            </div>
+            <TrackDisplay />
 
             {/* Center Section: Progress Bar + Controls */}
             <div className={styles.mediaBarCenter}>

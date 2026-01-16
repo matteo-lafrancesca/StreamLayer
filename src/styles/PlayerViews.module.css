@@ -1,0 +1,126 @@
+/* Layouts */
+.scrollContainer {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.contentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.sectionHeader {
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Status Messages */
+.statusMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.errorMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--color-error);
+}
+
+/* Track Cards */
+.trackCard {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-base);
+}
+
+.trackCard:hover {
+    background: var(--color-gray-100);
+}
+
+/* Playlist Cards */
+.playlistCard {
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform var(--transition-base);
+}
+
+.playlistCard:hover {
+    transform: scale(1.05);
+}
+
+.playlistInfo {
+    padding: var(--spacing-sm) var(--spacing-xs);
+}
+
+.playlistTitle {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: var(--spacing-xs);
+}
+
+.playlistMeta {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+/* Covers */
+.coverMedium {
+    width: var(--player-cover-md);
+    height: var(--player-cover-md);
+    border-radius: var(--radius-sm);
+}
+
+.coverPlaylist {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+/* Text Styles */
+.trackInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.trackTitleMedium {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackSubtitle {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackSubtitleLight {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

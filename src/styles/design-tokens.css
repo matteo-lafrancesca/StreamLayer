@@ -150,7 +150,11 @@
     /* ========== DIMENSIONS SPÉCIFIQUES ========== */
 
     /* Player */
-    --player-width-desktop: 60vw;
+    /* Use min() to keep player at 1140px until viewport is smaller, then use 95vw */
+    /* At 1920px: min(1140px, 1824px) = 1140px (~60%) */
+    /* At 1200px: min(1140px, 1140px) = 1140px (95%) */
+    /* Below 1200px: uses 95vw */
+    --player-width-desktop: min(1140px, 95vw);
     --player-collapsed-height: 72px;
     --player-expanded-height: 600px;
     --player-cover-sm: 56px;
@@ -178,3 +182,8 @@
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }
+
+/* ========== RESPONSIVE MEDIA QUERIES ========== */
+
+/* Note: Player width is now handled by min(1140px, 95vw) in the base variable above */
+/* This automatically keeps the player at 1140px on large screens and switches to 95vw on smaller screens */
