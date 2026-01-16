@@ -1,42 +1,5 @@
-/* Layouts */
-.scrollContainer {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-lg);
-}
+/* Player Views CSS (Playlist/Project) */
 
-.contentList {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.contentGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-.sectionHeader {
-    margin-bottom: var(--spacing-lg);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-}
-
-/* Status Messages */
-.statusMessage {
-    padding: var(--spacing-xl);
-    text-align: center;
-    color: var(--text-secondary);
-}
-
-.errorMessage {
-    padding: var(--spacing-xl);
-    text-align: center;
-    color: var(--color-error);
-}
-
-/* Track Cards */
 .trackCard {
     display: flex;
     align-items: center;
@@ -51,7 +14,6 @@
     background: var(--color-gray-100);
 }
 
-/* Playlist Cards */
 .playlistCard {
     cursor: pointer;
     border-radius: var(--radius-md);
@@ -81,7 +43,6 @@
     color: var(--text-secondary);
 }
 
-/* Covers */
 .coverMedium {
     width: var(--player-cover-md);
     height: var(--player-cover-md);
@@ -95,10 +56,17 @@
     border-radius: var(--radius-md);
 }
 
-/* Text Styles */
 .trackInfo {
     flex: 1;
     min-width: 0;
+}
+
+.trackTitle {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .trackTitleMedium {
@@ -123,4 +91,40 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.scrollContainer {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.contentList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.sectionHeader {
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+.statusMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.errorMessage {
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--color-error);
 }

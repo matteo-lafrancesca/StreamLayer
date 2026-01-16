@@ -1,3 +1,5 @@
+/* Playback Controls CSS */
+
 .playbackControls {
     display: flex;
     align-items: center;
@@ -72,14 +74,12 @@
     pointer-events: none;
 }
 
-/* TABLET: Reduce button spacing */
 @media (max-width: 1200px) {
     .playbackControls {
         gap: var(--spacing-md);
     }
 }
 
-/* TABLET COMPACT: Further reduce spacing */
 @media (max-width: 992px) {
     .playbackControls {
         gap: var(--spacing-sm);

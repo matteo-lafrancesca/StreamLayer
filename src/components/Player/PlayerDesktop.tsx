@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { PlaylistView } from './PlaylistView';
 import { ProjectView } from './ProjectView';
-import { Button } from '../UI';
-import { ListMusic } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useHeightAnimation } from '../../hooks/useHeightAnimation';
 import { useOpacityAnimation } from '../../hooks/useOpacityAnimation';
-import styles from '../../styles/Player.module.css';
+import { usePlayer } from '../../context/PlayerContext';
+import styles from '../../styles/PlayerDesktop.module.css';
 
 /**
  * Desktop Player Component
@@ -15,6 +15,7 @@ import styles from '../../styles/Player.module.css';
 export function PlayerDesktop() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [currentView, setCurrentView] = useState<'playlist' | 'project'>('project');
+    const { selectedPlaylist } = usePlayer();
 
     // Height animation (300ms)
     const playerRef = useHeightAnimation({
@@ -53,13 +54,24 @@ export function PlayerDesktop() {
                 >
                     {/* Header */}
                     <div className={styles.expandedPlayerHeader}>
-                        <Button
-                            variant={currentView === 'playlist' ? 'primary' : 'secondary'}
-                            onClick={() => setCurrentView(currentView === 'playlist' ? 'project' : 'playlist')}
-                        >
-                            <ListMusic size={18} />
-                            {currentView === 'playlist' ? 'Voir les playlists' : 'Voir la playlist'}
-                        </Button>
+                        {currentView === 'playlist' ? (
+                            <div className={styles.headerTitleRow}>
+                                <button
+                                    onClick={() => setCurrentView('project')}
+                                    className={styles.backButton}
+                                    title="Retour aux projets"
+                                >
+                                    <ArrowLeft size={24} />
+                                </button>
+                                <h2 className={styles.headerTitle}>
+                                    {selectedPlaylist?.metadata.title || 'Playlist'}
+                                </h2>
+                            </div>
+                        ) : (
+                            <h2 className={styles.headerTitle}>
+                                Playlists du projet
+                            </h2>
+                        )}
                     </div>
 
                     {/* Content Area */}

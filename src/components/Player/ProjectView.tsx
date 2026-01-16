@@ -3,7 +3,7 @@ import { usePlaylists } from '../../hooks/usePlaylists';
 import { getPlaylistDisplayInfo } from '../../utils/playlist';
 import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
 import type { Playlist } from '../../types/playlist';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/PlayerViews.module.css';
 
 interface ProjectViewProps {
     onPlaylistSelect: () => void;
@@ -36,9 +36,7 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
 
     return (
         <div className={styles.scrollContainer}>
-            <h2 className={styles.sectionHeader}>
-                Playlists du projet
-            </h2>
+
 
             <div className={styles.contentGrid}>
                 {playlists?.map((playlist) => {

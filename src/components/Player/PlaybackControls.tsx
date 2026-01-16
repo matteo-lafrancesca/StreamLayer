@@ -1,6 +1,6 @@
 import { Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Repeat1 } from 'lucide-react';
 import { IconButton } from '../UI';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/PlaybackControls.module.css';
 import type { PlaybackControlsProps } from '../../types/player';
 import { usePlayer } from '../../context/PlayerContext';
 

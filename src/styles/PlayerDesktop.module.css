@@ -1,4 +1,5 @@
-/* Shared Player Container - Desktop */
+/* Player Desktop CSS */
+
 .playerContainer {
     position: fixed;
     bottom: 20px;
@@ -7,6 +8,12 @@
     z-index: var(--z-player);
     transform-origin: bottom center;
     will-change: transform;
+}
+
+@media (max-width: 750px) {
+    .playerContainer {
+        display: none !important;
+    }
 }
 
 .player {
@@ -20,7 +27,6 @@
     -webkit-user-select: none;
 }
 
-/* MediaBar Section Positioning */
 .mediaBarSection {
     position: absolute;
     bottom: 0;
@@ -36,7 +42,6 @@
     box-sizing: border-box;
 }
 
-/* Separator line */
 .mediaBarSection::before {
     content: '';
     position: absolute;
@@ -52,7 +57,6 @@
     background: var(--color-gray-300);
 }
 
-/* Expandable Content */
 .expandableContent {
     position: absolute;
     top: 0;
@@ -85,10 +89,42 @@
 
 .expandedPlayerHeader {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     padding: var(--spacing-lg);
     position: relative;
+    height: 60px;
+    /* Fixed header height */
+}
+
+.headerTitleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.headerTitle {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-round);
+    color: var(--text-primary);
+    transition: background var(--transition-base);
+}
+
+.backButton:hover {
+    background: var(--color-gray-100);
 }
 
 .expandedPlayerHeader::after {

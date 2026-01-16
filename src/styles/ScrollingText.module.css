@@ -1,0 +1,39 @@
+/* Scrolling Text CSS */
+
+.scrollingTextContainer {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.scrollingTextContent {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.scrollingTextContent.scrolling {
+    animation: scroll-text linear infinite;
+}
+
+.scrollingTextContent.scrolling:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll-text {
+    0% {
+        transform: translateX(0);
+    }
+
+    25%,
+    50% {
+        transform: translateX(calc(-1 * var(--overflow-distance)));
+    }
+
+    75% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}

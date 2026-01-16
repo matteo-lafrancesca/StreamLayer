@@ -5,7 +5,7 @@ import { getTrackDisplayInfo } from '../../utils/track';
 import { AuthenticatedImage } from '../AuthenticatedImage/AuthenticatedImage';
 import { usePreloadAlbumCovers } from '../../hooks/usePreloadAlbumCovers';
 import { useMemo } from 'react';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/PlayerViews.module.css';
 
 export function PlaylistView() {
     const { selectedPlaylist, setPlayingTrack } = usePlayer();
@@ -47,9 +47,7 @@ export function PlaylistView() {
 
     return (
         <div className={styles.scrollContainer}>
-            <h2 className={styles.sectionHeader}>
-                {selectedPlaylist.metadata.title}
-            </h2>
+
 
             <div className={styles.contentList}>
                 {tracks?.map((track) => {

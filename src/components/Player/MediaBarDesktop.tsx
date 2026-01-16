@@ -5,7 +5,7 @@ import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { IconButton } from '../UI';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/MediaBarDesktop.module.css';
 import type { MediaBarProps } from '../../types/player';
 
 /**

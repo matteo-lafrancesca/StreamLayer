@@ -1,10 +1,12 @@
+/* Volume Control CSS */
+
 .volumeSection {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
 
-.volumeIcon {
+.volumeIconNew {
     color: var(--color-black);
     flex-shrink: 0;
     display: flex;
@@ -19,23 +21,29 @@
     user-select: none;
 }
 
-/* TABLET: Reduce button spacing */
+.volumeBarTrack {
+    height: 4px;
+    background: var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.volumeBarFill {
+    height: 100%;
+    background: var(--color-black);
+    border-radius: var(--radius-sm);
+    transition: width 0.1s ease;
+}
+
 @media (max-width: 1200px) {
     .volumeBarContainer {
         width: 60px;
     }
 }
 
-/* TABLET COMPACT: Further reduce spacing */
 @media (max-width: 992px) {
     .volumeBarContainer {
         width: 50px;
-    }
-}
-
-/* MOBILE: Hide volume control */
-@media (max-width: 750px) {
-    .volumeSection {
-        display: none;
     }
 }

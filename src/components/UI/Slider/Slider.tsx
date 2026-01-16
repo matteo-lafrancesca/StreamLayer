@@ -1,5 +1,5 @@
 import { useSlider } from '../../../hooks/useSlider';
-import styles from './Slider.module.css';
+import styles from '../../../styles/Slider.module.css';
 
 export interface SliderProps {
     value: number;

@@ -1,3 +1,5 @@
+/* Slider Module CSS */
+
 .sliderContainer {
     position: relative;
     cursor: pointer;
@@ -35,15 +37,22 @@
     transition: var(--transition-transform);
 }
 
-
-/* Hover State */
 .sliderContainer:hover .sliderThumb {
     width: 14px;
     height: 14px;
     right: -7px;
 }
 
-/* Thin Variant (Mobile Progress Bar) */
+/* Variant pour la couleur de remplissage */
+.sliderFill.spotify {
+    background: var(--color-spotify-green);
+}
+
+.sliderThumb.spotify {
+    background: var(--color-spotify-green);
+}
+
+/* Thin variant for mobile progress bar */
 .thinContainer {
     padding: 0;
 }

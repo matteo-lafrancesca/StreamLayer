@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/ScrollingText.module.css';
 import type { ScrollingTextProps } from '../../types/player';
 
 export function ScrollingText({ text, className = '', speed = 30 }: ScrollingTextProps) {

@@ -1,7 +1,7 @@
 import { Volume2, VolumeX } from 'lucide-react';
 import { Slider, IconButton } from '../UI';
 import { useVolumeControl } from '../../hooks/useVolumeControl';
-import styles from '../../styles/Player.module.css';
+import styles from '../../styles/VolumeControl.module.css';
 import type { VolumeControlProps } from '../../types/player';
 
 export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {

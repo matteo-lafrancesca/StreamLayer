@@ -1,3 +1,5 @@
+/* Track Display CSS */
+
 .mediaBarLeft {
     display: flex;
     align-items: center;
@@ -6,19 +8,12 @@
     flex: 1;
 }
 
-.coverSmall {
-    width: var(--player-cover-sm);
-    height: var(--player-cover-sm);
-    border-radius: var(--radius-md);
-}
-
 .trackInfoLarge {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
     max-width: 200px;
-    /* Constraint only for desktop */
     overflow: hidden;
 }
 
@@ -33,29 +28,30 @@
     color: var(--text-secondary);
 }
 
-/* TABLET COMPACT */
+.coverSmall {
+    width: var(--player-cover-sm);
+    height: var(--player-cover-sm);
+    border-radius: var(--radius-md);
+}
+
+/* Tablet Compact */
 @media (max-width: 992px) {
     .trackInfoLarge {
         max-width: 150px;
     }
 }
 
-/* MOBILE */
+/* Mobile styles */
 @media (max-width: 750px) {
 
-    /* Left section */
+    /* Using default gap from desktop */
     .mediaBarLeft {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        /* Reduced gap */
         flex: 1;
         min-width: 0;
     }
 
+    /* Keep same cover size as desktop */
     .coverSmall {
-        width: 48px;
-        height: 48px;
         flex-shrink: 0;
     }
 
@@ -63,7 +59,6 @@
         flex: 1;
         min-width: 0;
         max-width: none;
-        /* Remove width constraint for mobile */
         gap: 2px;
     }
 
@@ -77,7 +72,7 @@
     }
 }
 
-/* EXTRA SMALL MOBILE */
+/* Extra Small */
 @media (max-width: 400px) {
     .coverSmall {
         width: 40px;

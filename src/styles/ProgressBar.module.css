@@ -1,0 +1,68 @@
+/* Progress Bar CSS */
+
+.progressSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.timeText {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 40px;
+    text-align: center;
+}
+
+.progressBarNew {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    padding: var(--hitbox-padding) 0;
+    margin: calc(-1 * var(--hitbox-padding)) 0;
+}
+
+.progressBarTrack {
+    height: 4px;
+    background: var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: visible;
+}
+
+.progressBarFillNew {
+    height: 100%;
+    background: var(--color-black);
+    border-radius: var(--radius-sm);
+    position: relative;
+    transition: width 0.1s ease;
+}
+
+.progressBarThumb {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--color-black);
+    border: 2px solid var(--color-white);
+    border-radius: var(--radius-round);
+    box-shadow: var(--shadow-sm);
+}
+
+.progressBarNew:hover .progressBarThumb {
+    width: 14px;
+    height: 14px;
+    right: -7px;
+}
+
+@media (max-width: 400px) {
+    .timeText {
+        display: none;
+    }
+
+    .progressBarNew {
+        padding: var(--spacing-sm) 0;
+    }
+}
