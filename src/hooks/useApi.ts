@@ -4,15 +4,20 @@ import { refreshTokens } from '@services/api/auth';
 
 /**
  * Hook to make authenticated API calls with auto-refresh token logic
+ * @param providedAccessToken - Optional access token to avoid circular dependency
  */
-export function useApi() {
+export function useApi(providedAccessToken?: string | null) {
+    // Only call usePlayer if accessToken is not provided (avoid circular dependency)
+    const playerContext = providedAccessToken === undefined ? usePlayer() : null;
     const {
-        projectId,
-        accessToken,
-        refreshToken,
-        setAccessToken,
-        setRefreshToken
-    } = usePlayer();
+        projectId = '',
+        accessToken: contextAccessToken = null,
+        refreshToken = null,
+        setAccessToken = () => { },
+        setRefreshToken = () => { }
+    } = playerContext || {};
+
+    const accessToken = providedAccessToken ?? contextAccessToken;
 
     /**
      * Helper to wrap API calls with authentication and retry logic

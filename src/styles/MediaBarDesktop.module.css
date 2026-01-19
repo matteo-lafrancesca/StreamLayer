@@ -25,6 +25,16 @@
     flex: 1;
 }
 
+.viewControls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.activeButton {
+    color: var(--color-primary);
+}
+
 .expandButton {
     background: none;
     border: none;

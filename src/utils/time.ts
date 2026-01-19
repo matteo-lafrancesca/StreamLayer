@@ -42,6 +42,6 @@ export function formatTimeDisplay(progress: number, trackDuration: number): { cu
 
     return {
         currentTime: formatDuration(currentSeconds),
-        duration: formatDuration(remainingSeconds),
+        duration: `-${formatDuration(remainingSeconds)}`,
     };
 }

@@ -1,4 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+
+interface UsePlaybackControlsProps {
+    isShuffled: boolean;
+    repeatMode: 'off' | 'all' | 'one';
+    onShuffle: () => void;
+    onPrevious: () => void;
+    onNext: () => void;
+    onRepeat: () => void;
+}
 
 interface UsePlaybackControlsReturn {
     isShuffled: boolean;
@@ -9,32 +18,33 @@ interface UsePlaybackControlsReturn {
     handleRepeat: () => void;
 }
 
-export function usePlaybackControls(): UsePlaybackControlsReturn {
-    const [isShuffled, setIsShuffled] = useState(false);
-    const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
-
+/**
+ * Controlled hook for playback controls
+ * Delegates all logic to parent (PlayerContext via queueManager)
+ */
+export function usePlaybackControls({
+    isShuffled,
+    repeatMode,
+    onShuffle,
+    onPrevious,
+    onNext,
+    onRepeat,
+}: UsePlaybackControlsProps): UsePlaybackControlsReturn {
     const handleShuffle = useCallback(() => {
-        setIsShuffled(prev => !prev);
-        // TODO: Implement shuffle logic
-    }, []);
+        onShuffle();
+    }, [onShuffle]);
 
     const handlePrevious = useCallback(() => {
-        // TODO: Implement previous track logic
-        console.log('Previous track');
-    }, []);
+        onPrevious();
+    }, [onPrevious]);
 
     const handleNext = useCallback(() => {
-        // TODO: Implement next track logic
-        console.log('Next track');
-    }, []);
+        onNext();
+    }, [onNext]);
 
     const handleRepeat = useCallback(() => {
-        setRepeatMode(prev => {
-            if (prev === 'off') return 'all';
-            if (prev === 'all') return 'one';
-            return 'off';
-        });
-    }, []);
+        onRepeat();
+    }, [onRepeat]);
 
     return {
         isShuffled,
@@ -45,4 +55,3 @@ export function usePlaybackControls(): UsePlaybackControlsReturn {
         handleRepeat,
     };
 }
-

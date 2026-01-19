@@ -1,6 +1,7 @@
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { PlaylistView } from './PlaylistView';
 import { ProjectView } from './ProjectView';
+import { QueueView } from './QueueView';
 import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
 import { useExpandablePlayer } from '@hooks/useExpandablePlayer';
 import { usePlayer } from '@context/PlayerContext';
@@ -49,6 +50,8 @@ export function PlayerDesktop() {
                     <div className={styles.expandableContentScroll}>
                         {currentView === 'playlist' ? (
                             <PlaylistView />
+                        ) : currentView === 'queue' ? (
+                            <QueueView />
                         ) : (
                             <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />
                         )}

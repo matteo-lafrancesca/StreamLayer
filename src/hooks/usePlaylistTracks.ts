@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
 import { getPlaylistTracks } from '@services/api/playlists';
 import type { Track } from '@definitions/track';
-import { usePlayer } from '@context/PlayerContext';
-import { useApi } from './useApi';
+import { useDataFetcher } from './useDataFetcher';
 
 // Cache simple en mémoire pour les tracks par playlist
 const tracksCache = new Map<number, Track[]>();
@@ -16,51 +14,23 @@ interface UsePlaylistTracksResult {
 /**
  * Hook pour récupérer les tracks d'une playlist
  * @param playlistId - L'ID de la playlist (null si aucune sélectionnée)
+ * @param accessToken - Optional access token (to avoid circular dependency when used in PlayerContext)
  * @returns Tracks, état de chargement et erreur éventuelle
  */
-export function usePlaylistTracks(playlistId: number | null | undefined): UsePlaylistTracksResult {
-    const { accessToken } = usePlayer();
-    const { authenticatedCall } = useApi();
-    const [tracks, setTracks] = useState<Track[] | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-
-    useEffect(() => {
-        // Ne rien faire si pas de playlist sélectionnée ou pas de token
-        if (!playlistId || !accessToken) {
-            setTracks(null);
-            setLoading(false);
-            return;
-        }
-
-        // Vérifier le cache d'abord
-        const cached = tracksCache.get(playlistId);
-        if (cached) {
-            setTracks(cached);
-            setLoading(false);
-            return;
-        }
-
-        // Sinon, charger depuis l'API
-        setLoading(true);
-        setError(null);
-
-        // Utiliser authenticatedCall pour gérer le refresh token
-        authenticatedCall(async (token) => {
-            return await getPlaylistTracks({ playlistId, limit: 100, offset: 0, accessToken: token });
-        })
-            .then((response) => {
-                setTracks(response.items);
-                // Mettre en cache
-                tracksCache.set(playlistId, response.items);
-            })
-            .catch((err) => {
-                setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [playlistId, accessToken, authenticatedCall]);
+export function usePlaylistTracks(
+    playlistId: number | null | undefined,
+    accessToken?: string | null
+): UsePlaylistTracksResult {
+    const { data: tracks, loading, error } = useDataFetcher<Track[]>({
+        fetcher: async (token) => {
+            const response = await getPlaylistTracks({ playlistId: playlistId!, limit: 100, offset: 0, accessToken: token });
+            return response.items;
+        },
+        cacheKey: playlistId!,
+        cacheMap: tracksCache,
+        enabled: !!playlistId,
+        accessToken, // Pass through to avoid circular dependency
+    });
 
     return { tracks, loading, error };
 }

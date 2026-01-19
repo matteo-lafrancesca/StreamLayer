@@ -1,6 +1,6 @@
 import type { PlaylistsResponse, PlaylistTracksResponse } from '@definitions/playlist';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { fetchJson } from './client';
 
 interface GetPlaylistsParams {
     projectId: string;
@@ -20,26 +20,8 @@ export async function getPlaylists({
     offset = 0,
     accessToken,
 }: GetPlaylistsParams): Promise<PlaylistsResponse> {
-    const url = `${API_BASE_URL}/lists?project=${projectId}&type=1&limit=${limit}&offset=${offset}`;
-
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    };
-
-    if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    const response = await fetch(url, {
-        method: 'GET',
-        headers,
-    });
-
-    if (!response.ok) {
-        throw new Error(`Erreur lors de la récupération des playlists: ${response.status}`);
-    }
-
-    return await response.json();
+    const queryString = `project=${projectId}&type=1&limit=${limit}&offset=${offset}`;
+    return fetchJson<PlaylistsResponse>(`/lists?${queryString}`, { accessToken });
 }
 
 interface GetPlaylistTracksParams {
@@ -60,25 +42,7 @@ export async function getPlaylistTracks({
     offset = 0,
     accessToken,
 }: GetPlaylistTracksParams): Promise<PlaylistTracksResponse> {
-    const url = `${API_BASE_URL}/lists/${playlistId}/tracks?limit=${limit}&offset=${offset}`;
-
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    };
-
-    if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    const response = await fetch(url, {
-        method: 'GET',
-        headers,
-    });
-
-    if (!response.ok) {
-        throw new Error(`Erreur lors de la récupération des tracks de la playlist: ${response.status}`);
-    }
-
-    return await response.json();
+    const queryString = `limit=${limit}&offset=${offset}`;
+    return fetchJson<PlaylistTracksResponse>(`/lists/${playlistId}/tracks?${queryString}`, { accessToken });
 }
 

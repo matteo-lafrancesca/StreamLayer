@@ -1,6 +1,7 @@
 import { MediaBarMobile } from './MediaBarMobile';
 import { PlaylistView } from './PlaylistView';
 import { ProjectView } from './ProjectView';
+import { QueueView } from './QueueView';
 import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
 import { Slider } from '@components/UI';
 import { useExpandablePlayer } from '@hooks/useExpandablePlayer';
@@ -13,7 +14,6 @@ import styles from '@styles/PlayerMobile.module.css';
  */
 export function PlayerMobile() {
     const {
-        isExpanded,
         currentView,
         setCurrentView,
         playerRef,
@@ -50,6 +50,8 @@ export function PlayerMobile() {
                     <div className={styles.expandableContentScroll}>
                         {currentView === 'playlist' ? (
                             <PlaylistView />
+                        ) : currentView === 'queue' ? (
+                            <QueueView />
                         ) : (
                             <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />
                         )}

@@ -4,7 +4,7 @@ import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { IconButton } from '@components/UI';
-import { ChevronUp } from 'lucide-react';
+import { ListMusic, ListVideo } from 'lucide-react';
 import styles from '@styles/MediaBarDesktop.module.css';
 import type { MediaBarProps } from '@definitions/player';
 
@@ -22,8 +22,30 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
         setProgress,
         currentTime,
         duration,
-        playbackControls
+        playbackControls,
+        setIsSeeking,
+        selectedPlaylist,
+        setCurrentView,
+        currentView
     } = usePlayer();
+
+    const handleOpenPlaylist = () => {
+        if (!isExpanded) {
+            onExpandToggle();
+        }
+        if (selectedPlaylist) {
+            setCurrentView('playlist');
+        } else {
+            setCurrentView('project');
+        }
+    };
+
+    const handleOpenQueue = () => {
+        if (!isExpanded) {
+            onExpandToggle();
+        }
+        setCurrentView('queue');
+    };
 
     return (
         <div className={styles.mediaBarNew}>
@@ -37,6 +59,8 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
                     currentTime={currentTime}
                     duration={duration}
                     onProgressChange={setProgress}
+                    onSeekStart={() => setIsSeeking(true)}
+                    onSeekEnd={() => setIsSeeking(false)}
                 />
 
                 <PlaybackControls
@@ -49,21 +73,29 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
                 />
             </div>
 
-            {/* Right Section: Volume + Expand Button */}
+            {/* Right Section: Volume + View Toggles */}
             <div className={styles.mediaBarRight}>
+                <div className={styles.viewControls}>
+                    <IconButton
+                        icon={<ListMusic size={20} />}
+                        onClick={handleOpenPlaylist}
+                        className={currentView === 'playlist' || currentView === 'project' ? styles.activeButton : ''}
+                        title={selectedPlaylist ? "Playlist en cours" : "Projets"}
+                        enlargeHitbox
+                    />
+                    <IconButton
+                        icon={<ListVideo size={20} />}
+                        onClick={handleOpenQueue}
+                        className={currentView === 'queue' ? styles.activeButton : ''}
+                        title="File d'attente"
+                        enlargeHitbox
+                    />
+                </div>
+
                 <VolumeControl
                     volume={volume}
                     onVolumeChange={setVolume}
                 />
-                <div style={{ opacity: isExpanded ? 0 : 1, pointerEvents: isExpanded ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
-                    <IconButton
-                        icon={<ChevronUp size={20} />}
-                        onClick={onExpandToggle}
-                        className={styles.expandButton}
-                        title="Agrandir"
-                        enlargeHitbox
-                    />
-                </div>
             </div>
         </div>
     );

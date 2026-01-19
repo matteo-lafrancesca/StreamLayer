@@ -4,8 +4,8 @@ import type { Playlist } from '@definitions/playlist';
 import styles from '@styles/ExpandedPlayerHeader.module.css';
 
 export interface ExpandedPlayerHeaderProps {
-    currentView: 'playlist' | 'project';
-    setCurrentView: (view: 'playlist' | 'project') => void;
+    currentView: 'playlist' | 'project' | 'queue';
+    setCurrentView: (view: 'playlist' | 'project' | 'queue') => void;
     selectedPlaylist: Playlist | null;
     onExpandToggle: () => void;
 }
@@ -35,6 +35,10 @@ export function ExpandedPlayerHeader({
                         {selectedPlaylist?.metadata.title || 'Playlist'}
                     </h2>
                 </div>
+            ) : currentView === 'queue' ? (
+                <h2 className={styles.headerTitle}>
+                    File d'attente
+                </h2>
             ) : (
                 <h2 className={styles.headerTitle}>
                     Playlists du projet
