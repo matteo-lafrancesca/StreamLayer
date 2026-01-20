@@ -35,26 +35,9 @@
     color: var(--color-primary);
 }
 
-.expandButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--hitbox-padding);
-    margin: calc(-1 * var(--spacing-xs));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-black);
-    transition: opacity var(--transition-base);
-}
-
-.expandButton:hover {
-    opacity: 0.6;
-}
-
 /* TABLET: Reduce button spacing (1200px → 750px) */
 @media (max-width: 1200px) {
-    .mediaBarNew {
+    .mediaBar {
         gap: var(--spacing-md);
     }
 
@@ -65,7 +48,7 @@
 
 /* TABLET COMPACT: Further reduce spacing and sizes */
 @media (max-width: 992px) {
-    .mediaBarNew {
+    .mediaBar {
         gap: var(--spacing-sm);
     }
 

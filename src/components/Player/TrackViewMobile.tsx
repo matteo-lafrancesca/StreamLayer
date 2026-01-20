@@ -1,11 +1,11 @@
 import { usePlayer } from '@context/PlayerContext';
-import { getTrackDisplayInfo } from '@utils/track';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { ScrollingText } from './ScrollingText';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { IconButton } from '@components/UI';
-import { ListMusic, ListVideo, ChevronDown } from 'lucide-react';
+import { ListMusic, ListVideo } from 'lucide-react';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/TrackViewMobile.module.css';
 
 /**
@@ -20,51 +20,31 @@ export function TrackViewMobile() {
         playbackControls,
         setIsSeeking,
         setCurrentView,
-        selectedPlaylist,
-        setIsExpanded
+        selectedPlaylist
     } = usePlayer();
-
-    const displayInfo = playingTrack
-        ? getTrackDisplayInfo(playingTrack, 'l')
-        : { title: '', artist: '' };
 
     return (
         <div className={styles.trackViewMobile}>
-            {/* Clickable Header Bar */}
-            <div className={styles.headerBar} onClick={() => setIsExpanded(false)}>
-                <ChevronDown size={24} className={styles.chevronIcon} />
-            </div>
-
             {/* Scrollable Content */}
-            <div className={styles.trackContent}>
+            <div className={styles.trackContent} data-scrollable>
                 {/* Album Cover */}
                 <div className={styles.coverContainer}>
-                    {playingTrack ? (
-                        <AuthenticatedImage
-                            type="album"
-                            id={playingTrack.id_album}
-                            size="l"
-                            alt={displayInfo.title}
-                            className={styles.coverLarge}
-                        />
-                    ) : (
-                        <img
-                            src="/img/placeholder.png"
-                            alt="No track"
-                            className={styles.coverLarge}
-                        />
-                    )}
+                    <AlbumCoverOrPlaceholder
+                        track={playingTrack}
+                        size="l"
+                        className={styles.coverLarge}
+                    />
                 </div>
 
                 {/* Track Info */}
                 <div className={styles.trackInfo}>
                     <ScrollingText
-                        text={displayInfo.title}
+                        text={playingTrack?.title || ''}
                         className={styles.trackTitle}
                         speed={20}
                     />
                     <ScrollingText
-                        text={displayInfo.artist}
+                        text={playingTrack?.artists?.map(a => a.name).join(', ') || ''}
                         className={styles.trackArtist}
                         speed={16}
                     />
@@ -91,16 +71,16 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Bottom Navigation */}
-                <div className={styles.bottomNavigation}>
+                {/* Navigation Buttons - Centered below controls */}
+                <div className={styles.navigationButtons}>
                     <IconButton
-                        icon={<ListMusic size={24} />}
+                        icon={<ListMusic size={PLAYER_SIZES.MOBILE.ICON_SMALL} />}
                         onClick={() => setCurrentView(selectedPlaylist ? 'playlist' : 'project')}
                         title="Playlist"
                         enlargeHitbox
                     />
                     <IconButton
-                        icon={<ListVideo size={24} />}
+                        icon={<ListVideo size={PLAYER_SIZES.MOBILE.ICON_SMALL} />}
                         onClick={() => setCurrentView('queue')}
                         title="File d'attente"
                         enlargeHitbox

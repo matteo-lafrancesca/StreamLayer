@@ -1,6 +1,7 @@
 import { Volume2, VolumeX } from 'lucide-react';
 import { Slider, IconButton } from '@components/UI';
 import { useVolumeControl } from '@hooks/useVolumeControl';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/VolumeControl.module.css';
 import type { VolumeControlProps } from '@definitions/player';
 
@@ -12,9 +13,12 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
     return (
         <div className={styles.volumeSection}>
             <IconButton
-                icon={displayMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                icon={displayMuted
+                    ? <VolumeX size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />
+                    : <Volume2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />
+                }
                 onClick={toggleMute}
-                className={styles.volumeIconNew}
+                className={styles.volumeIcon}
                 title={displayMuted ? "Réactiver le son" : "Couper le son"}
             />
             <Slider
@@ -27,4 +31,3 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
         </div>
     );
 }
-

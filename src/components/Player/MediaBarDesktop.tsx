@@ -1,10 +1,13 @@
 import { usePlayer } from '@context/PlayerContext';
+import { useMediaBarNavigation } from '@hooks/useMediaBarNavigation';
+import { useCompactMode } from '@hooks/useCompactMode';
 import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { IconButton } from '@components/UI';
 import { ListMusic, ListVideo, Minimize2 } from 'lucide-react';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/MediaBarDesktop.module.css';
 import type { MediaBarDesktopProps } from '@definitions/player';
 
@@ -21,37 +24,12 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         playbackControls,
         setIsSeeking,
         selectedPlaylist,
-        setCurrentView,
         currentView,
-        setIsCompact,
-        setIsExpanded
     } = usePlayer();
 
-    const handleOpenPlaylist = () => {
-        if (isExpanded && (currentView === 'playlist' || currentView === 'project')) {
-            onExpandToggle();
-        } else {
-            if (!isExpanded) {
-                onExpandToggle();
-            }
-            if (selectedPlaylist) {
-                setCurrentView('playlist');
-            } else {
-                setCurrentView('project');
-            }
-        }
-    };
-
-    const handleOpenQueue = () => {
-        if (isExpanded && currentView === 'queue') {
-            onExpandToggle();
-        } else {
-            if (!isExpanded) {
-                onExpandToggle();
-            }
-            setCurrentView('queue');
-        }
-    };
+    // Extract navigation and compact mode logic to hooks
+    const { handleOpenPlaylist, handleOpenQueue } = useMediaBarNavigation(isExpanded, onExpandToggle);
+    const { enableCompactMode } = useCompactMode();
 
     return (
         <div className={styles.mediaBar}>
@@ -79,25 +57,20 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
             <div className={styles.mediaBarRight}>
                 <div className={styles.viewControls}>
                     <IconButton
-                        icon={<Minimize2 size={20} />}
-                        onClick={() => {
-                            if (isExpanded) {
-                                setIsExpanded(false);
-                            }
-                            setIsCompact(true);
-                        }}
+                        icon={<Minimize2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
+                        onClick={enableCompactMode}
                         title="Mode compact"
                         enlargeHitbox
                     />
                     <IconButton
-                        icon={<ListMusic size={20} />}
+                        icon={<ListMusic size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                         onClick={handleOpenPlaylist}
                         className={currentView === 'playlist' || currentView === 'project' ? styles.activeButton : ''}
                         title={selectedPlaylist ? "Playlist en cours" : "Projets"}
                         enlargeHitbox
                     />
                     <IconButton
-                        icon={<ListVideo size={20} />}
+                        icon={<ListVideo size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                         onClick={handleOpenQueue}
                         className={currentView === 'queue' ? styles.activeButton : ''}
                         title="File d'attente"
@@ -113,4 +86,3 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         </div>
     );
 }
-

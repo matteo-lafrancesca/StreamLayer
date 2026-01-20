@@ -1,5 +1,6 @@
 import { Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Repeat1 } from 'lucide-react';
 import { IconButton } from '@components/UI';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/PlaybackControls.module.css';
 import type { PlaybackControlsProps } from '@definitions/player';
 import { usePlayer } from '@context/PlayerContext';
@@ -16,10 +17,19 @@ export function PlaybackControls({
     const { playbackControls } = usePlayer();
 
     // Icon sizes based on variant
-    // Icon sizes based on variant
     const sizes = variant === 'mobile'
-        ? { shuffle: 24, skip: 28, play: 30, repeat: 24 }
-        : { shuffle: 18, skip: 24, play: 56, repeat: 18 };
+        ? {
+            shuffle: PLAYER_SIZES.MOBILE.ICON_SMALL,
+            skip: PLAYER_SIZES.MOBILE.ICON_SKIP,
+            play: PLAYER_SIZES.MOBILE.PLAY_BUTTON,
+            repeat: PLAYER_SIZES.MOBILE.ICON_SMALL
+        }
+        : {
+            shuffle: PLAYER_SIZES.DESKTOP.ICON_SMALL,
+            skip: PLAYER_SIZES.DESKTOP.ICON_LARGE,
+            play: PLAYER_SIZES.DESKTOP.PLAY_BUTTON,
+            repeat: PLAYER_SIZES.DESKTOP.ICON_SMALL
+        };
 
     return (
         <div className={`${styles.playbackControls} ${variant === 'mobile' ? styles.mobile : ''}`}>
@@ -66,4 +76,3 @@ export function PlaybackControls({
         </div>
     );
 }
-

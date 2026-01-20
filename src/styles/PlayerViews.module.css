@@ -22,7 +22,26 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: var(--spacing-sm);
-    width: 160px;
+    width: 100%;
+}
+
+/* ... existing styles ... */
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 160px);
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    justify-content: center;
+    width: 100%;
+}
+
+/* Responsive: Smaller columns for mobile */
+@media (max-width: 600px) {
+    .contentGrid {
+        grid-template-columns: repeat(auto-fill, 160px);
+        gap: var(--spacing-md);
+    }
 }
 
 .playlistCard:hover {
@@ -119,20 +138,7 @@
     gap: var(--spacing-sm);
 }
 
-.contentGrid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-md);
-}
 
-/* Responsive: layout en colonne unique quand pas assez de place */
-@media (max-width: 400px) {
-    .contentGrid {
-        flex-direction: column;
-        align-items: center;
-    }
-}
 
 .tracksList {
     display: flex;

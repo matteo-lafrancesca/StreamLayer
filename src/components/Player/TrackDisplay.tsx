@@ -1,6 +1,5 @@
 import { usePlayer } from '@context/PlayerContext';
-import { getTrackDisplayInfo } from '@utils/track';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { ScrollingText } from './ScrollingText';
 import styles from '@styles/TrackDisplay.module.css';
 
@@ -11,35 +10,21 @@ import styles from '@styles/TrackDisplay.module.css';
 export function TrackDisplay() {
     const { playingTrack } = usePlayer();
 
-    const displayInfo = playingTrack
-        ? getTrackDisplayInfo(playingTrack, 's')
-        : { title: '', artist: '' };
-
     return (
         <div className={styles.mediaBarLeft}>
-            {playingTrack ? (
-                <AuthenticatedImage
-                    type="album"
-                    id={playingTrack.id_album}
-                    size="s"
-                    alt={displayInfo.title}
-                    className={styles.coverSmall}
-                />
-            ) : (
-                <img
-                    src="/img/placeholder.png"
-                    alt="No track"
-                    className={styles.coverSmall}
-                />
-            )}
+            <AlbumCoverOrPlaceholder
+                track={playingTrack}
+                size="s"
+                className={styles.coverSmall}
+            />
             <div className={styles.trackInfoLarge}>
                 <ScrollingText
-                    text={displayInfo.title}
+                    text={playingTrack?.title || ''}
                     className={styles.trackTitleLarge}
                     speed={20}
                 />
                 <ScrollingText
-                    text={displayInfo.artist}
+                    text={playingTrack?.artists?.map(a => a.name).join(', ') || ''}
                     className={styles.trackArtist}
                     speed={16}
                 />
@@ -47,4 +32,3 @@ export function TrackDisplay() {
         </div>
     );
 }
-

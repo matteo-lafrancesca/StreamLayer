@@ -1,8 +1,8 @@
 import { usePlayer } from '@context/PlayerContext';
-import { getTrackDisplayInfo } from '@utils/track';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { IconButton } from '@components/UI';
 import { Play, Pause, Maximize2 } from 'lucide-react';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/CompactMediaBar.module.css';
 
 /**
@@ -17,34 +17,20 @@ export function CompactMediaBar() {
         setIsCompact
     } = usePlayer();
 
-    const displayInfo = playingTrack
-        ? getTrackDisplayInfo(playingTrack, 's')
-        : { title: '', artist: '' };
-
     return (
         <div className={styles.compactMediaBar}>
             {/* Album Cover */}
             <div className={styles.coverContainer}>
-                {playingTrack ? (
-                    <AuthenticatedImage
-                        type="album"
-                        id={playingTrack.id_album}
-                        size="s"
-                        alt={displayInfo.title}
-                        className={styles.cover}
-                    />
-                ) : (
-                    <img
-                        src="/img/placeholder.png"
-                        alt="No track"
-                        className={styles.cover}
-                    />
-                )}
+                <AlbumCoverOrPlaceholder
+                    track={playingTrack}
+                    size="s"
+                    className={styles.cover}
+                />
             </div>
 
             {/* Play/Pause Button */}
             <IconButton
-                icon={isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                icon={isPlaying ? <Pause size={PLAYER_SIZES.DESKTOP.ICON_LARGE} /> : <Play size={PLAYER_SIZES.DESKTOP.ICON_LARGE} />}
                 onClick={() => setIsPlaying(!isPlaying)}
                 className={styles.playButton}
                 enlargeHitbox
@@ -52,7 +38,7 @@ export function CompactMediaBar() {
 
             {/* Fullscreen Toggle */}
             <IconButton
-                icon={<Maximize2 size={20} />}
+                icon={<Maximize2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                 onClick={() => setIsCompact(false)}
                 className={styles.expandButton}
                 title="Agrandir le lecteur"

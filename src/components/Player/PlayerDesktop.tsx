@@ -1,13 +1,11 @@
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { CompactMediaBar } from './CompactMediaBar';
-import { PlaylistView } from './PlaylistView';
-import { ProjectView } from './ProjectView';
-import { QueueView } from './QueueView';
+import { ViewRenderer } from './ViewRenderer';
 import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
-import { Slider } from '@components/UI';
-import { useExpandablePlayer } from '@hooks/useExpandablePlayer';
+import { ProgressSlider } from './ProgressSlider';
 import { usePlayer } from '@context/PlayerContext';
-import { useTrackProgress } from '@hooks/useTrackProgress';
+import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import sharedStyles from '@styles/PlayerShared.module.css';
 import styles from '@styles/PlayerDesktop.module.css';
 
@@ -16,24 +14,19 @@ import styles from '@styles/PlayerDesktop.module.css';
  * Full-featured player with expandable content area
  */
 export function PlayerDesktop() {
-    const {
-        isExpanded,
-        currentView,
-        setCurrentView,
-        playerRef,
-        contentOpacity,
-        onExpandToggle
-    } = useExpandablePlayer();
-
-    const { selectedPlaylist, isCompact } = usePlayer();
-    const { progress, seek } = useTrackProgress();
+    const { currentView, setCurrentView, selectedPlaylist, isCompact } = usePlayer();
+    const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     return (
         <div className={styles.playerContainer}>
             <div
-                ref={playerRef}
                 className={`${styles.player} ${isCompact ? styles.playerCompact : ''}`}
-                style={{ height: '72px' }}
+                style={{
+                    height: isExpanded
+                        ? `${PLAYER_SIZES.DESKTOP.EXPANDED_HEIGHT}px`
+                        : `${PLAYER_SIZES.DESKTOP.COLLAPSED_HEIGHT}px`,
+                    width: isCompact ? `${PLAYER_SIZES.DESKTOP.COMPACT_WIDTH}px` : undefined // Undefined lets CSS handle default
+                }}
             >
                 {isCompact ? (
                     // Compact Mode: Only show compact media bar and progress slider
@@ -41,25 +34,17 @@ export function PlayerDesktop() {
                         <div className={sharedStyles.mediaBarSection}>
                             <CompactMediaBar />
                         </div>
-                        <div className={sharedStyles.progressSlider}>
-                            <Slider
-                                value={progress}
-                                onChange={seek}
-                                showThumb={false}
-                                variant="thin"
-                            />
-                        </div>
+                        <ProgressSlider />
                     </>
                 ) : (
                     // Normal Mode: Show expandable content and full media bar
                     <>
                         {/* Expandable Content Area */}
                         <div
-                            className={sharedStyles.expandableContent}
-                            style={{
-                                opacity: contentOpacity,
-                                pointerEvents: contentOpacity > 0.5 ? 'auto' : 'none',
-                            }}
+                            className={`
+                                ${sharedStyles.expandableContent} 
+                                ${isExpanded ? sharedStyles.expanded : sharedStyles.collapsed}
+                            `}
                         >
                             {/* Header */}
                             <ExpandedPlayerHeader
@@ -69,15 +54,12 @@ export function PlayerDesktop() {
                                 onExpandToggle={onExpandToggle}
                             />
 
-                            {/* Content Area */}
+                            {/* Content Area - using ViewRenderer */}
                             <div className={sharedStyles.expandableContentScroll}>
-                                {currentView === 'playlist' ? (
-                                    <PlaylistView />
-                                ) : currentView === 'queue' ? (
-                                    <QueueView />
-                                ) : (
-                                    <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />
-                                )}
+                                <ViewRenderer
+                                    currentView={currentView}
+                                    setCurrentView={setCurrentView}
+                                />
                             </div>
                         </div>
 
@@ -94,4 +76,3 @@ export function PlayerDesktop() {
         </div>
     );
 }
-

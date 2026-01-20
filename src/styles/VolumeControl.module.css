@@ -6,7 +6,7 @@
     gap: var(--spacing-sm);
 }
 
-.volumeIconNew {
+.volumeIcon {
     color: var(--color-black);
     flex-shrink: 0;
     display: flex;

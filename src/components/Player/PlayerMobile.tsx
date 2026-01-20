@@ -1,97 +1,75 @@
 import { MediaBarMobile } from './MediaBarMobile';
 import { TrackViewMobile } from './TrackViewMobile';
-import { PlaylistView } from './PlaylistView';
-import { ProjectView } from './ProjectView';
-import { QueueView } from './QueueView';
-import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
-import { Slider } from '@components/UI';
-import { useExpandablePlayer } from '@hooks/useExpandablePlayer';
-import { useMobilePlayerAnimation } from '@hooks/useMobilePlayerAnimation';
+import { ViewRenderer } from './ViewRenderer';
+import { ExpandedPlayerHeaderMobile } from './ExpandedPlayerHeaderMobile';
+import { BottomSheet } from './BottomSheet';
+import { ProgressSlider } from './ProgressSlider';
 import { usePlayer } from '@context/PlayerContext';
-import { useTrackProgress } from '@hooks/useTrackProgress';
+import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
+import { MOBILE_PLAYER_STYLES } from '@constants/mobilePlayerStyles';
 import sharedStyles from '@styles/PlayerShared.module.css';
 import styles from '@styles/PlayerMobile.module.css';
 
 /**
  * Mobile Player Component
- * Optimized player for mobile with bottom progress slider
+ * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay
  */
 export function PlayerMobile() {
-    const {
-        currentView,
-        setCurrentView,
-        playerRef,
-        contentOpacity,
-        onExpandToggle
-    } = useExpandablePlayer();
-
-    const { selectedPlaylist, isExpanded } = usePlayer();
-
-    // Use local progress hook for compact mobile slider
-    const { progress } = useTrackProgress();
-
-    // Get animation styles - applies to all expanded views
-    const animationStyles = useMobilePlayerAnimation({
-        isExpanded,
-        isTrackView: true, // Always animate when expanded
-        duration: 300
-    });
+    const { currentView, setCurrentView, selectedPlaylist } = usePlayer();
+    const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     return (
-        <div className={styles.playerContainer} style={animationStyles.container}>
+        <>
+            {/* Fixed Player at Bottom */}
             <div
-                ref={playerRef}
-                className={styles.player}
-                style={animationStyles.player}
+                className={styles.playerContainer}
+                style={{
+                    ...MOBILE_PLAYER_STYLES.container,
+                    pointerEvents: isExpanded ? 'none' : MOBILE_PLAYER_STYLES.container.pointerEvents
+                }}
             >
-                {/* Expandable Content Area */}
-                <div
-                    className={sharedStyles.expandableContent}
-                    style={{
-                        opacity: contentOpacity,
-                        pointerEvents: contentOpacity > 0.5 ? 'auto' : 'none',
-                    }}
-                >
-                    {/* Header */}
-                    <ExpandedPlayerHeader
-                        currentView={currentView}
-                        setCurrentView={setCurrentView}
-                        selectedPlaylist={selectedPlaylist}
-                        onExpandToggle={onExpandToggle}
-                    />
-
-                    {/* Content Area */}
-                    <div className={sharedStyles.expandableContentScroll}>
-                        {currentView === 'track' ? (
-                            <TrackViewMobile />
-                        ) : currentView === 'playlist' ? (
-                            <PlaylistView />
-                        ) : currentView === 'queue' ? (
-                            <QueueView />
-                        ) : (
-                            <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />
-                        )}
+                <div className={styles.player} style={MOBILE_PLAYER_STYLES.player}>
+                    {/* MediaBar */}
+                    <div className={sharedStyles.mediaBarSection}>
+                        <MediaBarMobile onExpandToggle={onExpandToggle} />
                     </div>
-                </div>
 
-                {/* MediaBar - Hidden only when expanded in track view */}
-                <div className={`${sharedStyles.mediaBarSection} ${isExpanded && currentView === 'track' ? styles.mediaBarHidden : ''}`}>
-                    <MediaBarMobile
-                        onExpandToggle={onExpandToggle}
-                    />
-                </div>
-
-                {/* Mobile progress slider - Hidden only when expanded in track view */}
-                <div className={`${sharedStyles.progressSlider} ${isExpanded && currentView === 'track' ? styles.progressSliderHidden : ''}`}>
-                    <Slider
-                        value={progress}
-                        onChange={() => { }} // Non-interactive on mobile
-                        showThumb={false}
-                        variant="thin"
-                    />
+                    {/* Mobile progress slider */}
+                    <ProgressSlider interactive={false} />
                 </div>
             </div>
-        </div>
+
+            {/* Bottom Sheet for ALL Expanded Views */}
+            <BottomSheet
+                isOpen={isExpanded}
+                onClose={onExpandToggle}
+                showChevron={currentView === 'track'}
+            >
+                {currentView === 'track' ? (
+                    <TrackViewMobile />
+                ) : (
+                    <>
+                        {/* Header for non-track views (Mobile-specific) */}
+                        <ExpandedPlayerHeaderMobile
+                            currentView={currentView}
+                            setCurrentView={setCurrentView}
+                            selectedPlaylist={selectedPlaylist}
+                            onExpandToggle={onExpandToggle}
+                        />
+
+                        {/* Content Area - using ViewRenderer */}
+                        <div
+                            className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`}
+                            data-scrollable
+                        >
+                            <ViewRenderer
+                                currentView={currentView}
+                                setCurrentView={setCurrentView}
+                            />
+                        </div>
+                    </>
+                )}
+            </BottomSheet>
+        </>
     );
 }
-

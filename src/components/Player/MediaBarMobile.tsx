@@ -2,6 +2,7 @@ import { usePlayer } from '@context/PlayerContext';
 import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
 import { Play, Pause } from 'lucide-react';
+import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/MediaBarMobile.module.css';
 import type { MediaBarMobileProps } from '@definitions/player';
 
@@ -32,7 +33,10 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
             {/* Right Section: Play/Pause Button */}
             <div className={styles.mediaBarRight}>
                 <IconButton
-                    icon={isPlaying ? <Pause size={24} /> : <Play size={24} strokeWidth={2.5} />}
+                    icon={isPlaying
+                        ? <Pause size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
+                        : <Play size={PLAYER_SIZES.MOBILE.ICON_SMALL} strokeWidth={2.5} />
+                    }
                     onClick={(e) => {
                         e.stopPropagation(); // Prevent triggering expand
                         setIsPlaying(!isPlaying);
@@ -45,4 +49,3 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
         </div>
     );
 }
-

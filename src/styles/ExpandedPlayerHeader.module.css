@@ -7,6 +7,8 @@
     padding: var(--spacing-lg);
     position: relative;
     height: var(--player-header-height);
+    width: 100%;
+    box-sizing: border-box;
     /* Fixed header height */
 }
 
@@ -24,6 +26,9 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
+    flex: 1;
+    min-width: 0;
+    /* Enable truncation in flex item */
 }
 
 .headerTitle {
@@ -31,6 +36,9 @@
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .closeButtonWrapper {

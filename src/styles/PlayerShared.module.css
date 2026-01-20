@@ -13,9 +13,7 @@
     height: var(--player-collapsed-height);
     background: var(--bg-secondary);
     z-index: 10;
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
+
     box-sizing: border-box;
 }
 
@@ -45,15 +43,17 @@
     overflow: hidden;
     opacity: 0;
     transition: opacity var(--transition-base);
-    transform: translateZ(0);
+
+    background: var(--bg-secondary);
 }
 
-.expandableContent.collapsed {
+/* Standalone state classes for proper CSS Module export */
+.collapsed {
     opacity: 0;
     pointer-events: none;
 }
 
-.expandableContent.expanded {
+.expanded {
     opacity: 1;
     transition: opacity var(--transition-base) 0.15s;
 }

@@ -2,13 +2,13 @@ import { Slider } from '@components/UI';
 import { useTrackProgress } from '@hooks/useTrackProgress';
 import styles from '@styles/ProgressBar.module.css';
 
-interface ExtendedProgressBarProps {
+interface ProgressBarProps {
     className?: string; // Allow custom styling
     onSeekStart?: () => void;
     onSeekEnd?: () => void;
 }
 
-export function ProgressBar({ className, onSeekStart, onSeekEnd }: ExtendedProgressBarProps) {
+export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarProps) {
     const { progress, formattedCurrentTime, formattedRemainingTime, seek } = useTrackProgress();
 
     return (
@@ -18,7 +18,7 @@ export function ProgressBar({ className, onSeekStart, onSeekEnd }: ExtendedProgr
                 value={progress}
                 onChange={seek}
                 variant="default"
-                className={styles.progressBarNew}
+                className={styles.progressBar}
                 onDragStart={onSeekStart}
                 onDragEnd={onSeekEnd}
             />
@@ -26,4 +26,3 @@ export function ProgressBar({ className, onSeekStart, onSeekEnd }: ExtendedProgr
         </div>
     );
 }
-

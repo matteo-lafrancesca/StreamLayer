@@ -1,8 +1,6 @@
 /* Player Mobile CSS */
 
-.playerContainer {
-    /* Styles controlled by TypeScript animation hook */
-}
+
 
 @media (min-width: 751px) {
     .playerContainer {
@@ -11,20 +9,15 @@
 }
 
 .player {
-    /* Styles controlled by TypeScript animation hook */
+    /* Styles controlled by constants/mobilePlayerStyles.ts */
+    isolation: isolate;
+    z-index: 1;
 }
 
-/* Hide media bar in track view full-screen - Mobile specific */
-.mediaBarHidden {
-    display: none;
-}
-
-/* Hide progress slider in track view full-screen - Mobile specific */
-.progressSliderHidden {
-    display: none;
+/* Content scroll area for mobile (needs flex layout) */
+.expandableContentScrollMobile {
+    flex: 1;
+    overflow: auto;
 }
 
 /* Handle extra small screens */
-@media (max-width: 400px) {
-    /* If there are specific player mobile styles for small screens */
-}

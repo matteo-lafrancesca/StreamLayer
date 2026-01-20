@@ -4,7 +4,7 @@ import { PLAYER_SIZES } from '@constants/playerSizes';
 import type { Playlist } from '@definitions/playlist';
 import styles from '@styles/ExpandedPlayerHeader.module.css';
 
-export interface ExpandedPlayerHeaderProps {
+export interface ExpandedPlayerHeaderMobileProps {
     currentView: 'playlist' | 'project' | 'queue' | 'track';
     setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
     selectedPlaylist: Playlist | null;
@@ -12,15 +12,21 @@ export interface ExpandedPlayerHeaderProps {
 }
 
 /**
- * Header component for expanded player view (Desktop)
+ * Mobile-specific header component for expanded player view
  * Displays dynamic title and navigation based on current view
+ * Mobile has different navigation flow (includes Track view)
  */
-export function ExpandedPlayerHeader({
+export function ExpandedPlayerHeaderMobile({
     currentView,
     setCurrentView,
     selectedPlaylist,
     onExpandToggle
-}: ExpandedPlayerHeaderProps) {
+}: ExpandedPlayerHeaderMobileProps) {
+    // Track view doesn't have a header (handled by BottomSheet chevron)
+    if (currentView === 'track') {
+        return null;
+    }
+
     // Helper function to render header content based on view
     const renderHeaderContent = () => {
         switch (currentView) {
@@ -32,7 +38,7 @@ export function ExpandedPlayerHeader({
                             className={styles.backButton}
                             title="Retour aux projets"
                         >
-                            <ArrowLeft size={PLAYER_SIZES.DESKTOP.ICON_LARGE} />
+                            <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
                         </button>
                         <h2 className={styles.headerTitle}>
                             {selectedPlaylist?.metadata.title || 'Playlist'}
@@ -43,20 +49,31 @@ export function ExpandedPlayerHeader({
             case 'queue':
                 return (
                     <div className={styles.headerTitleRow}>
-                        <h2 className={styles.headerTitle} style={{ marginLeft: 0 }}>
+                        <button
+                            onClick={() => setCurrentView('track')}
+                            className={styles.backButton}
+                            title="Retour à la lecture"
+                        >
+                            <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
+                        </button>
+                        <h2 className={styles.headerTitle}>
                             File d'attente
                         </h2>
                     </div>
                 );
 
-            case 'track':
-                return null; // No header for track view
-
             case 'project':
             default:
                 return (
                     <div className={styles.headerTitleRow}>
-                        <h2 className={styles.headerTitle} style={{ marginLeft: 0 }}>
+                        <button
+                            onClick={() => setCurrentView('track')}
+                            className={styles.backButton}
+                            title="Retour à la lecture"
+                        >
+                            <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
+                        </button>
+                        <h2 className={styles.headerTitle}>
                             Playlists du projet
                         </h2>
                     </div>
