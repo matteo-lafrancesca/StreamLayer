@@ -11,41 +11,48 @@ export function PlaybackControls({
     onPrevious,
     onNext,
     onRepeat,
+    variant = 'desktop'
 }: PlaybackControlsProps) {
     const { playbackControls } = usePlayer();
 
+    // Icon sizes based on variant
+    // Icon sizes based on variant
+    const sizes = variant === 'mobile'
+        ? { shuffle: 24, skip: 28, play: 30, repeat: 24 }
+        : { shuffle: 18, skip: 24, play: 56, repeat: 18 };
+
     return (
-        <div className={styles.playbackControls}>
+        <div className={`${styles.playbackControls} ${variant === 'mobile' ? styles.mobile : ''}`}>
             <IconButton
-                icon={<Shuffle size={18} />}
+                icon={<Shuffle size={sizes.shuffle} />}
                 className={`${styles.controlIconButton} ${playbackControls.isShuffled ? styles.active : styles.inactive}`}
                 title={playbackControls.isShuffled ? "Désactiver l'aléatoire" : "Activer l'aléatoire"}
                 onClick={onShuffle}
                 enlargeHitbox
             />
             <IconButton
-                icon={<SkipBack size={20} />}
+                icon={<SkipBack size={sizes.skip} />}
                 className={styles.controlIconButton}
                 title="Précédent"
                 onClick={onPrevious}
                 enlargeHitbox
             />
             <IconButton
-                icon={isPlaying ? <Pause size={18} strokeWidth={2.5} /> : <Play size={18} strokeWidth={2.5} />}
+                icon={isPlaying ? <Pause size={sizes.play} strokeWidth={2.5} /> : <Play size={sizes.play} strokeWidth={2.5} />}
                 className={styles.playPauseButton}
                 onClick={onPlayPause}
                 title={isPlaying ? "Pause" : "Lecture"}
                 enlargeHitbox
             />
             <IconButton
-                icon={<SkipForward size={20} />}
+                icon={<SkipForward size={sizes.skip} />}
                 className={styles.controlIconButton}
                 title="Suivant"
                 onClick={onNext}
                 enlargeHitbox
             />
             <IconButton
-                icon={playbackControls.repeatMode === 'one' ? <Repeat1 size={18} /> : <Repeat size={18} />}
+                icon={playbackControls.repeatMode === 'one' ? <Repeat1 size={sizes.repeat} /> : <Repeat size={sizes.repeat} />}
                 className={`${styles.controlIconButton} ${playbackControls.repeatMode !== 'off' ? styles.active : styles.inactive}`}
                 title={
                     playbackControls.repeatMode === 'off' ? 'Activer la répétition' :

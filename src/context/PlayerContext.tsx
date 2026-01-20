@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode, type RefObject } from 'react';
 import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 import { usePlaybackControls } from '@hooks/usePlaybackControls';
@@ -25,6 +25,10 @@ interface PlayerContextType {
     setRefreshToken: (token: string | null) => void;
 
     // Playback state
+    // Audio Ref for direct access
+    audioRef: RefObject<HTMLAudioElement | null>;
+
+    // Playback state
     playingTrack: Track | null;
     setPlayingTrack: (track: Track | null) => void;
     playTrackFromPlaylist: (trackIndex: number, tracks?: Track[]) => void;
@@ -32,10 +36,9 @@ interface PlayerContextType {
     setIsPlaying: (isPlaying: boolean) => void;
     volume: number;
     setVolume: (volume: number) => void;
-    progress: number;
-    setProgress: (progress: number) => void;
-    currentTime: string;
-    duration: string;
+
+    // Durée totale (change peu souvent, peut rester dans le contexte)
+    duration: number;
     isBuffering: boolean;
 
     // UI state
@@ -47,8 +50,12 @@ interface PlayerContextType {
     // Player expansion state
     isExpanded: boolean;
     setIsExpanded: (isExpanded: boolean) => void;
-    currentView: 'playlist' | 'project' | 'queue';
-    setCurrentView: (view: 'playlist' | 'project' | 'queue') => void;
+    currentView: 'playlist' | 'project' | 'queue' | 'track';
+    setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
+
+    // Player compact mode state
+    isCompact: boolean;
+    setIsCompact: (isCompact: boolean) => void;
 
     // Queue state
     queue: Track[];
@@ -76,14 +83,14 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     const [playingTrack, setPlayingTrack] = useState<Track | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(70);
-    const [progress, setProgress] = useState(0);
 
     // UI state
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
     const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [currentView, setCurrentView] = useState<'playlist' | 'project' | 'queue'>('project');
+    const [currentView, setCurrentView] = useState<'playlist' | 'project' | 'queue' | 'track'>('project');
     const [isSeeking, setIsSeeking] = useState(false);
+    const [isCompact, setIsCompact] = useState(false);
 
     // Load playlist tracks (pass accessToken to avoid circular dependency)
     const { tracks: playlistTracks } = usePlaylistTracks(selectedPlaylist?.id, accessToken);
@@ -122,41 +129,12 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         isShuffled: queueManager.isShuffled,
         repeatMode: queueManager.repeatMode,
         onShuffle: queueManager.toggleShuffle,
-        onPrevious: () => queueManager.playPrevious(audioPlayer.currentTime),
+        onPrevious: () => queueManager.playPrevious(audioPlayer.audioRef.current?.currentTime || 0),
         onNext: queueManager.playNext,
         onRepeat: queueManager.toggleRepeat,
     });
 
-    // Calculate progress percentage once (avoid duplication)
-    const progressPercent = useMemo(() => {
-        return audioPlayer.duration > 0
-            ? (audioPlayer.currentTime / audioPlayer.duration) * 100
-            : 0;
-    }, [audioPlayer.currentTime, audioPlayer.duration]);
-
-    // Sync progress from audio player
-    useEffect(() => {
-        if (!isSeeking && audioPlayer.duration > 0) {
-            setProgress(progressPercent);
-        }
-    }, [progressPercent, isSeeking, audioPlayer.duration]);
-
-    // Time display (format from audio player's actual time)
-    const currentTime = useMemo(() => {
-        if (!audioPlayer.duration) return '0:00';
-        const currentSeconds = Math.floor((progressPercent / 100) * audioPlayer.duration);
-        const mins = Math.floor(currentSeconds / 60);
-        const secs = Math.floor(currentSeconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }, [progressPercent, audioPlayer.duration]);
-
-    const duration = useMemo(() => {
-        if (!audioPlayer.duration) return '0:00';
-        const remainingSeconds = Math.floor(audioPlayer.duration - (progressPercent / 100) * audioPlayer.duration);
-        const mins = Math.floor(remainingSeconds / 60);
-        const secs = Math.floor(remainingSeconds % 60);
-        return `-${mins}:${secs.toString().padStart(2, '0')}`;
-    }, [progressPercent, audioPlayer.duration]);
+    // NOTE: Progress/Time logic has been moved to useTrackProgress hook to prevent global re-renders
 
     // Function to play a track from the playlist (creates new queue)
     const playTrackFromPlaylist = useCallback((trackIndex: number, tracks?: Track[]) => {
@@ -170,20 +148,10 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     // Auto-play when track changes
     useEffect(() => {
         if (playingTrack) {
-            setProgress(0);
+            // Reset logic is handled locally in hooks or by audio player
             setIsPlaying(true);
         }
     }, [playingTrack?.id]);
-
-    // Handle manual progress changes (seeking)
-    const handleProgressChange = useCallback((newProgress: number) => {
-        setProgress(newProgress);
-        // Convert percentage to seconds and seek
-        if (audioPlayer.duration > 0) {
-            const seekTime = (newProgress / 100) * audioPlayer.duration;
-            audioPlayer.seek(seekTime);
-        }
-    }, [audioPlayer.duration, audioPlayer.seek]);
 
     // Playback controls object
     const playbackControls: PlaybackControls = {
@@ -214,10 +182,8 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
                 setIsPlaying,
                 volume,
                 setVolume,
-                progress,
-                setProgress: handleProgressChange,
-                currentTime,
-                duration,
+                audioRef: audioPlayer.audioRef,
+                duration: audioPlayer.duration,
                 isBuffering: audioPlayer.isBuffering,
                 isExpanded,
                 setIsExpanded,
@@ -227,6 +193,8 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
                 playbackControls,
                 isSeeking,
                 setIsSeeking,
+                isCompact,
+                setIsCompact,
             }}
         >
             {children}

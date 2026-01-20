@@ -1,0 +1,29 @@
+/* Compact Media Bar CSS */
+
+.compactMediaBar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    height: 100%;
+    padding: 0 var(--spacing-md);
+}
+
+.coverContainer {
+    flex-shrink: 0;
+}
+
+.cover {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+}
+
+.playButton {
+    flex-shrink: 0;
+}
+
+.expandButton {
+    flex-shrink: 0;
+}

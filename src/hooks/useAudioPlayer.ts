@@ -11,7 +11,7 @@ interface UseAudioPlayerProps {
 }
 
 interface UseAudioPlayerReturn {
-    currentTime: number;
+    audioRef: React.MutableRefObject<HTMLAudioElement | null>;
     duration: number;
     isPlaying: boolean;
     isBuffering: boolean;
@@ -32,7 +32,6 @@ export function useAudioPlayer({
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const hlsRef = useRef<Hls | null>(null);
 
-    const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
@@ -54,10 +53,6 @@ export function useAudioPlayer({
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
-
-        const handleTimeUpdate = () => {
-            setCurrentTime(audio.currentTime);
-        };
 
         const handleDurationChange = () => {
             setDuration(audio.duration || 0);
@@ -85,7 +80,7 @@ export function useAudioPlayer({
             onEnded?.();
         };
 
-        audio.addEventListener('timeupdate', handleTimeUpdate);
+        // Note: timeupdate is handled locally in consumers via useTrackProgress
         audio.addEventListener('durationchange', handleDurationChange);
         audio.addEventListener('play', handlePlay);
         audio.addEventListener('pause', handlePause);
@@ -94,7 +89,6 @@ export function useAudioPlayer({
         audio.addEventListener('ended', handleEnded);
 
         return () => {
-            audio.removeEventListener('timeupdate', handleTimeUpdate);
             audio.removeEventListener('durationchange', handleDurationChange);
             audio.removeEventListener('play', handlePlay);
             audio.removeEventListener('pause', handlePause);
@@ -109,7 +103,6 @@ export function useAudioPlayer({
         const audio = audioRef.current;
 
         // Immediately reset states when track changes (for instant UI update)
-        setCurrentTime(0);
         setDuration(0);
         setIsPlaying(false);
 
@@ -222,7 +215,7 @@ export function useAudioPlayer({
     }, []);
 
     return {
-        currentTime,
+        audioRef,
         duration,
         isPlaying,
         isBuffering,

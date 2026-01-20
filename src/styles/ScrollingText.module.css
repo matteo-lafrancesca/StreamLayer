@@ -1,39 +1,19 @@
-/* Scrolling Text CSS */
-
 .scrollingTextContainer {
-    position: relative;
-    overflow: hidden;
     width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    /* Masquer le débordement proprement */
+    /* Masquer le débordement proprement */
+    /* mask-image removed as it caused unwanted shadows */
 }
 
 .scrollingTextContent {
     display: inline-block;
     white-space: nowrap;
-}
-
-.scrollingTextContent.scrolling {
-    animation: scroll-text linear infinite;
-}
-
-.scrollingTextContent.scrolling:hover {
-    animation-play-state: paused;
-}
-
-@keyframes scroll-text {
-    0% {
-        transform: translateX(0);
-    }
-
-    25%,
-    50% {
-        transform: translateX(calc(-1 * var(--overflow-distance)));
-    }
-
-    75% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
+    /* La propriété transform sera gérée par le composant React */
+    will-change: transform;
+    /* Optimisation GPU */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }

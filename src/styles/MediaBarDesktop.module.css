@@ -1,6 +1,6 @@
 /* MediaBar Desktop CSS */
 
-.mediaBarNew {
+.mediaBar {
     display: flex;
     align-items: center;
     gap: var(--spacing-lg);

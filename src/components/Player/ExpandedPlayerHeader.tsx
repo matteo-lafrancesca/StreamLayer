@@ -4,8 +4,8 @@ import type { Playlist } from '@definitions/playlist';
 import styles from '@styles/ExpandedPlayerHeader.module.css';
 
 export interface ExpandedPlayerHeaderProps {
-    currentView: 'playlist' | 'project' | 'queue';
-    setCurrentView: (view: 'playlist' | 'project' | 'queue') => void;
+    currentView: 'playlist' | 'project' | 'queue' | 'track';
+    setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
     selectedPlaylist: Playlist | null;
     onExpandToggle: () => void;
 }
@@ -36,13 +36,34 @@ export function ExpandedPlayerHeader({
                     </h2>
                 </div>
             ) : currentView === 'queue' ? (
-                <h2 className={styles.headerTitle}>
-                    File d'attente
-                </h2>
+                <div className={styles.headerTitleRow}>
+                    <button
+                        onClick={() => setCurrentView('track')}
+                        className={styles.backButton}
+                        title="Retour"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h2 className={styles.headerTitle}>
+                        File d'attente
+                    </h2>
+                </div>
+            ) : currentView === 'track' ? (
+                null // No header for track view
             ) : (
-                <h2 className={styles.headerTitle}>
-                    Playlists du projet
-                </h2>
+                // Project view
+                <div className={styles.headerTitleRow}>
+                    <button
+                        onClick={() => setCurrentView('track')}
+                        className={styles.backButton}
+                        title="Retour"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h2 className={styles.headerTitle}>
+                        Playlists du projet
+                    </h2>
+                </div>
             )}
 
             {/* Close Button */}

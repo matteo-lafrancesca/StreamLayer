@@ -1,25 +1,28 @@
 import { Slider } from '@components/UI';
+import { useTrackProgress } from '@hooks/useTrackProgress';
 import styles from '@styles/ProgressBar.module.css';
-import type { ProgressBarProps } from '@definitions/player';
 
-interface ExtendedProgressBarProps extends ProgressBarProps {
+interface ExtendedProgressBarProps {
+    className?: string; // Allow custom styling
     onSeekStart?: () => void;
     onSeekEnd?: () => void;
 }
 
-export function ProgressBar({ progress, currentTime, duration, onProgressChange, onSeekStart, onSeekEnd }: ExtendedProgressBarProps) {
+export function ProgressBar({ className, onSeekStart, onSeekEnd }: ExtendedProgressBarProps) {
+    const { progress, formattedCurrentTime, formattedRemainingTime, seek } = useTrackProgress();
+
     return (
-        <div className={styles.progressSection}>
-            <span className={styles.timeText}>{currentTime}</span>
+        <div className={`${styles.progressSection} ${className || ''}`}>
+            <span className={styles.timeText}>{formattedCurrentTime}</span>
             <Slider
                 value={progress}
-                onChange={onProgressChange}
+                onChange={seek}
                 variant="default"
                 className={styles.progressBarNew}
                 onDragStart={onSeekStart}
                 onDragEnd={onSeekEnd}
             />
-            <span className={styles.timeText}>-{duration}</span>
+            <span className={styles.timeText}>{formattedRemainingTime}</span>
         </div>
     );
 }

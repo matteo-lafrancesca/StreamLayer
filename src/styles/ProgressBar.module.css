@@ -56,13 +56,3 @@
     height: 14px;
     right: -7px;
 }
-
-@media (max-width: 400px) {
-    .timeText {
-        display: none;
-    }
-
-    .progressBarNew {
-        padding: var(--spacing-sm) 0;
-    }
-}

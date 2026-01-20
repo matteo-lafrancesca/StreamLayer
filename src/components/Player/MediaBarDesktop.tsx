@@ -4,61 +4,63 @@ import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { IconButton } from '@components/UI';
-import { ListMusic, ListVideo } from 'lucide-react';
+import { ListMusic, ListVideo, Minimize2 } from 'lucide-react';
 import styles from '@styles/MediaBarDesktop.module.css';
-import type { MediaBarProps } from '@definitions/player';
+import type { MediaBarDesktopProps } from '@definitions/player';
 
 /**
  * Desktop MediaBar component
  * Full-featured player bar with all controls
  */
-export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
+export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopProps) {
     const {
         isPlaying,
         setIsPlaying,
         volume,
         setVolume,
-        progress,
-        setProgress,
-        currentTime,
-        duration,
         playbackControls,
         setIsSeeking,
         selectedPlaylist,
         setCurrentView,
-        currentView
+        currentView,
+        setIsCompact,
+        setIsExpanded
     } = usePlayer();
 
     const handleOpenPlaylist = () => {
-        if (!isExpanded) {
+        if (isExpanded && (currentView === 'playlist' || currentView === 'project')) {
             onExpandToggle();
-        }
-        if (selectedPlaylist) {
-            setCurrentView('playlist');
         } else {
-            setCurrentView('project');
+            if (!isExpanded) {
+                onExpandToggle();
+            }
+            if (selectedPlaylist) {
+                setCurrentView('playlist');
+            } else {
+                setCurrentView('project');
+            }
         }
     };
 
     const handleOpenQueue = () => {
-        if (!isExpanded) {
+        if (isExpanded && currentView === 'queue') {
             onExpandToggle();
+        } else {
+            if (!isExpanded) {
+                onExpandToggle();
+            }
+            setCurrentView('queue');
         }
-        setCurrentView('queue');
     };
 
     return (
-        <div className={styles.mediaBarNew}>
+        <div className={styles.mediaBar}>
             {/* Left Section: Cover + Track Info */}
             <TrackDisplay />
 
             {/* Center Section: Progress Bar + Controls */}
             <div className={styles.mediaBarCenter}>
                 <ProgressBar
-                    progress={progress}
-                    currentTime={currentTime}
-                    duration={duration}
-                    onProgressChange={setProgress}
                     onSeekStart={() => setIsSeeking(true)}
                     onSeekEnd={() => setIsSeeking(false)}
                 />
@@ -76,6 +78,17 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarProps) {
             {/* Right Section: Volume + View Toggles */}
             <div className={styles.mediaBarRight}>
                 <div className={styles.viewControls}>
+                    <IconButton
+                        icon={<Minimize2 size={20} />}
+                        onClick={() => {
+                            if (isExpanded) {
+                                setIsExpanded(false);
+                            }
+                            setIsCompact(true);
+                        }}
+                        title="Mode compact"
+                        enlargeHitbox
+                    />
                     <IconButton
                         icon={<ListMusic size={20} />}
                         onClick={handleOpenPlaylist}

@@ -2,18 +2,35 @@
  * Type definitions for Player components
  */
 
-export interface MediaBarProps {
+/**
+ * MediaBar props for Desktop - includes isExpanded state
+ */
+export interface MediaBarDesktopProps {
     isExpanded: boolean;
     onExpandToggle: () => void;
 }
 
+/**
+ * MediaBar props for Mobile - only needs onExpandToggle
+ */
+export interface MediaBarMobileProps {
+    onExpandToggle: () => void;
+}
+
+/**
+ * @deprecated Use MediaBarDesktopProps or MediaBarMobileProps instead
+ * Generic MediaBar props - kept for backwards compatibility
+ */
+export type MediaBarProps = MediaBarDesktopProps;
+
 export interface PlaybackControlsProps {
     isPlaying: boolean;
     onPlayPause: () => void;
-    onShuffle?: () => void;
-    onPrevious?: () => void;
-    onNext?: () => void;
-    onRepeat?: () => void;
+    onShuffle: () => void;
+    onPrevious: () => void;
+    onNext: () => void;
+    onRepeat: () => void;
+    variant?: 'desktop' | 'mobile';
 }
 
 export interface ProgressBarProps {
@@ -21,6 +38,8 @@ export interface ProgressBarProps {
     currentTime: string;
     duration: string;
     onProgressChange: (progress: number) => void;
+    onSeekStart?: () => void;
+    onSeekEnd?: () => void;
 }
 
 export interface VolumeControlProps {

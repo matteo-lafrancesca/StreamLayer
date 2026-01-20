@@ -3,8 +3,29 @@
 .playbackControls {
     display: flex;
     align-items: center;
+    gap: var(--spacing-md);
     justify-content: center;
+}
+
+/* Mobile variant - larger spacing */
+.playbackControls.mobile {
     gap: var(--spacing-lg);
+}
+
+/* Mobile variant - bigger play/pause button */
+.playbackControls.mobile .playPauseButton {
+    background: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    margin: 0;
+}
+
+.playbackControls.mobile .playPauseButton:hover {
+    transform: scale(1.05);
+    opacity: 1;
 }
 
 .controlIconButton {
@@ -47,7 +68,7 @@
 
 /* Toggle states for Shuffle and Repeat */
 .controlIconButton.inactive {
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 .controlIconButton.active {
@@ -55,7 +76,7 @@
 }
 
 .controlIconButton.inactive:hover {
-    opacity: 0.5;
+    opacity: 0.6;
 }
 
 .controlIconButton.active:hover {

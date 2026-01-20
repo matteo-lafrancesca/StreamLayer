@@ -3,22 +3,28 @@ import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
 import { Play, Pause } from 'lucide-react';
 import styles from '@styles/MediaBarMobile.module.css';
-import type { MediaBarProps } from '@definitions/player';
+import type { MediaBarMobileProps } from '@definitions/player';
 
 /**
  * Mobile MediaBar component
  * Simplified player bar with click-to-expand and thin bottom progress bar
  */
-export function MediaBarMobile({ onExpandToggle }: Omit<MediaBarProps, 'isExpanded'>) {
+export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     const {
         isPlaying,
-        setIsPlaying
+        setIsPlaying,
+        setCurrentView
     } = usePlayer();
+
+    const handleExpand = () => {
+        setCurrentView('track'); // Set to track view before expanding
+        onExpandToggle();
+    };
 
     return (
         <div
             className={styles.mediaBarMobile}
-            onClick={onExpandToggle}
+            onClick={handleExpand}
         >
             {/* Left Section: Cover + Track Info */}
             <TrackDisplay />
