@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useAlbumCover } from '@hooks/useAlbumCover';
 import { usePlaylistCover } from '@hooks/usePlaylistCover';
-import type { ImageSize } from '@definitions/player';
+import { type CoverSize } from '@services/api/covers';
 
 interface AuthenticatedImageProps {
     alt: string;
@@ -8,7 +9,7 @@ interface AuthenticatedImageProps {
     className?: string;
     type: 'album' | 'playlist';
     id: number;
-    size?: ImageSize;
+    size?: CoverSize;
 }
 
 /**
@@ -24,10 +25,23 @@ export function AuthenticatedImage({
 }: AuthenticatedImageProps) {
     const albumBlobUrl = useAlbumCover(type === 'album' ? id : null, size);
     const playlistBlobUrl = usePlaylistCover(type === 'playlist' ? id : null, size);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const blobUrl = type === 'album' ? albumBlobUrl : playlistBlobUrl;
 
-    if (!blobUrl) {
+    // Précharger l'image avant de la rendre dans le DOM
+    useEffect(() => {
+        if (!blobUrl) {
+            setImageLoaded(false);
+            return;
+        }
+
+        const img = new Image();
+        img.onload = () => setImageLoaded(true);
+        img.src = blobUrl;
+    }, [blobUrl]);
+
+    if (!blobUrl || !imageLoaded) {
         // Placeholder pendant le chargement
         return (
             <img

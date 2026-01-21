@@ -62,5 +62,7 @@ export interface ProjectViewProps {
     onPlaylistSelect: () => void;
 }
 
-// Type alias for image sizes (maps to CoverSize in covers API)
-export type ImageSize = 's' | 'm' | 'l';
+import { type CoverSize } from '@services/api/covers';
+
+// Type alias for image sizes (maps directly to CoverSize)
+export type ImageSize = CoverSize;

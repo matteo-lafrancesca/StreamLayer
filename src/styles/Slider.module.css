@@ -68,3 +68,24 @@
     border-radius: 0 0 0 var(--radius-md);
     background: var(--color-black);
 }
+
+/* Breathing animation for loading state - Global to work across modules */
+:global {
+    @keyframes breathing {
+
+        0%,
+        100% {
+            background-color: var(--color-gray-300);
+        }
+
+        50% {
+            background-color: var(--color-white);
+        }
+    }
+}
+
+/* Apply breathing when parent has loading/disabled class */
+:global(.loading) .sliderTrack,
+:global(.disabled) .sliderTrack {
+    animation: breathing 1s ease-in-out infinite;
+}

@@ -1,10 +1,27 @@
+import { useMemo } from 'react';
 import { usePlayer } from '@context/PlayerContext';
-import { PlaylistTrackRow } from './PlaylistTrackRow';
-import { PlaylistTableHeader } from './PlaylistTableHeader';
+import { QueueTrackRow } from './QueueTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function QueueView() {
-    const { queue, playTrackFromPlaylist } = usePlayer();
+    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, selectedPlaylist, playingFromPlaylist } = usePlayer();
+
+    // Séparer la track actuelle des suivantes
+    const { currentTrack, upcomingTracks } = useMemo(() => {
+        if (!queue || queue.length === 0 || !playingTrack) {
+            return { currentTrack: null, upcomingTracks: [] };
+        }
+
+        const currentIndex = queue.findIndex(track => track.id === playingTrack.id);
+        if (currentIndex === -1) {
+            return { currentTrack: null, upcomingTracks: queue };
+        }
+
+        return {
+            currentTrack: queue[currentIndex],
+            upcomingTracks: queue.slice(currentIndex + 1)
+        };
+    }, [queue, playingTrack]);
 
     if (!queue || queue.length === 0) {
         return (
@@ -18,21 +35,44 @@ export function QueueView() {
         <div className={styles.scrollContainer}>
             <div className={styles.header}>
                 <h2>File d'attente</h2>
-                <div className={styles.subtitle}>{queue.length} titres</div>
             </div>
 
-            <PlaylistTableHeader />
-
-            <div className={styles.tracksList}>
-                {queue.map((track, index) => (
-                    <PlaylistTrackRow
-                        key={`${track.id}-${index}`} // Composite key as tracks might repeat or be same ID
-                        track={track}
-                        index={index + 1}
-                        onClick={() => playTrackFromPlaylist(index, queue)}
+            {/* Titre en cours */}
+            {currentTrack && (
+                <div className={styles.queueSection}>
+                    <h3 className={styles.sectionTitle}>Titre en cours de lecture</h3>
+                    <QueueTrackRow
+                        track={currentTrack}
+                        onClick={() => {
+                            // Toggle play/pause
+                            setIsPlaying(!isPlaying);
+                        }}
+                        isPlaying={true}
+                        isPlayingState={isPlaying}
                     />
-                ))}
-            </div>
+                </div>
+            )}
+
+            {/* À suivre */}
+            {upcomingTracks.length > 0 && (
+                <div className={styles.queueSection}>
+                    <h3 className={styles.sectionTitle}>
+                        À suivre dans : {(playingFromPlaylist || selectedPlaylist)?.metadata?.title || 'Playlist'}
+                    </h3>
+                    {upcomingTracks.map((track, index) => {
+                        const realIndex = queue.findIndex(t => t === track);
+                        return (
+                            <QueueTrackRow
+                                key={`${track.id}-${realIndex}`}
+                                track={track}
+                                onClick={() => playTrackFromPlaylist(realIndex, queue)}
+                                isPlaying={false}
+                                isPlayingState={false}
+                            />
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }

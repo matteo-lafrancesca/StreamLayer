@@ -1,22 +1,23 @@
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
+
+import { type CoverSize } from '@services/api/covers';
 
 interface AlbumCoverOrPlaceholderProps {
     track?: { id_album: number } | null;
-    size: 's' | 'm' | 'l';
+    size: CoverSize;
     className?: string;
 }
 
 /**
  * AlbumCoverOrPlaceholder Component
  * Displays album cover if track exists, otherwise shows placeholder
- * Eliminates duplication across TrackDisplay, CompactMediaBar, TrackViewMobile
  */
 export function AlbumCoverOrPlaceholder({ track, size, className }: AlbumCoverOrPlaceholderProps) {
     if (!track) {
         return (
             <img
                 src="/img/placeholder.png"
-                alt="No track"
+                alt="Album cover"
                 className={className}
             />
         );

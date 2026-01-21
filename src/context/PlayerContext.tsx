@@ -44,6 +44,7 @@ interface PlayerContextType {
     // UI state
     selectedPlaylist: Playlist | null;
     setSelectedPlaylist: (playlist: Playlist | null) => void;
+    playingFromPlaylist: Playlist | null;
     selectedTrack: Track | null;
     setSelectedTrack: (track: Track | null) => void;
 
@@ -86,6 +87,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
 
     // UI state
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+    const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);
     const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [currentView, setCurrentView] = useState<'playlist' | 'project' | 'queue' | 'track'>('project');
@@ -142,8 +144,10 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         if (tracksToPlay && tracksToPlay.length > 0) {
             // Create new queue starting from the clicked track
             queueManager.setQueue(tracksToPlay, trackIndex);
+            // Set the playlist we're playing from
+            setPlayingFromPlaylist(selectedPlaylist);
         }
-    }, [playlistTracks, queueManager]);
+    }, [playlistTracks, queueManager, selectedPlaylist]);
 
     // Auto-play when track changes
     useEffect(() => {
@@ -176,6 +180,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
                 playTrackFromPlaylist,
                 selectedPlaylist,
                 setSelectedPlaylist,
+                playingFromPlaylist,
                 selectedTrack,
                 setSelectedTrack,
                 isPlaying,

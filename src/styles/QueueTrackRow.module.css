@@ -1,32 +1,30 @@
-/* Playlist Track Row Component */
+/* Queue Track Row Component */
 
 .row {
-    display: grid;
-    grid-template-columns: 40px 1fr 200px 80px;
+    display: flex;
+    align-items: center;
     gap: var(--spacing-md);
     padding: var(--spacing-sm) var(--spacing-lg);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background var(--transition-base);
-    align-items: center;
 }
 
 .row:hover {
     background: var(--color-gray-300);
 }
 
-.index {
-    text-align: center;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-weight: var(--font-weight-medium);
+/* Play control area */
+.playControl {
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    flex-shrink: 0;
 }
 
-.indexContent {
+.playControlContent {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -39,19 +37,12 @@
     color: var(--text-primary);
 }
 
-.row:hover .indexContent {
+.row:hover .playControlContent {
     display: none;
 }
 
 .row:hover .playIcon {
     display: block;
-}
-
-.trackContent {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    min-width: 0;
 }
 
 .cover {
@@ -82,22 +73,6 @@
     white-space: nowrap;
 }
 
-.album {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
-}
-
-.duration {
-    text-align: right;
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-}
-
 /* Currently playing track */
 .rowPlaying {
     background: var(--color-gray-200);
@@ -110,15 +85,4 @@
 .rowPlaying .title {
     color: var(--color-spotify-green);
     font-weight: var(--font-weight-semibold);
-}
-
-/* Responsive: masquer la colonne album en dessous de 700px */
-@container (max-width: 700px) {
-    .row {
-        grid-template-columns: 40px 1fr 80px;
-    }
-
-    .album {
-        display: none;
-    }
 }

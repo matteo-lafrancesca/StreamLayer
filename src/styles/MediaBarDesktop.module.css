@@ -56,3 +56,11 @@
         gap: var(--spacing-sm);
     }
 }
+
+.hidden {
+    opacity: 0;
+}
+
+.visible {
+    opacity: 1;
+}

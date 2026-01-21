@@ -12,7 +12,11 @@ export function useAlbumCover(
     size: CoverSize = 'm'
 ): string | null {
     const { accessToken } = usePlayer();
-    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [blobUrl, setBlobUrl] = useState<string | null>(() => {
+        if (!albumId) return null;
+        const cacheKey = `album-${albumId}-${size}`;
+        return getCachedImage(cacheKey);
+    });
 
     useEffect(() => {
         if (!albumId || !accessToken) {
@@ -31,10 +35,9 @@ export function useAlbumCover(
 
         // Charger l'image si pas en cache
         fetchAlbumCover(albumId, size, accessToken)
-            .then((blob) => {
-                const objectUrl = URL.createObjectURL(blob);
-                setCachedImage(cacheKey, objectUrl);
-                setBlobUrl(objectUrl);
+            .then((url) => {
+                setCachedImage(cacheKey, url);
+                setBlobUrl(url);
             })
             .catch((error) => {
                 console.error(`Erreur chargement cover album ${albumId}:`, error);

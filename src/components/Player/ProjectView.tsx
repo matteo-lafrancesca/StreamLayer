@@ -1,7 +1,8 @@
 import { usePlayer } from '@context/PlayerContext';
 import { usePlaylists } from '@hooks/usePlaylists';
+import { useImageReadyState } from '@hooks/useImageReadyState';
 import { getPlaylistDisplayInfo } from '@utils/playlist';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
 import type { Playlist } from '@definitions/playlist';
 import styles from '@styles/PlayerViews.module.css';
 
@@ -12,6 +13,9 @@ interface ProjectViewProps {
 export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
     const { projectId, setSelectedPlaylist } = usePlayer();
     const { playlists, loading, error } = usePlaylists(projectId);
+
+    // Gérer l'affichage instantané après chargement des images
+    const isVisible = useImageReadyState(loading);
 
     if (loading) {
         return (
@@ -35,7 +39,7 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
     };
 
     return (
-        <div className={styles.scrollContainer}>
+        <div className={`${styles.scrollContainer} ${isVisible ? styles.visible : styles.hidden}`}>
 
 
             <div className={styles.contentGrid}>

@@ -1,27 +1,43 @@
 import { memo } from 'react';
 import type { Track } from '@definitions/track';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
+import { PlayingIndicator } from './PlayingIndicator';
 import { useAlbum } from '@hooks/useAlbum';
 import { getTrackDisplayInfo } from '@utils/track';
-import { Play } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import styles from '@styles/PlaylistTrackRow.module.css';
 
 interface PlaylistTrackRowProps {
     track: Track;
     index: number;
     onClick: () => void;
+    isPlaying?: boolean;
+    isPlayingState?: boolean; // État de lecture (true = en cours, false = en pause)
 }
 
-function PlaylistTrackRowComponent({ track, index, onClick }: PlaylistTrackRowProps) {
+function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, isPlayingState = false }: PlaylistTrackRowProps) {
     const displayInfo = getTrackDisplayInfo(track, 's');
     const { album } = useAlbum(track.id_album);
 
     return (
-        <div className={styles.row} onClick={onClick}>
-            {/* Index with Play Icon on Hover */}
+        <div className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} onClick={onClick}>
+            {/* Index with Play/Pause Icon on Hover */}
             <div className={styles.index}>
-                <span className={styles.indexNumber}>{index}</span>
-                <Play className={styles.playIcon} fill="currentColor" />
+                {/* Default state (pas de hover) */}
+                <div className={styles.indexContent}>
+                    {isPlaying && isPlayingState ? (
+                        <PlayingIndicator />
+                    ) : (
+                        <span className={styles.indexNumber}>{index}</span>
+                    )}
+                </div>
+
+                {/* Hover state */}
+                {isPlaying && isPlayingState ? (
+                    <Pause className={styles.playIcon} fill="currentColor" />
+                ) : (
+                    <Play className={styles.playIcon} fill="currentColor" />
+                )}
             </div>
 
             {/* Track Content (Cover + Info) */}

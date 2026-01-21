@@ -7,7 +7,7 @@ import styles from '@styles/CompactMediaBar.module.css';
 
 /**
  * Compact Media Bar Component
- * Minimal player showing only cover, play/pause, and fullscreen toggle
+ * Minimal player showing only cover, play/pause, and button to get back to regular player
  */
 export function CompactMediaBar() {
     const {
@@ -36,12 +36,12 @@ export function CompactMediaBar() {
                 enlargeHitbox
             />
 
-            {/* Fullscreen Toggle */}
+            {/* Button to get back to regular player */}
             <IconButton
                 icon={<Maximize2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                 onClick={() => setIsCompact(false)}
                 className={styles.expandButton}
-                title="Agrandir le lecteur"
+                title="Revenir au lecteur standard"
                 enlargeHitbox
             />
         </div>

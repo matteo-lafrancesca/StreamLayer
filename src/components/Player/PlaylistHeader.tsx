@@ -1,6 +1,6 @@
 import type { Playlist } from '@definitions/playlist';
 import type { Track } from '@definitions/track';
-import { AuthenticatedImage } from '@components/AuthenticatedImage/AuthenticatedImage';
+import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
 import { IconButton } from '@components/UI';
 import { Play, Shuffle } from 'lucide-react';
 import { formatPlaylistDuration } from '@utils/formatPlaylistDuration';

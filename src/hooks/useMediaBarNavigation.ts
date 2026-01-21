@@ -10,7 +10,7 @@ import { usePlayer } from '@context/PlayerContext';
  * @returns Navigation handlers for playlist and queue
  */
 export function useMediaBarNavigation(isExpanded: boolean, onExpandToggle: () => void) {
-    const { currentView, setCurrentView, selectedPlaylist } = usePlayer();
+    const { currentView, setCurrentView, selectedPlaylist, playingFromPlaylist, setSelectedPlaylist } = usePlayer();
 
     /**
      * Handles opening the playlist/project view
@@ -29,8 +29,13 @@ export function useMediaBarNavigation(isExpanded: boolean, onExpandToggle: () =>
             onExpandToggle();
         }
 
-        setCurrentView(selectedPlaylist ? 'playlist' : 'project');
-    }, [isExpanded, currentView, selectedPlaylist, onExpandToggle, setCurrentView]);
+        // Mettre à jour selectedPlaylist avec la playlist en cours de lecture si elle existe
+        if (playingFromPlaylist) {
+            setSelectedPlaylist(playingFromPlaylist);
+        }
+
+        setCurrentView(selectedPlaylist || playingFromPlaylist ? 'playlist' : 'project');
+    }, [isExpanded, currentView, selectedPlaylist, playingFromPlaylist, onExpandToggle, setCurrentView, setSelectedPlaylist]);
 
     /**
      * Handles opening the queue view

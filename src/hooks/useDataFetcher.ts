@@ -7,6 +7,7 @@ interface UseDataFetcherOptions<T> {
     cacheKey?: string | number;
     enabled?: boolean;
     cacheMap?: Map<any, T>;
+    inFlightMap?: Map<any, Promise<T>>; // Map pour stocker les promesses en cours
     accessToken?: string | null; // Optional to avoid circular dependency
 }
 
@@ -25,6 +26,7 @@ export function useDataFetcher<T>({
     cacheKey,
     enabled = true,
     cacheMap,
+    inFlightMap,
     accessToken: providedAccessToken,
 }: UseDataFetcherOptions<T>): UseDataFetcherResult<T> {
     // Only call usePlayer if accessToken is not provided (avoid circular dependency)
@@ -36,7 +38,6 @@ export function useDataFetcher<T>({
     const [error, setError] = useState<Error | null>(null);
 
     // Ref pour la fonction fetcher afin d'éviter les boucles infinies dans useEffect
-    // si l'utilisateur passe une fonction fléchée inline
     const fetcherRef = useRef(fetcher);
     useEffect(() => {
         fetcherRef.current = fetcher;
@@ -49,7 +50,7 @@ export function useDataFetcher<T>({
             return;
         }
 
-        // Vérification du cache
+        // 1. Vérification du cache immédiat
         if (cacheKey && cacheMap) {
             const cached = cacheMap.get(cacheKey);
             if (cached) {
@@ -62,10 +63,36 @@ export function useDataFetcher<T>({
         setLoading(true);
         setError(null);
 
-        // Appel API authentifié
-        authenticatedCall(async (token) => {
+        // 2. Vérification d'une requête déjà en cours (Deduplication)
+        if (cacheKey && inFlightMap && inFlightMap.has(cacheKey)) {
+            inFlightMap.get(cacheKey)!
+                .then((result) => {
+                    setData(result);
+                    // Mettre à jour le cache si nécessaire (au cas où le fetcher principal ne l'a pas fait)
+                    if (cacheMap && !cacheMap.has(cacheKey)) {
+                        cacheMap.set(cacheKey, result);
+                    }
+                })
+                .catch((err) => {
+                    setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+            return;
+        }
+
+        // 3. Lancement de la nouvelle requête
+        const fetchPromise = authenticatedCall(async (token) => {
             return await fetcherRef.current(token);
-        })
+        });
+
+        // Enregistrement dans la map des requêtes en cours
+        if (cacheKey && inFlightMap) {
+            inFlightMap.set(cacheKey, fetchPromise);
+        }
+
+        fetchPromise
             .then((result) => {
                 setData(result);
                 // Mise en cache
@@ -77,9 +104,13 @@ export function useDataFetcher<T>({
                 setError(err instanceof Error ? err : new Error('Erreur inconnue'));
             })
             .finally(() => {
+                // Nettoyage de la map "in-flight"
+                if (cacheKey && inFlightMap) {
+                    inFlightMap.delete(cacheKey);
+                }
                 setLoading(false);
             });
-    }, [accessToken, authenticatedCall, cacheKey, enabled, cacheMap]);
+    }, [accessToken, authenticatedCall, cacheKey, enabled, cacheMap, inFlightMap]);
 
     return { data, loading, error };
 }

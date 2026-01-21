@@ -1,6 +1,8 @@
 import { usePlayer } from '@context/PlayerContext';
 import { useMediaBarNavigation } from '@hooks/useMediaBarNavigation';
 import { useCompactMode } from '@hooks/useCompactMode';
+import { useAlbumCover } from '@hooks/useAlbumCover';
+import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
@@ -25,14 +27,20 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         setIsSeeking,
         selectedPlaylist,
         currentView,
+        playingTrack,
     } = usePlayer();
 
     // Extract navigation and compact mode logic to hooks
     const { handleOpenPlaylist, handleOpenQueue } = useMediaBarNavigation(isExpanded, onExpandToggle);
     const { enableCompactMode } = useCompactMode();
 
+    // Vérifier si la cover est chargée
+    const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
+    // Cacher seulement si un track existe MAIS que la cover n'est pas encore chargée
+    const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
+
     return (
-        <div className={styles.mediaBar}>
+        <div className={`${styles.mediaBar} ${isVisible ? styles.visible : styles.hidden}`}>
             {/* Left Section: Cover + Track Info */}
             <TrackDisplay />
 

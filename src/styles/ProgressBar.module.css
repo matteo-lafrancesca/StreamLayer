@@ -56,3 +56,50 @@
     height: 14px;
     right: -7px;
 }
+
+/* Disabled state - no track */
+.progressBar.disabled {
+    pointer-events: none;
+}
+
+.progressBar.disabled .progressBarFill,
+.progressBar.disabled .progressBarThumb {
+    display: none;
+}
+
+/* Loading state - breathing animation */
+.progressBar.loading {
+    pointer-events: none;
+}
+
+.progressBar.loading .progressBarTrack {
+    background: var(--color-gray-300);
+    animation: breathing 5s ease-in-out infinite;
+}
+
+.progressBar.loading .progressBarFill,
+.progressBar.loading .progressBarThumb {
+    display: none;
+}
+
+@keyframes breathing {
+
+    0%,
+    100% {
+        background-color: var(--color-gray-300);
+    }
+
+    50% {
+        background-color: var(--color-gray-200);
+        /* Entre gray-200 et gray-300 */
+    }
+}
+
+/* Wrapper pour l'animation breathing */
+.breathingWrapper {
+    flex: 1;
+    background-color: var(--color-gray-300);
+    animation: breathing 1s cubic-bezier(0.4, 0.0, 0.6, 1.0) infinite;
+    border-radius: var(--radius-sm);
+    height: 4px;
+}

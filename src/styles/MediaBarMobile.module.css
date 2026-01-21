@@ -33,3 +33,11 @@
 .playPauseButtonMobile:hover {
     background: var(--color-gray-100);
 }
+
+.hidden {
+    opacity: 0;
+}
+
+.visible {
+    opacity: 1;
+}

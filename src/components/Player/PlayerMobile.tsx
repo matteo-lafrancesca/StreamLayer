@@ -19,7 +19,7 @@ export function PlayerMobile() {
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     return (
-        <>
+        <div className={styles.mobileWrapper}>
             {/* Fixed Player at Bottom */}
             <div
                 className={styles.playerContainer}
@@ -70,6 +70,6 @@ export function PlayerMobile() {
                     </>
                 )}
             </BottomSheet>
-        </>
+        </div>
     );
 }

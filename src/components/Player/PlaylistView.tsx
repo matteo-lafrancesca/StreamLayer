@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 import { usePlayer } from '@context/PlayerContext';
 import { usePlaylistTracks } from '@hooks/usePlaylistTracks';
-import { usePreloadAlbumCovers } from '@hooks/usePreloadAlbumCovers';
+import { usePreloadPlaylistImages } from '@hooks/usePreloadPlaylistImages';
+import { useImageReadyState } from '@hooks/useImageReadyState';
 import { useMemo } from 'react';
 import { PlaylistHeader } from './PlaylistHeader';
 import { PlaylistTableHeader } from './PlaylistTableHeader';
@@ -9,8 +10,8 @@ import { PlaylistTrackRow } from './PlaylistTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function PlaylistView() {
-    const { selectedPlaylist, playTrackFromPlaylist, playbackControls } = usePlayer();
-    const { tracks, loading, error } = usePlaylistTracks(selectedPlaylist?.id);
+    const { selectedPlaylist, playTrackFromPlaylist, playbackControls, playingTrack, isPlaying, setIsPlaying } = usePlayer();
+    const { tracks, loading: tracksLoading, error } = usePlaylistTracks(selectedPlaylist?.id);
 
     // Extraire les IDs d'albums uniques pour le préchargement
     const albumIds = useMemo(() => {
@@ -19,8 +20,16 @@ export function PlaylistView() {
         return Array.from(uniqueIds);
     }, [tracks]);
 
-    // Précharger toutes les covers (silencieusement)
-    usePreloadAlbumCovers(albumIds, 's');
+    // Précharger la cover de la playlist ET toutes les covers d'albums
+    const { loading: imagesLoading } = usePreloadPlaylistImages(
+        selectedPlaylist?.id,
+        albumIds,
+        'l', // Taille pour la cover de playlist (header)
+        's'  // Taille pour les covers d'albums (lignes)
+    );
+
+    // Gérer l'affichage instantané après chargement
+    const isVisible = useImageReadyState(tracksLoading || imagesLoading);
 
     // Handler pour lire tous les titres
     const handlePlayAll = useCallback(() => {
@@ -46,9 +55,8 @@ export function PlaylistView() {
         );
     }
 
-    // Écran de chargement vide pendant le chargement des tracks UNIQUEMENT
-    // Les covers chargeront en arrière-plan (Lazy Loading) sans bloquer l'UI
-    if (loading) {
+    // Écran de chargement tant que les tracks OU les images ne sont pas chargées
+    if (tracksLoading || imagesLoading) {
         return (
             <div className={styles.scrollContainerLoading} />
         );
@@ -71,7 +79,7 @@ export function PlaylistView() {
     }
 
     return (
-        <div className={styles.scrollContainer}>
+        <div className={`${styles.scrollContainer} ${isVisible ? styles.visible : styles.hidden}`}>
             <PlaylistHeader
                 playlist={selectedPlaylist}
                 tracks={tracks}
@@ -82,14 +90,27 @@ export function PlaylistView() {
             <PlaylistTableHeader />
 
             <div className={styles.tracksList}>
-                {tracks.map((track, index) => (
-                    <PlaylistTrackRow
-                        key={track.id}
-                        track={track}
-                        index={index + 1}
-                        onClick={() => playTrackFromPlaylist(index, tracks)}
-                    />
-                ))}
+                {tracks.map((track, index) => {
+                    const isCurrentTrack = playingTrack?.id === track.id;
+                    return (
+                        <PlaylistTrackRow
+                            key={track.id}
+                            track={track}
+                            index={index + 1}
+                            onClick={() => {
+                                if (isCurrentTrack) {
+                                    // Toggle play/pause pour la track en cours
+                                    setIsPlaying(!isPlaying);
+                                } else {
+                                    // Jouer une nouvelle track
+                                    playTrackFromPlaylist(index, tracks);
+                                }
+                            }}
+                            isPlaying={isCurrentTrack}
+                            isPlayingState={isPlaying}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

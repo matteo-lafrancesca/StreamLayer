@@ -38,16 +38,17 @@ export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): 
  * @returns Blob de l'image
  */
 // Map pour stocker les requêtes en cours et éviter les doublons
-const inFlightRequests = new Map<string, Promise<Blob>>();
+const inFlightRequests = new Map<string, Promise<string>>();
 
 /**
  * Helper générique pour récupérer une cover avec déduplication
+ * Retourne une URL (string) au lieu d'un Blob pour partager la même référence
  */
 async function fetchCoverWithDeduplication(
     key: string,
     url: string,
     accessToken: string
-): Promise<Blob> {
+): Promise<string> {
     // Si une requête est déjà en cours pour cette image, on la retourne
     if (inFlightRequests.has(key)) {
         return inFlightRequests.get(key)!;
@@ -57,12 +58,15 @@ async function fetchCoverWithDeduplication(
         headers: {
             'Authorization': `Bearer ${accessToken}`,
         },
+        // Important: fetch en mode 'cors' si besoin, mais ici 'default' suffit souvent
     })
         .then(async (response) => {
             if (!response.ok) {
                 throw new Error(`Erreur lors du chargement de la cover: ${response.status}`);
             }
-            return await response.blob();
+            const blob = await response.blob();
+            // Créer l'URL unique ici, partagée par tous les appelants
+            return URL.createObjectURL(blob);
         })
         .finally(() => {
             // Nettoyer la map une fois la requête terminée (succès ou erreur)
@@ -79,13 +83,13 @@ async function fetchCoverWithDeduplication(
  * @param albumId - L'ID de l'album
  * @param size - Taille de la cover
  * @param accessToken - Token d'accès
- * @returns Blob de l'image
+ * @returns URL de l'image (string)
  */
 export async function fetchAlbumCover(
     albumId: number,
     size: CoverSize,
     accessToken: string
-): Promise<Blob> {
+): Promise<string> {
     const key = `album-${albumId}-${size}`;
     const url = getAlbumCoverUrl(albumId, size);
     return fetchCoverWithDeduplication(key, url, accessToken);
@@ -97,13 +101,13 @@ export async function fetchAlbumCover(
  * @param playlistId - L'ID de la playlist
  * @param size - Taille de la cover
  * @param accessToken - Token d'accès
- * @returns Blob de l'image
+ * @returns URL de l'image (string)
  */
 export async function fetchPlaylistCover(
     playlistId: number,
     size: CoverSize,
     accessToken: string
-): Promise<Blob> {
+): Promise<string> {
     const key = `playlist-${playlistId}-${size}`;
     const url = getPlaylistCoverUrl(playlistId, size);
     return fetchCoverWithDeduplication(key, url, accessToken);

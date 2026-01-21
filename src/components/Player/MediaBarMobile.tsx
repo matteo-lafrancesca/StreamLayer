@@ -1,4 +1,6 @@
 import { usePlayer } from '@context/PlayerContext';
+import { useAlbumCover } from '@hooks/useAlbumCover';
+import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
 import { Play, Pause } from 'lucide-react';
@@ -14,7 +16,8 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     const {
         isPlaying,
         setIsPlaying,
-        setCurrentView
+        setCurrentView,
+        playingTrack,
     } = usePlayer();
 
     const handleExpand = () => {
@@ -22,9 +25,14 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
         onExpandToggle();
     };
 
+    // Vérifier si la cover est chargée
+    const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
+    // Cacher seulement si un track existe MAIS que la cover n'est pas encore chargée
+    const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
+
     return (
         <div
-            className={styles.mediaBarMobile}
+            className={`${styles.mediaBarMobile} ${isVisible ? styles.visible : styles.hidden}`}
             onClick={handleExpand}
         >
             {/* Left Section: Cover + Track Info */}

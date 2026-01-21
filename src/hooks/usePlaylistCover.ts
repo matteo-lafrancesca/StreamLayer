@@ -12,7 +12,11 @@ export function usePlaylistCover(
     size: CoverSize = 'm'
 ): string | null {
     const { accessToken } = usePlayer();
-    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [blobUrl, setBlobUrl] = useState<string | null>(() => {
+        if (!playlistId) return null;
+        const cacheKey = `playlist-${playlistId}-${size}`;
+        return getCachedImage(cacheKey);
+    });
 
     useEffect(() => {
         if (!playlistId || !accessToken) {
@@ -31,10 +35,9 @@ export function usePlaylistCover(
 
         // Charger l'image si pas en cache
         fetchPlaylistCover(playlistId, size, accessToken)
-            .then((blob) => {
-                const objectUrl = URL.createObjectURL(blob);
-                setCachedImage(cacheKey, objectUrl);
-                setBlobUrl(objectUrl);
+            .then((url) => {
+                setCachedImage(cacheKey, url);
+                setBlobUrl(url);
             })
             .catch((error) => {
                 console.error(`Erreur chargement cover playlist ${playlistId}:`, error);
