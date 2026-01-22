@@ -1,11 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode, type RefObject } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode, type RefObject } from 'react';
 import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 import { usePlaybackControls } from '@hooks/usePlaybackControls';
 import { useAudioPlayer } from '@hooks/useAudioPlayer';
 import { useAuthTokens } from '@hooks/useAuthTokens';
 import { useQueueManager } from '@hooks/useQueueManager';
-import { usePlaylistTracks } from '@hooks/usePlaylistTracks';
+import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
 
 interface PlaybackControls {
     isShuffled: boolean;
@@ -95,7 +95,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     const [isCompact, setIsCompact] = useState(false);
 
     // Load playlist tracks (pass accessToken to avoid circular dependency)
-    const { tracks: playlistTracks } = usePlaylistTracks(selectedPlaylist?.id, accessToken);
+    const { tracks: playlistTracks } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
 
     // Queue manager
     const queueManager = useQueueManager({
@@ -120,6 +120,16 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
                 queueManager.playNext();
             } else {
                 setIsPlaying(false);
+            }
+        },
+        onError: () => {
+            // En cas d'échec de chargement après retries, passer à la track suivante
+            console.log('[PlayerContext] Track loading failed, skipping to next');
+            // Forcer l'arrêt du playback pour éviter un état UI incohérent
+            setIsPlaying(false);
+
+            if (queueManager.canPlayNext) {
+                queueManager.playNext();
             }
         },
     });
@@ -154,6 +164,41 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         }
     }, [playlistTracks, queueManager, selectedPlaylist]);
 
+    // Auto-update queue when all playlist tracks are loaded
+    useEffect(() => {
+        // Only update if:
+        // 1. We're currently playing from a playlist
+        // 2. We have loaded tracks
+        // 3. The playlist indicates it has more tracks than what we have loaded
+        if (
+            playingFromPlaylist &&
+            playlistTracks &&
+            selectedPlaylist?.id === playingFromPlaylist.id &&
+            selectedPlaylist?.nb_items &&
+            playlistTracks.length < selectedPlaylist.nb_items
+        ) {
+            // Queue is incomplete, will be updated when playlistTracks grows
+            return;
+        }
+
+        // If we have all tracks and we're playing from this playlist, update the queue
+        if (
+            playingFromPlaylist &&
+            playlistTracks &&
+            selectedPlaylist?.id === playingFromPlaylist.id &&
+            selectedPlaylist?.nb_items &&
+            playlistTracks.length === selectedPlaylist.nb_items &&
+            queueManager.totalTracks < selectedPlaylist.nb_items
+        ) {
+            console.log('[PlayerContext] All tracks loaded, updating queue with full playlist');
+            // Find the current track index in the full list
+            const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
+            if (currentTrackIndex >= 0) {
+                queueManager.setQueue(playlistTracks, currentTrackIndex);
+            }
+        }
+    }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager]);
+
     // Auto-play when track changes
     useEffect(() => {
         if (playingTrack) {
@@ -163,14 +208,14 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     }, [playingTrack?.id]);
 
     // Playback controls object
-    const playbackControls: PlaybackControls = {
+    const playbackControls: PlaybackControls = useMemo(() => ({
         isShuffled: playbackControlsHook.isShuffled,
         repeatMode: playbackControlsHook.repeatMode,
         onShuffle: playbackControlsHook.handleShuffle,
         onPrevious: playbackControlsHook.handlePrevious,
         onNext: playbackControlsHook.handleNext,
         onRepeat: playbackControlsHook.handleRepeat,
-    };
+    }), [playbackControlsHook]);
 
     return (
         <PlayerContext.Provider

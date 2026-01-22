@@ -3,10 +3,8 @@ import { usePlayer } from '@context/PlayerContext';
 import { fetchAlbumCover, fetchPlaylistCover, type CoverSize } from '@services/api/covers';
 import { hasCachedImage, setCachedImage } from '../cache/imageCache';
 
-/**
- * Hook pour précharger la cover d'une playlist ET toutes les covers des albums
- * Gère un état de chargement global pour éviter d'afficher des placeholders
- */
+const PRIORITY_LIMIT = 8; // Nombre d'albums à charger en priorité
+
 export function usePreloadPlaylistImages(
     playlistId: number | null | undefined,
     albumIds: number[],
@@ -15,17 +13,17 @@ export function usePreloadPlaylistImages(
 ): { loading: boolean; error: Error | null } {
     const { accessToken } = usePlayer();
 
-    // Calculer l'état initial de manière synchrone
+    // Calculer l'état initial : on ne bloque QUE si la playlist ou les 8 premiers albums manquent
     const [loading, setLoading] = useState(() => {
         if (!accessToken || !playlistId || albumIds.length === 0) return true;
 
-        // Vérifier si la cover de la playlist est en cache
         const playlistCached = hasCachedImage(`playlist-${playlistId}-${playlistCoverSize}`);
 
-        // Vérifier si au moins une cover d'album manque
-        const albumsMissing = albumIds.some(id => !hasCachedImage(`album-${id}-${albumCoverSize}`));
+        // On ne vérifie le cache que pour les IDs prioritaires pour déterminer le "loading" initial
+        const priorityIds = albumIds.slice(0, PRIORITY_LIMIT);
+        const priorityAlbumsMissing = priorityIds.some(id => !hasCachedImage(`album-${id}-${albumCoverSize}`));
 
-        return !playlistCached || albumsMissing;
+        return !playlistCached || priorityAlbumsMissing;
     });
 
     const [error, setError] = useState<Error | null>(null);
@@ -37,54 +35,62 @@ export function usePreloadPlaylistImages(
         }
 
         const playlistCacheKey = `playlist-${playlistId}-${playlistCoverSize}`;
-        const missingImages: Promise<void>[] = [];
+        const priorityPromises: Promise<void>[] = [];
+
+        // 1. GESTION DE LA PRIORITÉ (Playlist + 8 premiers albums)
 
         // Charger la cover de la playlist si nécessaire
         if (!hasCachedImage(playlistCacheKey)) {
-            missingImages.push(
+            priorityPromises.push(
                 fetchPlaylistCover(playlistId, playlistCoverSize, accessToken)
-                    .then((url) => {
-                        setCachedImage(playlistCacheKey, url);
-                    })
-                    .catch((err) => {
-                        console.error(`Erreur chargement cover playlist ${playlistId}:`, err);
-                    })
+                    .then((url) => setCachedImage(playlistCacheKey, url))
+                    .catch((err) => console.error(`Erreur playlist:`, err))
             );
         }
 
-        // Charger les covers d'albums manquantes
-        const missingAlbumIds = albumIds.filter(id =>
-            !hasCachedImage(`album-${id}-${albumCoverSize}`)
-        );
-
-        missingAlbumIds.forEach((albumId) => {
-            missingImages.push(
-                fetchAlbumCover(albumId, albumCoverSize, accessToken)
-                    .then((url) => {
-                        setCachedImage(`album-${albumId}-${albumCoverSize}`, url);
-                    })
-                    .catch((err) => {
-                        console.error(`Erreur chargement cover album ${albumId}:`, err);
-                    })
-            );
+        // Identifier les albums prioritaires manquants
+        const priorityIds = albumIds.slice(0, PRIORITY_LIMIT);
+        priorityIds.forEach((albumId) => {
+            const key = `album-${albumId}-${albumCoverSize}`;
+            if (!hasCachedImage(key)) {
+                priorityPromises.push(
+                    fetchAlbumCover(albumId, albumCoverSize, accessToken)
+                        .then((url) => setCachedImage(key, url))
+                        .catch((err) => console.error(`Erreur album priority ${albumId}:`, err))
+                );
+            }
         });
 
-        // Si tout est en cache, pas besoin de charger
-        if (missingImages.length === 0) {
+        // 2. GESTION DU RESTE (Background loading)
+        const remainingIds = albumIds.slice(PRIORITY_LIMIT);
+        remainingIds.forEach((albumId) => {
+            const key = `album-${albumId}-${albumCoverSize}`;
+            if (!hasCachedImage(key)) {
+                // On lance le fetch SANS l'ajouter à priorityPromises
+                // Cela remplit le cache en tâche de fond sans bloquer l'UI
+                fetchAlbumCover(albumId, albumCoverSize, accessToken)
+                    .then((url) => setCachedImage(key, url))
+                    .catch(() => { }); // Échec silencieux pour le background
+            }
+        });
+
+        // 3. DÉBLOCAGE DE L'INTERFACE
+        if (priorityPromises.length === 0) {
             setLoading(false);
             return;
         }
 
-        // Charger toutes les images manquantes en parallèle
         setLoading(true);
         setError(null);
 
-        Promise.all(missingImages)
+        // On ne wait que les promesses prioritaires
+        Promise.all(priorityPromises)
             .then(() => setLoading(false))
             .catch((err) => {
                 setError(err instanceof Error ? err : new Error('Erreur de chargement'));
                 setLoading(false);
             });
+
     }, [playlistId, albumIds.join(','), playlistCoverSize, albumCoverSize, accessToken]);
 
     return { loading, error };

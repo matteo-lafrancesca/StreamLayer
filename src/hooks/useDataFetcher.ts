@@ -7,8 +7,8 @@ interface UseDataFetcherOptions<T> {
     cacheKey?: string | number;
     enabled?: boolean;
     cacheMap?: Map<any, T>;
-    inFlightMap?: Map<any, Promise<T>>; // Map pour stocker les promesses en cours
-    accessToken?: string | null; // Optional to avoid circular dependency
+    inFlightMap?: Map<any, Promise<T>>;
+    accessToken?: string | null;
 }
 
 interface UseDataFetcherResult<T> {
@@ -39,6 +39,7 @@ export function useDataFetcher<T>({
 
     // Ref pour la fonction fetcher afin d'éviter les boucles infinies dans useEffect
     const fetcherRef = useRef(fetcher);
+
     useEffect(() => {
         fetcherRef.current = fetcher;
     }, [fetcher]);
@@ -101,6 +102,7 @@ export function useDataFetcher<T>({
                 }
             })
             .catch((err) => {
+                console.error('[DataFetcher] Error:', err);
                 setError(err instanceof Error ? err : new Error('Erreur inconnue'));
             })
             .finally(() => {

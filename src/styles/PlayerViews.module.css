@@ -163,11 +163,6 @@
     color: var(--color-error);
 }
 
-.scrollContainerLoading {
-    flex: 1;
-    overflow: hidden;
-}
-
 .hidden {
     opacity: 0;
 }
@@ -189,4 +184,26 @@
     color: var(--text-secondary);
     padding: var(--spacing-md) var(--spacing-lg);
     margin: 0;
+}
+
+/* Loading more indicator */
+.loadingMore {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }

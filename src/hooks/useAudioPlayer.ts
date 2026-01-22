@@ -8,6 +8,7 @@ interface UseAudioPlayerProps {
     volume: number;
     shouldPlay: boolean;
     onEnded?: () => void;
+    onError?: () => void; // Callback appelé après échec de retry
 }
 
 interface UseAudioPlayerReturn {
@@ -28,9 +29,14 @@ export function useAudioPlayer({
     volume,
     shouldPlay,
     onEnded,
+    onError,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const hlsRef = useRef<Hls | null>(null);
+    const retryCountRef = useRef<number>(0); // Compteur de retries
+    const bufferingTimeoutRef = useRef<number | null>(null); // Timeout pour buffering bloqué
+    const MAX_RETRIES = 2;
+    const BUFFERING_TIMEOUT = 10000; // 10 secondes max de buffering
 
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -69,10 +75,22 @@ export function useAudioPlayer({
 
         const handleWaiting = () => {
             setIsBuffering(true);
+
+            // Démarrer un timeout de buffering (10s max)
+            bufferingTimeoutRef.current = setTimeout(() => {
+                console.error('[Audio] Buffering timeout (10s), skipping to next track');
+                onError?.();
+            }, BUFFERING_TIMEOUT);
         };
 
         const handlePlaying = () => {
             setIsBuffering(false);
+
+            // Annuler le timeout si la lecture reprend
+            if (bufferingTimeoutRef.current) {
+                clearTimeout(bufferingTimeoutRef.current);
+                bufferingTimeoutRef.current = null;
+            }
         };
 
         const handleEnded = () => {
@@ -95,12 +113,19 @@ export function useAudioPlayer({
             audio.removeEventListener('waiting', handleWaiting);
             audio.removeEventListener('playing', handlePlaying);
             audio.removeEventListener('ended', handleEnded);
+
+            // Cleanup: annuler le timeout si le composant démonte
+            if (bufferingTimeoutRef.current) {
+                clearTimeout(bufferingTimeoutRef.current);
+                bufferingTimeoutRef.current = null;
+            }
         };
-    }, [onEnded]);
+    }, [onEnded, onError]);
 
     // Load track when trackId changes
     useEffect(() => {
         const audio = audioRef.current;
+        const retryTimeouts: number[] = []; // Stocker tous les timeouts pour cleanup
 
         // Immediately reset states when track changes (for instant UI update)
         setDuration(0);
@@ -147,26 +172,57 @@ export function useAudioPlayer({
             hls.attachMedia(audio);
 
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                // Stream is ready
+                // Stream is ready, reset retry counter
+                retryCountRef.current = 0;
                 setIsBuffering(false);
             });
 
             hls.on(Hls.Events.ERROR, (_event, data) => {
                 if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.error('HLS Network error, trying to recover...');
-                            hls.startLoad();
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.error('HLS Media error, trying to recover...');
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            console.error('HLS Fatal error, cannot recover');
-                            hls.destroy();
-                            break;
+                    console.error(`[HLS Error] Type: ${data.type}, Details:`, data.details, `(Retry ${retryCountRef.current}/${MAX_RETRIES})`);
+
+                    // Vérifier si on a atteint le max de retries
+                    if (retryCountRef.current >= MAX_RETRIES) {
+                        console.error('[HLS] Max retries reached, skipping to next track');
+                        hls.destroy();
+                        retryCountRef.current = 0; // Reset pour la prochaine track
+                        onError?.(); // Notifier l'échec -> passer à la track suivante
+                        return;
                     }
+
+                    // Incrémenter le compteur de retry
+                    retryCountRef.current++;
+
+                    // Délai avant retry (1 seconde) pour donner le temps au backend de générer les fichiers
+                    const retryTimeout = setTimeout(() => {
+                        // Vérifier que l'instance HLS est toujours valide (pas détruite entre temps)
+                        if (!hlsRef.current || hlsRef.current !== hls) {
+                            console.log('[HLS] Instance destroyed during retry, aborting');
+                            return;
+                        }
+
+                        // Tentative de récupération selon le type d'erreur
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log(`[HLS] Retry #${retryCountRef.current}: Network error (${data.details}), reloading manifest...`);
+                                // Pour les erreurs réseau (notamment 404 manifest), recharger le manifest
+                                hls.loadSource(streamUrl);
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log(`[HLS] Retry #${retryCountRef.current}: Media error, recovering...`);
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                console.error('[HLS] Unrecoverable error type');
+                                hls.destroy();
+                                retryCountRef.current = 0;
+                                onError?.();
+                                break;
+                        }
+                    }, 1000); // Attendre 1 seconde entre chaque retry
+
+                    // Stocker le timeout pour cleanup
+                    retryTimeouts.push(retryTimeout);
                 }
             });
         } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
@@ -177,12 +233,15 @@ export function useAudioPlayer({
         }
 
         return () => {
+            // Cleanup: annuler tous les timeouts de retry
+            retryTimeouts.forEach(clearTimeout);
+
             if (hlsRef.current) {
                 hlsRef.current.destroy();
                 hlsRef.current = null;
             }
         };
-    }, [trackId, accessToken]);
+    }, [trackId, accessToken, onError]);
 
     // Sync volume
     useEffect(() => {

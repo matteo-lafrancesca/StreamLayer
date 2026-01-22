@@ -14,8 +14,12 @@ interface PlaylistHeaderProps {
 }
 
 export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: PlaylistHeaderProps) {
-    const duration = formatPlaylistDuration(tracks);
-    const trackCount = tracks.length;
+    // Nombre de titres : toujours depuis playlist.nb_items pour éviter l'actualisation progressive
+    const trackCount = playlist.nb_items;
+
+    // Durée : seulement si toutes les tracks sont chargées
+    const allTracksLoaded = tracks.length >= playlist.nb_items;
+    const duration = allTracksLoaded ? formatPlaylistDuration(tracks) : 'Calcul...';
 
     return (
         <div className={styles.header}>
@@ -36,8 +40,12 @@ export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: P
 
                 <div className={styles.metadata}>
                     <span>{trackCount} {trackCount > 1 ? 'titres' : 'titre'}</span>
-                    <span className={styles.metadataSeparator}>•</span>
-                    <span>{duration}</span>
+                    {allTracksLoaded && (
+                        <>
+                            <span className={styles.metadataSeparator}>•</span>
+                            <span>{duration}</span>
+                        </>
+                    )}
                 </div>
 
                 <div className={styles.controls}>

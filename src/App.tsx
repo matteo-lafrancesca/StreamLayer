@@ -1,14 +1,13 @@
-import { PlayerProvider } from './context/PlayerContext';
-import { Player } from './components/Player/Player';
+import { StreamLayer } from '@components/StreamLayer';
 
 function App() {
   // TODO: Récupérer le projectId depuis les props ou la config
   const projectId = '34';
 
   return (
-    <PlayerProvider projectId={projectId}>
-      <Player />
-    </PlayerProvider>
+    <StreamLayer projectId={projectId}>
+      {/* Votre contenu d'application ici */}
+    </StreamLayer>
   );
 }
 
