@@ -12,7 +12,7 @@ interface PlaylistTrackRowProps {
     index: number;
     onClick: () => void;
     isPlaying?: boolean;
-    isPlayingState?: boolean; // État de lecture (true = en cours, false = en pause)
+    isPlayingState?: boolean; 
 }
 
 function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, isPlayingState = false }: PlaylistTrackRowProps) {

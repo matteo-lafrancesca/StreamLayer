@@ -8,7 +8,7 @@ interface BottomSheetProps {
     isOpen: boolean;
     onClose: () => void;
     children: ReactNode;
-    showChevron?: boolean; // Show chevron (for track view) or drag bar (for other views)
+    showChevron?: boolean;
 }
 
 /**

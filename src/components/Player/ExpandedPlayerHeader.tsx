@@ -21,7 +21,6 @@ export function ExpandedPlayerHeader({
     selectedPlaylist,
     onExpandToggle
 }: ExpandedPlayerHeaderProps) {
-    // Helper function to render header content based on view
     const renderHeaderContent = () => {
         switch (currentView) {
             case 'playlist':

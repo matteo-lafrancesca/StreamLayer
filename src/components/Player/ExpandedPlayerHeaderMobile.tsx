@@ -14,7 +14,7 @@ export interface ExpandedPlayerHeaderMobileProps {
 /**
  * Mobile-specific header component for expanded player view
  * Displays dynamic title and navigation based on current view
- * Mobile has different navigation flow (includes Track view)
+ * Mobile has different navigation flow
  */
 export function ExpandedPlayerHeaderMobile({
     currentView,

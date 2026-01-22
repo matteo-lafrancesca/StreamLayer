@@ -111,7 +111,12 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         shouldPlay: isPlaying,
         onEnded: () => {
             // Auto-play next track based on queue and repeat mode
-            if (queueManager.canPlayNext) {
+            if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
+                // Si mode répétition 1, on remet à 0 et on joue
+                audioPlayer.audioRef.current.currentTime = 0;
+                audioPlayer.audioRef.current.play().catch(console.error);
+                if (!isPlaying) setIsPlaying(true);
+            } else if (queueManager.canPlayNext) {
                 queueManager.playNext();
             } else {
                 setIsPlaying(false);

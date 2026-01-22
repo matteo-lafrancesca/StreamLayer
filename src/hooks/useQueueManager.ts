@@ -92,14 +92,17 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
 
     // Play next track
     const playNext = useCallback(() => {
+        let effectiveRepeatMode = repeatMode;
+
         if (repeatMode === 'one') {
-            // Replay current track (don't change index)
-            return;
+            // User requested skip while in 'repeat one': switch to 'repeat all' and skip
+            setRepeatMode('all');
+            effectiveRepeatMode = 'all';
         }
 
         if (currentIndex < totalTracks - 1) {
             setCurrentIndex(prev => prev + 1);
-        } else if (repeatMode === 'all') {
+        } else if (effectiveRepeatMode === 'all') {
             setCurrentIndex(0); // Loop to start
         }
         // If repeat is 'off' and we're at the end, don't change index
