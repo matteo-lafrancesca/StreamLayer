@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useAlbumCover } from '@hooks/useAlbumCover';
 import { usePlaylistCover } from '@hooks/usePlaylistCover';
 import { type CoverSize } from '@services/api/covers';
@@ -25,24 +24,12 @@ export function AuthenticatedImage({
 }: AuthenticatedImageProps) {
     const albumBlobUrl = useAlbumCover(type === 'album' ? id : null, size);
     const playlistBlobUrl = usePlaylistCover(type === 'playlist' ? id : null, size);
-    const [imageLoaded, setImageLoaded] = useState(false);
 
+    // Use whichever blob is active
     const blobUrl = type === 'album' ? albumBlobUrl : playlistBlobUrl;
 
-    // Preload image before rendering in DOM
-    useEffect(() => {
-        if (!blobUrl) {
-            setImageLoaded(false);
-            return;
-        }
-
-        const img = new Image();
-        img.onload = () => setImageLoaded(true);
-        img.src = blobUrl;
-    }, [blobUrl]);
-
-    if (!blobUrl || !imageLoaded) {
-        // Placeholder during loading
+    if (!blobUrl) {
+        // Placeholder waiting for cache/fetch
         return (
             <img
                 src="/img/placeholder.png"

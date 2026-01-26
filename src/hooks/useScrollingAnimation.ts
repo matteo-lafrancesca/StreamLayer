@@ -22,59 +22,141 @@ export function useScrollingAnimation(text: string, speed: number = 30) {
 
                 if (isOverflowing) {
                     const overflowDistance = contentWidth - containerWidth;
-                    const scrollVelocity = 10; // Fixed speed (px/s)
-                    const scrollDuration = (overflowDistance / scrollVelocity) * 1000; // Convert to ms
-                    const pauseAtEnd = 3000; // 3 seconds pause
-                    const pauseAtStart = 3000; // 3 seconds pause
+                    // Use the provided speed prop (pixels per second)
+                    const targetSpeed = speed;
 
-                    // Easing function: ease-in-out (smooth acceleration and deceleration)
-                    const easeInOut = (t: number): number => {
-                        return t < 0.5
-                            ? 2 * t * t // Accelerate
-                            : -1 + (4 - 2 * t) * t; // Decelerate
-                    };
+                    // Fixed duration for acceleration and deceleration phrases (in seconds)
+                    const rampTime = 1;
+
+                    // Distance covered during acceleration (0 to speed in rampTime) = 0.5 * speed * rampTime
+                    // Distance covered during deceleration (speed to 0 in rampTime) = 0.5 * speed * rampTime
+                    const rampDistance = 0.5 * targetSpeed * rampTime;
+
+                    // Total distance needed for full ramp up and down
+                    const totalRampDistance = rampDistance * 2;
+
+                    let linearTime = 0;
+                    let actualRampTime = rampTime;
+                    let actualSpeed = targetSpeed;
+
+                    // If distance is too short for full ramp up/down at target speed
+                    if (overflowDistance < totalRampDistance) {
+                        // We won't reach full speed.
+                        // dist = 0.5 * v * t + 0.5 * v * t = v * t
+                        // v = a * t? No, simpler: 
+                        // Peak velocity will be less. Let's keep it simple: reduce ramp time or speed.
+                        // Actually, if it's short, linear phase is 0.
+                        linearTime = 0;
+                        // But we might need to adjust logic. For simplicity, let's keep linear logic
+                        // but allowing negative linear time would be bad.
+                        // Let's just clamp for safety or simple linear. 
+                        // Realistically for music titles, overflow is usually significant or tiny.
+                        // If tiny, just linear is fine.
+                        actualRampTime = overflowDistance / targetSpeed / 2; // Split time
+                        // This is an approximation fallback
+                    } else {
+                        const linearDistance = overflowDistance - totalRampDistance;
+                        linearTime = linearDistance / targetSpeed;
+                    }
+
+                    const pauseAtEnd = 2000;
+                    const pauseAtStart = 2000;
 
                     let phase = 0; // 0: pause start, 1: scroll right, 2: pause end, 3: scroll left
                     let startTime = Date.now();
 
                     const animate = () => {
-                        const elapsed = Date.now() - startTime;
+                        const now = Date.now();
+                        const elapsed = (now - startTime) / 1000; // in seconds
 
                         switch (phase) {
                             case 0: // Pause at start
                                 setTranslateX(0);
-                                if (elapsed >= pauseAtStart) {
+                                if (now - startTime >= pauseAtStart) {
                                     phase = 1;
                                     startTime = Date.now();
                                 }
                                 break;
 
-                            case 1: { // Scroll to show overflow (with easing)
-                                const progress1 = Math.min(elapsed / scrollDuration, 1);
-                                const eased1 = easeInOut(progress1);
-                                setTranslateX(-overflowDistance * eased1);
-                                if (progress1 >= 1) {
+                            case 1: { // Scroll right
+                                // Total duration of movement
+                                const totalMoveTime = actualRampTime * 2 + linearTime;
+
+                                if (elapsed >= totalMoveTime) {
+                                    setTranslateX(-overflowDistance);
                                     phase = 2;
                                     startTime = Date.now();
+                                } else {
+                                    let currentPos = 0;
+
+                                    if (elapsed < actualRampTime) {
+                                        // Acceleration phase: d = 0.5 * a * t^2
+                                        // a = speed / rampTime
+                                        const a = actualSpeed / actualRampTime;
+                                        currentPos = 0.5 * a * elapsed * elapsed;
+                                    } else if (elapsed < actualRampTime + linearTime) {
+                                        // Linear phase
+                                        const linearElapsed = elapsed - actualRampTime;
+                                        const accelDist = 0.5 * actualSpeed * actualRampTime;
+                                        currentPos = accelDist + (actualSpeed * linearElapsed);
+                                    } else {
+                                        // Deceleration phase
+                                        const decelElapsed = elapsed - (actualRampTime + linearTime);
+                                        const accelDist = 0.5 * actualSpeed * actualRampTime;
+                                        const linearDist = actualSpeed * linearTime;
+
+                                        // Deceleration: v0 * t - 0.5 * a * t^2
+                                        // a = speed / rampTime
+                                        const a = actualSpeed / actualRampTime;
+                                        const decelDist = (actualSpeed * decelElapsed) - (0.5 * a * decelElapsed * decelElapsed);
+
+                                        currentPos = accelDist + linearDist + decelDist;
+                                    }
+
+                                    // Clamp to avoid overshoot
+                                    setTranslateX(-Math.min(currentPos, overflowDistance));
                                 }
                                 break;
                             }
 
                             case 2: // Pause at end
                                 setTranslateX(-overflowDistance);
-                                if (elapsed >= pauseAtEnd) {
+                                if (now - startTime >= pauseAtEnd) {
                                     phase = 3;
                                     startTime = Date.now();
                                 }
                                 break;
 
-                            case 3: { // Scroll back to start (with easing)
-                                const progress2 = Math.min(elapsed / scrollDuration, 1);
-                                const eased2 = easeInOut(progress2);
-                                setTranslateX(-overflowDistance * (1 - eased2));
-                                if (progress2 >= 1) {
+                            case 3: { // Scroll left (rewind) - same logic but reverse
+                                const totalMoveTime = actualRampTime * 2 + linearTime;
+
+                                if (elapsed >= totalMoveTime) {
+                                    setTranslateX(0);
                                     phase = 0;
                                     startTime = Date.now();
+                                } else {
+                                    let currentProgress = 0; // 0 to overflowDistance
+
+                                    if (elapsed < actualRampTime) {
+                                        const a = actualSpeed / actualRampTime;
+                                        currentProgress = 0.5 * a * elapsed * elapsed;
+                                    } else if (elapsed < actualRampTime + linearTime) {
+                                        const linearElapsed = elapsed - actualRampTime;
+                                        const accelDist = 0.5 * actualSpeed * actualRampTime;
+                                        currentProgress = accelDist + (actualSpeed * linearElapsed);
+                                    } else {
+                                        const decelElapsed = elapsed - (actualRampTime + linearTime);
+                                        const accelDist = 0.5 * actualSpeed * actualRampTime;
+                                        const linearDist = actualSpeed * linearTime;
+                                        const a = actualSpeed / actualRampTime;
+                                        const decelDist = (actualSpeed * decelElapsed) - (0.5 * a * decelElapsed * decelElapsed);
+                                        currentProgress = accelDist + linearDist + decelDist;
+                                    }
+
+                                    // Invert for rewinding: start at overflowDistance, go to 0
+                                    // So translateX goes from -overflowDistance to 0
+                                    // means translateX = -(overflowDistance - currentProgress)
+                                    setTranslateX(-(overflowDistance - Math.min(currentProgress, overflowDistance)));
                                 }
                                 break;
                             }

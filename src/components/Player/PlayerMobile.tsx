@@ -18,6 +18,8 @@ export function PlayerMobile() {
     const { currentView, setCurrentView, selectedPlaylist } = usePlayer();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
+    const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';
+
     return (
         <div className={styles.mobileWrapper}>
             {/* Fixed Player at Bottom */}
@@ -25,7 +27,8 @@ export function PlayerMobile() {
                 className={styles.playerContainer}
                 style={{
                     ...MOBILE_PLAYER_STYLES.container,
-                    pointerEvents: isExpanded ? 'none' : MOBILE_PLAYER_STYLES.container.pointerEvents
+                    pointerEvents: (isExpanded && !showMiniPlayerOverSheet) ? 'none' : MOBILE_PLAYER_STYLES.container.pointerEvents,
+                    zIndex: showMiniPlayerOverSheet ? 10000 : MOBILE_PLAYER_STYLES.container.zIndex,
                 }}
             >
                 <div className={styles.player} style={MOBILE_PLAYER_STYLES.player}>

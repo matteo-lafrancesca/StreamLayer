@@ -17,11 +17,12 @@ export const MOBILE_PLAYER_STYLES = {
         width: '90%',
         height: '72px',
         borderRadius: '12px',
-        background: 'var(--bg-secondary)',
-        boxShadow: 'var(--shadow-xl)',
+        background: '#FFFFFF',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
         position: 'relative' as const,
         overflow: 'hidden' as const,
         userSelect: 'none' as const,
         pointerEvents: 'auto' as const,
+        border: '1px solid var(--border-subtle)',
     }
 } as const;

@@ -19,7 +19,7 @@
     position: relative;
     cursor: pointer;
     padding: var(--hitbox-padding) 0;
-    margin: calc(-1 * var(--hitbox-padding)) 0;
+    /* margin: calc(-1 * var(--hitbox-padding)) 0; Removed to fix vertical centering */
 }
 
 .progressBarTrack {

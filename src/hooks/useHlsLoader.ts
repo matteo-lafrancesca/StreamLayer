@@ -57,12 +57,21 @@ export function useHlsLoader({
             }
             if (audio) {
                 audio.pause();
-                audio.src = '';
+                audio.removeAttribute('src');
+                audio.load();
             }
             return;
         }
 
-        const streamUrl = getTrackStreamUrl(trackId, accessToken ?? undefined);
+        // Don't pass accessToken here, let xhrSetup handle it to avoid double-auth params
+        const streamUrl = getTrackStreamUrl(trackId);
+        console.log('[HLS] Loading stream:', streamUrl);
+
+        if (!streamUrl) {
+            console.error('[HLS] Invalid stream URL');
+            onErrorRef.current?.();
+            return;
+        }
 
         // Debounce HLS initialization to prevent request flooding
         const loadTimeout = setTimeout(() => {

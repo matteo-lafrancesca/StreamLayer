@@ -35,10 +35,10 @@ export async function fetchJson<T>(endpoint: string, options: FetchOptions = {})
         headers,
     });
 
-    // Handle token expiration (401)
-    if (response.status === 401) {
+    // Handle token expiration (401) or Forbidden (403) which acts as expired for this API
+    if (response.status === 401 || response.status === 403) {
         try {
-            console.log('[API] Token expired (401), attempting refresh...');
+            console.log(`[API] Token issue (${response.status}), attempting refresh...`);
             const newToken = await tokenManager.refreshAccessToken();
 
             // Retry with new token

@@ -65,12 +65,6 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
             <div className={styles.mediaBarRight}>
                 <div className={styles.viewControls}>
                     <IconButton
-                        icon={<Minimize2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
-                        onClick={enableCompactMode}
-                        title="Mode compact"
-                        enlargeHitbox
-                    />
-                    <IconButton
                         icon={<ListMusic size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                         onClick={handleOpenPlaylist}
                         className={currentView === 'playlist' || currentView === 'project' ? styles.activeButton : ''}
@@ -89,6 +83,13 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                 <VolumeControl
                     volume={volume}
                     onVolumeChange={setVolume}
+                />
+
+                <IconButton
+                    icon={<Minimize2 size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
+                    onClick={enableCompactMode}
+                    title="Mode compact"
+                    enlargeHitbox
                 />
             </div>
         </div>

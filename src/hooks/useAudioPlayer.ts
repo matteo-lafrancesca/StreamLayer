@@ -48,7 +48,8 @@ export function useAudioPlayer({
 
         return () => {
             audio.pause();
-            audio.src = '';
+            audio.removeAttribute('src'); // Avoids loading current page as access token
+            audio.load(); // Reset element
             audioRef.current = null;
             setAudioElement(null);
         };
@@ -82,6 +83,19 @@ export function useAudioPlayer({
             }, BUFFERING_TIMEOUT);
         };
 
+        const handleError = (e: Event) => {
+            const target = e.target as HTMLAudioElement;
+            console.error('[Audio] Error event:', e);
+            if (target.error) {
+                console.error('[Audio] Error details:', {
+                    code: target.error.code,
+                    message: target.error.message,
+                    src: target.src,
+                    currentSrc: target.currentSrc
+                });
+            }
+        };
+
         const handlePlaying = () => {
             setIsBuffering(false);
 
@@ -101,6 +115,7 @@ export function useAudioPlayer({
         audio.addEventListener('durationchange', handleDurationChange);
         audio.addEventListener('play', handlePlay);
         audio.addEventListener('pause', handlePause);
+        audio.addEventListener('error', handleError);
         audio.addEventListener('waiting', handleWaiting);
         audio.addEventListener('playing', handlePlaying);
         audio.addEventListener('ended', handleEnded);
@@ -109,6 +124,7 @@ export function useAudioPlayer({
             audio.removeEventListener('durationchange', handleDurationChange);
             audio.removeEventListener('play', handlePlay);
             audio.removeEventListener('pause', handlePause);
+            audio.removeEventListener('error', handleError);
             audio.removeEventListener('waiting', handleWaiting);
             audio.removeEventListener('playing', handlePlaying);
             audio.removeEventListener('ended', handleEnded);

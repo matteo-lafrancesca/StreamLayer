@@ -26,6 +26,9 @@ class TokenManager {
     public setTokens(accessToken: string, refreshToken: string) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+
+        // Debug logic removed
+
         this.notifyListeners();
     }
 
