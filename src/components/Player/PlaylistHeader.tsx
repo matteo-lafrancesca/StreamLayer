@@ -14,10 +14,10 @@ interface PlaylistHeaderProps {
 }
 
 export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: PlaylistHeaderProps) {
-    // Nombre de titres : toujours depuis playlist.nb_items pour éviter l'actualisation progressive
+    // Track count: always from playlist.nb_items to avoid progressive update
     const trackCount = playlist.nb_items;
 
-    // Durée : seulement si toutes les tracks sont chargées
+    // Duration: only if all tracks loaded
     const allTracksLoaded = tracks.length >= playlist.nb_items;
     const duration = allTracksLoaded ? formatPlaylistDuration(tracks) : 'Calcul...';
 
@@ -53,7 +53,7 @@ export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: P
                         icon={<Play size={24} fill="currentColor" />}
                         onClick={onPlayAll}
                         size="lg"
-                        aria-label="Lire tous les titres"
+                        aria-label="Tout lire"
                     />
                     <IconButton
                         icon={<Shuffle size={24} />}

@@ -11,8 +11,8 @@ import sharedStyles from '@styles/PlayerShared.module.css';
 import styles from '@styles/PlayerMobile.module.css';
 
 /**
- * Mobile Player Component
- * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay
+ * Mobile Player Component.
+ * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay.
  */
 export function PlayerMobile() {
     const { currentView, setCurrentView, selectedPlaylist } = usePlayer();

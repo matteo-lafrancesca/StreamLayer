@@ -6,7 +6,7 @@ import styles from '@styles/PlayerViews.module.css';
 export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, selectedPlaylist, playingFromPlaylist } = usePlayer();
 
-    // Séparer la track actuelle des suivantes
+    // Separate current track from upcoming tracks
     const { currentTrack, upcomingTracks } = useMemo(() => {
         if (!queue || queue.length === 0 || !playingTrack) {
             return { currentTrack: null, upcomingTracks: [] };
@@ -37,7 +37,7 @@ export function QueueView() {
                 <h2>File d'attente</h2>
             </div>
 
-            {/* Titre en cours */}
+            {/* Now Playing */}
             {currentTrack && (
                 <div className={styles.queueSection}>
                     <h3 className={styles.sectionTitle}>Titre en cours de lecture</h3>
@@ -53,13 +53,13 @@ export function QueueView() {
                 </div>
             )}
 
-            {/* À suivre */}
+            {/* Up Next */}
             {upcomingTracks.length > 0 && (
                 <div className={styles.queueSection}>
                     <h3 className={styles.sectionTitle}>
                         À suivre dans : {(playingFromPlaylist || selectedPlaylist)?.metadata?.title || 'Playlist'}
                     </h3>
-                    {upcomingTracks.map((track, index) => {
+                    {upcomingTracks.map((track) => {
                         const realIndex = queue.findIndex(t => t === track);
                         return (
                             <QueueTrackRow

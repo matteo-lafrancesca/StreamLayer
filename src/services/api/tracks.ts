@@ -5,10 +5,10 @@ import { fetchJson } from './client';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
- * Génère l'URL de streaming HLS pour une track
- * @param trackId - L'ID de la track
- * @param accessToken - Token d'accès optionnel (ajouté en query param)
- * @returns L'URL du manifest HLS (.m3u8)
+ * Generates HLS streaming URL for a track.
+ * @param trackId - Track ID.
+ * @param accessToken - Optional access token (added as query param).
+ * @returns HLS manifest URL (.m3u8).
  */
 export function getTrackStreamUrl(trackId: number, accessToken?: string): string {
     const baseUrl = `${API_BASE_URL}/tracks/${trackId}/hls`;
@@ -19,10 +19,10 @@ export function getTrackStreamUrl(trackId: number, accessToken?: string): string
 }
 
 /**
- * Récupère les informations d'une track par son ID
- * @param trackId - L'ID de la track
- * @param accessToken - Token d'accès optionnel
- * @returns Les informations complètes de la track
+ * Fetches track info by ID.
+ * @param trackId - Track ID.
+ * @param accessToken - Optional access token.
+ * @returns Complete track info.
  */
 export async function getTrackInfo(trackId: number, accessToken?: string): Promise<Track> {
     return fetchJson<Track>(`/tracks/${trackId}`, { accessToken });

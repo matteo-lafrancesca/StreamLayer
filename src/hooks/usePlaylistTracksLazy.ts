@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { getPlaylistTracks } from '@services/api/playlists';
 import type { Track } from '@definitions/track';
 
-const BATCH_SIZE = 10; // Charger 10 tracks à la fois
+const BATCH_SIZE = 10; // Batch size: 10 tracks
 
-// Cache pour les tracks complètes de chaque playlist
+// Cache for full playlist tracks
 const fullTracksCache = new Map<number, Track[]>();
 
 interface UsePlaylistTracksLazyResult {
@@ -16,11 +16,11 @@ interface UsePlaylistTracksLazyResult {
 }
 
 /**
- * Hook pour récupérer les tracks d'une playlist avec lazy loading progressif
- * Charge les tracks par batches de 10 pour un affichage ultra-rapide
- * @param playlistId - L'ID de la playlist
- * @param accessToken - Token d'accès (requis pour éviter la dépendance circulaire avec PlayerContext)
- * @param expectedTotal - Nombre total de tracks attendu (depuis playlist.nb_items)
+ * Hook to lazily fetch playlist tracks.
+ * Loads tracks in batches of 10 for fast initial render.
+ * @param playlistId - Playlist ID.
+ * @param accessToken - Access Token (required to avoid circular dependency).
+ * @param expectedTotal - Expected total count (from playlist.nb_items).
  */
 export function usePlaylistTracksLazy(
     playlistId: number | null | undefined,
@@ -45,7 +45,7 @@ export function usePlaylistTracksLazy(
             return;
         }
 
-        // Vérifier le cache complet
+        // Check full cache
         const cached = fullTracksCache.get(playlistId);
         if (cached) {
             setTracks(cached);
@@ -56,17 +56,17 @@ export function usePlaylistTracksLazy(
             return;
         }
 
-        // Réinitialiser le ref de chargement pour cette playlist
+        // Reset loading ref for this playlist
         loadingRef.current = false;
 
-        // Ref pour suivre si le composant est monté
+        // Ref to track mounted state
         const isMounted = { current: true };
 
-        // Éviter les doubles chargements
+        // Avoid double loading
         if (loadingRef.current) return;
         loadingRef.current = true;
 
-        // Fonction pour charger un batch
+        // Function to load a batch
         const loadBatch = async (offset: number, isFirst: boolean) => {
             try {
                 if (isFirst) {
@@ -90,33 +90,33 @@ export function usePlaylistTracksLazy(
                 const actualTotal = expectedTotal ?? response.count_item;
 
                 if (isFirst) {
-                    console.log('[LazyLoad] Premier batch chargé:', response.items.length, '/', actualTotal);
+                    console.log('[LazyLoad] First batch loaded:', response.items.length, '/', actualTotal);
                     setTracks(response.items);
                     setTotalCount(actualTotal);
                     setLoading(false);
                     currentOffsetRef.current = response.items.length;
                 } else {
-                    console.log('[LazyLoad] Batch chargé:', response.items.length, 'tracks (total:', offset + response.items.length, '/', actualTotal, ')');
+                    console.log('[LazyLoad] Batch loaded:', response.items.length, 'tracks (total:', offset + response.items.length, '/', actualTotal, ')');
                     setTracks(prevTracks => {
                         const newTracks = prevTracks ? [...prevTracks, ...response.items] : response.items;
                         currentOffsetRef.current = newTracks.length;
 
-                        // Mettre en cache si on a tout chargé
+                        // Cache if all tracks loaded
                         if (newTracks.length >= actualTotal) {
                             fullTracksCache.set(playlistId, newTracks);
-                            console.log('[LazyLoad] Toutes les tracks chargées et mises en cache');
+                            console.log('[LazyLoad] All tracks loaded and cached');
                         }
 
                         return newTracks;
                     });
                 }
 
-                // Charger le batch suivant si nécessaire
+                // Load next batch if needed
                 if (offset + response.items.length < actualTotal) {
                     if (isFirst) {
                         setIsLoadingMore(true);
                     }
-                    // Petit délai pour ne pas bloquer l'UI
+                    // Small delay to avoid UI blocking
                     setTimeout(() => {
                         if (isMounted.current) {
                             loadBatch(offset + BATCH_SIZE, false);
@@ -129,15 +129,15 @@ export function usePlaylistTracksLazy(
 
             } catch (err) {
                 if (!isMounted.current) return;
-                console.error('[LazyLoad] Erreur de chargement:', err);
-                setError(err instanceof Error ? err : new Error('Erreur lors du chargement des tracks'));
+                console.error('[LazyLoad] Load error:', err);
+                setError(err instanceof Error ? err : new Error('Error loading tracks'));
                 setLoading(false);
                 setIsLoadingMore(false);
                 loadingRef.current = false;
             }
         };
 
-        // Démarrer le chargement
+        // Start loading
         loadBatch(0, true);
 
         return () => {

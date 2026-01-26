@@ -29,7 +29,7 @@ export function useMediaBarNavigation(isExpanded: boolean, onExpandToggle: () =>
             onExpandToggle();
         }
 
-        // Mettre à jour selectedPlaylist avec la playlist en cours de lecture si elle existe
+        // Update selectedPlaylist with current playing playlist if exists
         if (playingFromPlaylist) {
             setSelectedPlaylist(playingFromPlaylist);
         }

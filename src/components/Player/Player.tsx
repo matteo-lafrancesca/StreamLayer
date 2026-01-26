@@ -2,11 +2,11 @@ import { PlayerDesktop } from './PlayerDesktop';
 import { PlayerMobile } from './PlayerMobile';
 
 /**
- * Player Component Router
- * Renders the appropriate player based on screen size
+ * Player Component Router.
+ * Renders both players (Desktop/Mobile) handling visibility via CSS.
  */
 export function Player() {
-    // Removed useMediaQuery logic to prevent unmounting/remounting
+    // No useMediaQuery to prevent unmount/remount
     return (
         <>
             <PlayerDesktop />

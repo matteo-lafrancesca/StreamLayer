@@ -6,6 +6,9 @@ interface UseSliderReturn {
     isDragging: boolean;
 }
 
+/**
+ * Hook for custom slider interaction.
+ */
 export function useSlider(onChange: (value: number) => void): UseSliderReturn {
     const ref = useRef<HTMLDivElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);

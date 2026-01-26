@@ -4,8 +4,7 @@ import { ScrollingText } from './ScrollingText';
 import styles from '@styles/TrackDisplay.module.css';
 
 /**
- * TrackDisplay - Shared component for displaying album cover and track info
- * Used by both MediaBarDesktop and MediaBarMobile to avoid code duplication
+ * Shared component for cover and track info (Desktop/Mobile).
  */
 export function TrackDisplay() {
     const { playingTrack } = usePlayer();

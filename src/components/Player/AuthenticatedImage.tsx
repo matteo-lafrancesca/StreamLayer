@@ -13,7 +13,7 @@ interface AuthenticatedImageProps {
 }
 
 /**
- * Composant Image qui charge les images avec authentification Bearer token
+ * Image component loading images with Bearer token authentication.
  */
 export function AuthenticatedImage({
     alt,
@@ -29,7 +29,7 @@ export function AuthenticatedImage({
 
     const blobUrl = type === 'album' ? albumBlobUrl : playlistBlobUrl;
 
-    // Précharger l'image avant de la rendre dans le DOM
+    // Preload image before rendering in DOM
     useEffect(() => {
         if (!blobUrl) {
             setImageLoaded(false);
@@ -42,7 +42,7 @@ export function AuthenticatedImage({
     }, [blobUrl]);
 
     if (!blobUrl || !imageLoaded) {
-        // Placeholder pendant le chargement
+        // Placeholder during loading
         return (
             <img
                 src="/img/placeholder.png"

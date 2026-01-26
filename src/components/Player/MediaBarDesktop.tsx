@@ -34,17 +34,17 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
     const { handleOpenPlaylist, handleOpenQueue } = useMediaBarNavigation(isExpanded, onExpandToggle);
     const { enableCompactMode } = useCompactMode();
 
-    // Vérifier si la cover est chargée
+    // Check if cover is loaded
     const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
-    // Cacher seulement si un track existe MAIS que la cover n'est pas encore chargée
+    // Hide only if track exists but cover is not loaded yet
     const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 
     return (
         <div className={`${styles.mediaBar} ${isVisible ? styles.visible : styles.hidden}`}>
-            {/* Left Section: Cover + Track Info */}
+            {/* Left: Cover + Track Info */}
             <TrackDisplay />
 
-            {/* Center Section: Progress Bar + Controls */}
+            {/* Center: Progress + Controls */}
             <div className={styles.mediaBarCenter}>
                 <ProgressBar
                     onSeekStart={() => setIsSeeking(true)}
@@ -61,7 +61,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                 />
             </div>
 
-            {/* Right Section: Volume + View Toggles */}
+            {/* Right: Volume + View Toggles */}
             <div className={styles.mediaBarRight}>
                 <div className={styles.viewControls}>
                     <IconButton
@@ -74,7 +74,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                         icon={<ListMusic size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                         onClick={handleOpenPlaylist}
                         className={currentView === 'playlist' || currentView === 'project' ? styles.activeButton : ''}
-                        title={selectedPlaylist ? "Playlist en cours" : "Projets"}
+                        title={selectedPlaylist ? "Playlist actuelle" : "Projets"}
                         enlargeHitbox
                     />
                     <IconButton

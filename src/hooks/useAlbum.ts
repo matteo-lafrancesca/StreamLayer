@@ -2,9 +2,9 @@ import { getAlbumInfo } from '@services/api/albums';
 import type { Album } from '@definitions/album';
 import { useDataFetcher } from './useDataFetcher';
 
-// Cache simple en mémoire pour les albums (données)
+// Simple in-memory cache for albums (data)
 const albumsCache = new Map<number, Album>();
-// Cache pour les requêtes en cours (promesses)
+// Cache for in-flight requests (promises)
 const albumsPromiseCache = new Map<number, Promise<Album>>();
 
 interface UseAlbumResult {
@@ -14,9 +14,9 @@ interface UseAlbumResult {
 }
 
 /**
- * Hook pour récupérer les informations d'un album
- * @param albumId - L'ID de l'album (null si non nécessaire)
- * @returns Album, état de chargement et erreur éventuelle
+ * Hook to fetch album details.
+ * @param albumId - The album ID (null if not needed).
+ * @returns Album data, loading state, and potential error.
  */
 export function useAlbum(albumId: number | null | undefined): UseAlbumResult {
     const { data: album, loading, error } = useDataFetcher<Album>({

@@ -9,8 +9,8 @@ import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/TrackViewMobile.module.css';
 
 /**
- * Full-Screen Track View for Mobile
- * Displays large album cover, track info, and playback controls
+ * Full-screen track view for mobile.
+ * Large cover, track info, and playback controls.
  */
 export function TrackViewMobile() {
     const {

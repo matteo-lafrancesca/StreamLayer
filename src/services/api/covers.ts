@@ -9,10 +9,10 @@ const COVER_DIMENSIONS: Record<CoverSize, { width: number; height: number }> = {
 };
 
 /**
- * Génère l'URL de la cover d'un album
- * @param albumId - L'ID de l'album
- * @param size - Taille de la cover ('s', 'm', ou 'l')
- * @returns URL de la cover de l'album
+ * Generates album cover URL.
+ * @param albumId - Album ID.
+ * @param size - Cover size ('s', 'm', or 'l').
+ * @returns Album cover URL.
  */
 export function getAlbumCoverUrl(albumId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
@@ -20,10 +20,10 @@ export function getAlbumCoverUrl(albumId: number, size: CoverSize = 'm'): string
 }
 
 /**
- * Génère l'URL de la cover d'une playlist
- * @param playlistId - L'ID de la playlist
- * @param size - Taille de la cover ('s', 'm', ou 'l')
- * @returns URL de la cover de la playlist
+ * Generates playlist cover URL.
+ * @param playlistId - Playlist ID.
+ * @param size - Cover size ('s', 'm', or 'l').
+ * @returns Playlist cover URL.
  */
 export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
@@ -37,19 +37,19 @@ export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): 
  * @param accessToken - Token d'accès
  * @returns Blob de l'image
  */
-// Map pour stocker les requêtes en cours et éviter les doublons
+// Map to store in-flight requests for deduplication
 const inFlightRequests = new Map<string, Promise<string>>();
 
 /**
- * Helper générique pour récupérer une cover avec déduplication
- * Retourne une URL (string) au lieu d'un Blob pour partager la même référence
+ * Generic helper to fetch cover with deduplication.
+ * Returns a URL (string) instead of Blob to share reference.
  */
 async function fetchCoverWithDeduplication(
     key: string,
     url: string,
     accessToken: string
 ): Promise<string> {
-    // Si une requête est déjà en cours pour cette image, on la retourne
+    // If request already in progress, return it
     if (inFlightRequests.has(key)) {
         return inFlightRequests.get(key)!;
     }
@@ -58,18 +58,18 @@ async function fetchCoverWithDeduplication(
         headers: {
             'Authorization': `Bearer ${accessToken}`,
         },
-        // Important: fetch en mode 'cors' si besoin, mais ici 'default' suffit souvent
+        // Important: fetch in 'cors' mode if needed (default usually fine)
     })
         .then(async (response) => {
             if (!response.ok) {
-                throw new Error(`Erreur lors du chargement de la cover: ${response.status}`);
+                throw new Error(`Error loading cover: ${response.status}`);
             }
             const blob = await response.blob();
-            // Créer l'URL unique ici, partagée par tous les appelants
+            // Create unique URL here, shared by all callers
             return URL.createObjectURL(blob);
         })
         .finally(() => {
-            // Nettoyer la map une fois la requête terminée (succès ou erreur)
+            // Clean map once request finishes (success or error)
             inFlightRequests.delete(key);
         });
 
@@ -78,12 +78,12 @@ async function fetchCoverWithDeduplication(
 }
 
 /**
- * Récupère la cover d'un album avec authentification
- * Gère la déduplication des requêtes simultanées
- * @param albumId - L'ID de l'album
- * @param size - Taille de la cover
- * @param accessToken - Token d'accès
- * @returns URL de l'image (string)
+ * Fetches album cover with authentication.
+ * Handles deduplication of concurrent requests.
+ * @param albumId - Album ID.
+ * @param size - Cover size.
+ * @param accessToken - Access token.
+ * @returns Image URL (string).
  */
 export async function fetchAlbumCover(
     albumId: number,
@@ -96,12 +96,12 @@ export async function fetchAlbumCover(
 }
 
 /**
- * Récupère la cover d'une playlist avec authentification
- * Gère la déduplication des requêtes simultanées
- * @param playlistId - L'ID de la playlist
- * @param size - Taille de la cover
- * @param accessToken - Token d'accès
- * @returns URL de l'image (string)
+ * Fetches playlist cover with authentication.
+ * Handles deduplication of concurrent requests.
+ * @param playlistId - Playlist ID.
+ * @param size - Cover size.
+ * @param accessToken - Access token.
+ * @returns Image URL (string).
  */
 export async function fetchPlaylistCover(
     playlistId: number,

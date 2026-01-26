@@ -12,7 +12,7 @@ interface PlaylistTrackRowProps {
     index: number;
     onClick: () => void;
     isPlaying?: boolean;
-    isPlayingState?: boolean; 
+    isPlayingState?: boolean;
 }
 
 function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, isPlayingState = false }: PlaylistTrackRowProps) {
@@ -21,9 +21,9 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
 
     return (
         <div className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} onClick={onClick}>
-            {/* Index with Play/Pause Icon on Hover */}
+            {/* Index with Play/Pause on hover */}
             <div className={styles.index}>
-                {/* Default state (pas de hover) */}
+                {/* Default state (no hover) */}
                 <div className={styles.indexContent}>
                     {isPlaying && isPlayingState ? (
                         <PlayingIndicator />
@@ -40,7 +40,7 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
                 )}
             </div>
 
-            {/* Track Content (Cover + Info) */}
+            {/* Track Content */}
             <div className={styles.trackContent}>
                 <AuthenticatedImage
                     type="album"
@@ -55,7 +55,6 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
                 </div>
             </div>
 
-            {/* Album */}
             <div className={styles.album}>
                 {album?.title || 'Chargement...'}
             </div>
@@ -66,5 +65,5 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
     );
 }
 
-// Memoize the component to optimize renders
+// Memoize component to optimize renders
 export const PlaylistTrackRow = memo(PlaylistTrackRowComponent);

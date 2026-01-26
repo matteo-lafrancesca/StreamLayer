@@ -20,8 +20,8 @@ export function useVolumeControl(
             onVolumeChange(volumeToRestore);
             setIsMuted(false);
         } else {
-            // Mute: sauvegarder le volume actuel avant de muter
-            // Note: On utilise initialVolume qui vient des props et se met à jour
+            // Mute: save current volume before muting
+            // Note: Use props-provided initialVolume
             if (initialVolume > 0) {
                 previousVolumeRef.current = initialVolume;
             }

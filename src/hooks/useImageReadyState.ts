@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook pour gérer l'affichage instantané après chargement des images
- * Évite le flash des placeholders en rendant le contenu invisible jusqu'à ce que tout soit prêt
+ * Hook to delay content display until images are ready.
+ * Prevents placeholder flash by keeping content invisible until ready.
  * 
- * @param isLoading - Indique si le contenu est en cours de chargement
- * @param delay - Délai en ms pour laisser le navigateur décoder les images (défaut: 50ms)
- * @returns isVisible - true quand le contenu peut être affiché
+ * @param isLoading - Whether content is loading.
+ * @param delay - Delay in ms to allow decoding (default: 50ms).
+ * @returns isVisible - True when content can be displayed.
  */
 export function useImageReadyState(isLoading: boolean, delay = 50): boolean {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         if (!isLoading) {
-            // Petit délai pour laisser le navigateur décoder les images
+            // Small delay to let browser decode images
             const timer = setTimeout(() => setIsVisible(true), delay);
             return () => clearTimeout(timer);
         } else {

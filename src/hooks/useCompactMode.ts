@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { usePlayer } from '@context/PlayerContext';
 
 /**
- * Hook for managing compact mode
- * Handles the logic for enabling compact mode and collapsing the player if expanded
+ * Hook for managing compact mode.
+ * Handles logic for enabling compact mode and collapsing the player if expanded.
  */
 export function useCompactMode() {
     const { setIsCompact, setIsExpanded, isExpanded } = usePlayer();

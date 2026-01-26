@@ -1,3 +1,5 @@
+import { tokenManager } from '@services/tokenManager';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface FetchOptions extends RequestInit {
@@ -5,9 +7,10 @@ interface FetchOptions extends RequestInit {
 }
 
 /**
- * Helper générique pour les requêtes API JSON
- * Gère l'URL de base, les headers d'authentification et le parsing JSON
+ * Generic helper for JSON API requests.
+ * Handles base URL, auth headers, and JSON parsing.
  */
+
 export async function fetchJson<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const { accessToken, ...customOptions } = options;
 
@@ -16,20 +19,44 @@ export async function fetchJson<T>(endpoint: string, options: FetchOptions = {})
         .../* @ts-ignore HeadersInit compatibility */ customOptions.headers as Record<string, string>,
     };
 
-    if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
+    // Use passed accessToken, or fall back to tokenManager if not provided?
+    // Usually we respect the passed one, but if we retry, we override.
+    let currentToken = accessToken;
+
+    if (currentToken) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
     }
 
-    // Gestion des URLs absolues ou relatives
+    // Handle absolute or relative URLs
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
         ...customOptions,
         headers,
     });
 
+    // Handle token expiration (401)
+    if (response.status === 401) {
+        try {
+            console.log('[API] Token expired (401), attempting refresh...');
+            const newToken = await tokenManager.refreshAccessToken();
+
+            // Retry with new token
+            headers['Authorization'] = `Bearer ${newToken}`;
+            response = await fetch(url, {
+                ...customOptions,
+                headers,
+            });
+            console.log('[API] Retry successful');
+        } catch (error) {
+            console.error('[API] Token refresh failed or retry failed:', error);
+            // Let original 401 or refresh error propagate
+            throw error;
+        }
+    }
+
     if (!response.ok) {
-        throw new Error(`Erreur API (${response.status}): ${response.statusText}`);
+        throw new Error(`API Error (${response.status}): ${response.statusText}`);
     }
 
     return await response.json();

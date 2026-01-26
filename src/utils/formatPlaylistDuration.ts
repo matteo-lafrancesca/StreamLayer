@@ -1,9 +1,9 @@
 import type { Track } from '@definitions/track';
 
 /**
- * Calcule et formate la durée totale d'une playlist
- * @param tracks - Tableau de tracks
- * @returns Durée formatée (ex: "2 h 34 min" ou "45 min")
+ * Calculates and formats total playlist duration.
+ * @param tracks - Array of tracks.
+ * @returns Formatted duration (e.g. "2 h 34 min" or "45 min").
  */
 export function formatPlaylistDuration(tracks: Track[]): string {
     if (!tracks || tracks.length === 0) {

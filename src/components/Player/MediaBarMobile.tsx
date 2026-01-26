@@ -9,8 +9,8 @@ import styles from '@styles/MediaBarMobile.module.css';
 import type { MediaBarMobileProps } from '@definitions/player';
 
 /**
- * Mobile MediaBar component
- * Simplified player bar with click-to-expand and thin bottom progress bar
+ * Mobile MediaBar component.
+ * Simplified player bar with click-to-expand and thin bottom progress bar.
  */
 export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     const {
@@ -25,9 +25,9 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
         onExpandToggle();
     };
 
-    // Vérifier si la cover est chargée
+    // Check if cover is loaded
     const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
-    // Cacher seulement si un track existe MAIS que la cover n'est pas encore chargée
+    // Hide if track exists but cover not loaded
     const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 
     return (
@@ -35,10 +35,10 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
             className={`${styles.mediaBarMobile} ${isVisible ? styles.visible : styles.hidden}`}
             onClick={handleExpand}
         >
-            {/* Left Section: Cover + Track Info */}
+            {/* Left: Cover + Track Info */}
             <TrackDisplay />
 
-            {/* Right Section: Play/Pause Button */}
+            {/* Right: Play/Pause */}
             <div className={styles.mediaBarRight}>
                 <IconButton
                     icon={isPlaying
@@ -46,7 +46,7 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
                         : <Play size={PLAYER_SIZES.MOBILE.ICON_SMALL} strokeWidth={2.5} />
                     }
                     onClick={(e) => {
-                        e.stopPropagation(); // Prevent triggering expand
+                        e.stopPropagation(); // Prevent expand trigger
                         setIsPlaying(!isPlaying);
                     }}
                     className={styles.playPauseButtonMobile}

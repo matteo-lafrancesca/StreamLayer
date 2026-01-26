@@ -84,12 +84,6 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
         setIsShuffled(false); // Reset shuffle when queue changes
     }, []);
 
-    /* 
-     * REMOVED: Automatic initialization of queue when tracks change.
-     * This was causing the first track to auto-play when selecting a playlist.
-     * The queue should only be set when the user explicitly clicks a track or "Play All".
-     */
-
     // Play next track
     const playNext = useCallback(() => {
         let effectiveRepeatMode = repeatMode;

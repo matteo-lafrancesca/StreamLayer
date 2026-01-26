@@ -14,8 +14,8 @@ interface SwipeState {
 }
 
 /**
- * Custom hook for swipe-to-dismiss gesture on bottom sheet
- * Allows swipe from anywhere, but only triggers dismiss when scrolled to top
+ * Hook for swipe-to-dismiss gesture on bottom sheet.
+ * triggers dismiss when scrolled to top.
  */
 export function useSwipeToDismiss({
     isOpen,

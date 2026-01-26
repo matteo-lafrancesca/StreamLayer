@@ -34,7 +34,7 @@ export function useApi(providedAccessToken?: string | null) {
             return await apiCall(accessToken);
         } catch (error: any) {
             // Check if error is 401 (Unauthorized)
-            // The service files throw "Erreur ...: 401"
+            // The service files throw "Error ...: 401"
             const errorMessage = error instanceof Error ? error.message : String(error);
 
             if (errorMessage.includes('401') && refreshToken) {

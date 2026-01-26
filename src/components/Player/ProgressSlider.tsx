@@ -7,9 +7,8 @@ interface ProgressSliderProps {
 }
 
 /**
- * ProgressSlider Component
- * Reusable progress slider for both Desktop and Mobile players
- * @param interactive - Whether the slider should respond to user input (default: true)
+ * Reusable progress slider for Desktop/Mobile.
+ * @param interactive - Whether slider responds to input (default: true).
  */
 export function ProgressSlider({ interactive = true }: ProgressSliderProps) {
     const { progress, seek } = useTrackProgress();

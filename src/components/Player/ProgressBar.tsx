@@ -13,12 +13,12 @@ export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarPr
     const { playingTrack } = usePlayer();
     const { progress, formattedCurrentTime, formattedRemainingTime, seek, duration } = useTrackProgress();
 
-    // Déterminer l'état
+    // Determine state
     const isDisabled = !playingTrack;
     const isActive = playingTrack != null && duration > 0 && isFinite(duration);
-    const isLoading = !isDisabled && !isActive; // Track sélectionnée mais pas encore de durée
+    const isLoading = !isDisabled && !isActive; // Track selected but duration not yet available
 
-    // Classes CSS selon l'état
+    // CSS classes based on state
     let stateClass = '';
     if (isDisabled) stateClass = styles.disabled;
     else if (isLoading) stateClass = styles.loading;

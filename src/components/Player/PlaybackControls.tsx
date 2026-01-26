@@ -16,7 +16,7 @@ export function PlaybackControls({
 }: PlaybackControlsProps) {
     const { playbackControls } = usePlayer();
 
-    // Icon sizes based on variant
+    // Variant-based icon sizes
     const sizes = variant === 'mobile'
         ? {
             shuffle: PLAYER_SIZES.MOBILE.ICON_SMALL,
@@ -66,7 +66,7 @@ export function PlaybackControls({
                 className={`${styles.controlIconButton} ${playbackControls.repeatMode !== 'off' ? styles.active : styles.inactive}`}
                 title={
                     playbackControls.repeatMode === 'off' ? 'Activer la répétition' :
-                        playbackControls.repeatMode === 'all' ? 'Répéter la piste actuelle' :
+                        playbackControls.repeatMode === 'all' ? 'Répéter le titre' :
                             'Désactiver la répétition'
                 }
                 onClick={onRepeat}

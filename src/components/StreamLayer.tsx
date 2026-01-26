@@ -3,16 +3,16 @@ import { PlayerProvider } from '@context/PlayerContext';
 import { Player } from '@components/Player/Player';
 
 export interface StreamLayerProps {
-    /** L'identifiant du projet StreamLayer */
+    /** StreamLayer project ID */
     projectId: string;
-    /** Le contenu de votre application qui aura accès au contexte audio */
+    /** App content with access to audio context */
     children?: ReactNode;
 }
 
 /**
- * Composant racine StreamLayer
- * Encapsule toute la logique audio et l'interface du lecteur.
- * Placez ce composant à la racine de votre application ou autour du contenu qui doit interagir avec l'audio.
+ * StreamLayer root component.
+ * Encapsulates audio logic and player UI.
+ * Wrap your app or content with this component.
  */
 export function StreamLayer({ projectId, children }: StreamLayerProps) {
     return (

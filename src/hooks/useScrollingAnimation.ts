@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Custom hook for horizontal scrolling text animation
- * Handles overflow detection, smooth easing, and continuous loop animation
- * 
- * @param text - The text content to animate
- * @param speed - Animation speed (unused currently, kept for API compatibility)
- * @returns Animation state and refs to attach to DOM elements
+ * Hook for horizontal scrolling text animation.
+ * Handles overflow detection, smooth easing, and continuous loop.
  */
 export function useScrollingAnimation(text: string, speed: number = 30) {
     const containerRef = useRef<HTMLDivElement>(null);

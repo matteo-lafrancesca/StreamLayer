@@ -10,13 +10,13 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Composant Card réutilisable avec effets de hover et variants
- * @param hover - Si true, applique un effet de lift au hover
- * @param hoverPrimary - Si true, applique hover effect avec couleur primaire
- * @param xl - Si true, utilise des bordures extra larges
- * @param padding - Taille du padding interne ('none', 'sm', 'md')
- * @param children - Contenu de la card
- * @param className - Classes CSS supplémentaires
+ * Reusable Card component with hover effects and variants.
+ * @param hover - If true, applies lift effect on hover.
+ * @param hoverPrimary - If true, applies primary color hover effect.
+ * @param xl - If true, uses extra large borders.
+ * @param padding - Internal padding size ('none', 'sm', 'md').
+ * @param children - Card content.
+ * @param className - Additional CSS classes.
  */
 export function Card({
     hover = true,

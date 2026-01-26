@@ -13,14 +13,14 @@ export interface SliderProps {
 }
 
 /**
- * Composant Slider draggable et cliquable
- * Imémente une UI optimiste pour éviter les lags lors du drag
+ * Draggable and clickable Slider component.
+ * Implements optimistic UI to avoid lag during drag.
  */
 export function Slider({ value, onChange, variant = 'default', showThumb = true, className = '', onDragStart, onDragEnd }: SliderProps) {
-    // État local pour l'affichage immédiat
+    // Local state for immediate display
     const [localValue, setLocalValue] = useState(value);
 
-    // Wrapper pour mettre à jour l'état local immédiatement ET notifier le parent
+    // Wrapper to update local state immediately AND notify parent
     const handleSliderChange = useCallback((newValue: number) => {
         setLocalValue(newValue);
         onChange(newValue);
@@ -28,7 +28,7 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
 
     const { ref, handleMouseDown, isDragging } = useSlider(handleSliderChange);
 
-    // Notifier le parent du début/fin du drag
+    // Notify parent of drag start/end
     useEffect(() => {
         if (isDragging) {
             onDragStart?.();
@@ -37,8 +37,8 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         }
     }, [isDragging, onDragStart, onDragEnd]);
 
-    // Synchroniser l'état local avec les props, SAUF si l'utilisateur est en train de drag
-    // Cela empêche le timer global de faire sauter le curseur pendant qu'on le bouge
+    // Sync local state with props, UNLESS user is dragging
+    // Prevents global timer from jumping cursor during interaction
     useEffect(() => {
         if (!isDragging) {
             setLocalValue(value);

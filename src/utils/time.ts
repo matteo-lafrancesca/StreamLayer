@@ -1,7 +1,7 @@
 /**
- * Formate la durée d'une track en minutes:secondes
- * @param seconds - Durée en secondes
- * @returns Durée formatée (ex: "3:45")
+ * Formats track duration in mm:ss.
+ * @param seconds - Duration in seconds.
+ * @returns Formatted duration (e.g. "3:45").
  */
 export function formatDuration(seconds: number): string {
     const mins = Math.floor(seconds / 60);
@@ -10,9 +10,9 @@ export function formatDuration(seconds: number): string {
 }
 
 /**
- * Formate la durée en heures:minutes:secondes si nécessaire
- * @param seconds - Durée en secondes
- * @returns Durée formatée (ex: "1:23:45" ou "23:45")
+ * Formats duration in hh:mm:ss if needed.
+ * @param seconds - Duration in seconds.
+ * @returns Formatted duration (e.g. "1:23:45" or "23:45").
  */
 export function formatDurationLong(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
@@ -27,10 +27,10 @@ export function formatDurationLong(seconds: number): string {
 }
 
 /**
- * Formate l'affichage du temps pour le player (temps écoulé et temps restant)
- * @param progress - Progression en pourcentage (0-100)
- * @param trackDuration - Durée totale de la track en secondes
- * @returns Objet avec le temps écoulé et le temps restant formatés
+ * Formats time display for player (elapsed and remaining).
+ * @param progress - Progress percentage (0-100).
+ * @param trackDuration - Total track duration in seconds.
+ * @returns Object with formatted elapsed and remaining time.
  */
 export function formatTimeDisplay(progress: number, trackDuration: number): { currentTime: string; duration: string } {
     if (trackDuration <= 0) {

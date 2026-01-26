@@ -8,9 +8,7 @@ export interface ViewRendererProps {
 }
 
 /**
- * ViewRenderer Component
- * Renders the appropriate view based on currentView state
- * Shared between Desktop and Mobile to eliminate duplication
+ * Renders appropriate view based on currentView state.
  */
 export function ViewRenderer({ currentView, setCurrentView }: ViewRendererProps) {
     if (currentView === 'playlist') {

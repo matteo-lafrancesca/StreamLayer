@@ -2,10 +2,10 @@ import type { Playlist } from '@definitions/playlist';
 import { getPlaylistCoverUrl, type CoverSize } from '@services/api/covers';
 
 /**
- * Récupère les informations d'affichage d'une playlist
- * @param playlist - La playlist
- * @param coverSize - Taille de la cover
- * @returns Objet avec les infos formatées
+ * Gets playlist display info.
+ * @param playlist - Playlist object.
+ * @param coverSize - Cover size.
+ * @returns Formatted info object.
  */
 export function getPlaylistDisplayInfo(playlist: Playlist, coverSize: CoverSize = 'm') {
     return {
@@ -19,19 +19,19 @@ export function getPlaylistDisplayInfo(playlist: Playlist, coverSize: CoverSize 
 }
 
 /**
- * Récupère le titre d'une playlist
- * @param playlist - La playlist
- * @returns Titre de la playlist
+ * Gets playlist title.
+ * @param playlist - Playlist object.
+ * @returns Playlist title.
  */
 export function getPlaylistTitle(playlist: Playlist): string {
     return playlist.metadata.title || 'Playlist sans titre';
 }
 
 /**
- * Récupère l'URL de la cover d'une playlist
- * @param playlist - La playlist
- * @param size - Taille de la cover
- * @returns URL de la cover
+ * Gets playlist cover URL.
+ * @param playlist - Playlist object.
+ * @param size - Cover size.
+ * @returns Cover URL.
  */
 export function getPlaylistCover(playlist: Playlist, size: CoverSize = 'm'): string {
     return getPlaylistCoverUrl(playlist.id, size);

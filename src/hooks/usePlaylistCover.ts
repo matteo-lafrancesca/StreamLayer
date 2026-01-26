@@ -1,50 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { usePlayer } from '@context/PlayerContext';
 import { fetchPlaylistCover, type CoverSize } from '@services/api/covers';
-import { getCachedImage, setCachedImage } from '../cache/imageCache';
+import { useDebouncedImage } from './useDebouncedImage';
 
 /**
- * Hook pour charger et mettre en cache la cover d'une playlist
- * Gère automatiquement le cache et le chargement
+ * Hook to load and cache a playlist cover.
+ * Automatically handles caching via useDebouncedImage.
  */
 export function usePlaylistCover(
     playlistId: number | null | undefined,
     size: CoverSize = 'm'
 ): string | null {
     const { accessToken } = usePlayer();
-    const [blobUrl, setBlobUrl] = useState<string | null>(() => {
-        if (!playlistId) return null;
-        const cacheKey = `playlist-${playlistId}-${size}`;
-        return getCachedImage(cacheKey);
-    });
 
-    useEffect(() => {
-        if (!playlistId || !accessToken) {
-            setBlobUrl(null);
-            return;
-        }
+    // Prepare dependencies
+    const shouldLoad = !!playlistId && !!accessToken;
+    const cacheKey = `playlist-${playlistId}-${size}`;
 
-        const cacheKey = `playlist-${playlistId}-${size}`;
-
-        // Vérifier le cache d'abord
-        const cached = getCachedImage(cacheKey);
-        if (cached) {
-            setBlobUrl(cached);
-            return;
-        }
-
-        // Charger l'image si pas en cache
-        fetchPlaylistCover(playlistId, size, accessToken)
-            .then((url) => {
-                setCachedImage(cacheKey, url);
-                setBlobUrl(url);
-            })
-            .catch((error) => {
-                console.error(`Erreur chargement cover playlist ${playlistId}:`, error);
-                setBlobUrl(null);
-            });
+    // Stable fetch function
+    const fetchFn = useCallback(() => {
+        return fetchPlaylistCover(playlistId!, size, accessToken!);
     }, [playlistId, size, accessToken]);
 
-    return blobUrl;
+    return useDebouncedImage(shouldLoad, cacheKey, fetchFn);
 }
 

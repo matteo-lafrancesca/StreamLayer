@@ -12,9 +12,8 @@ interface BottomSheetProps {
 }
 
 /**
- * BottomSheet Component
- * A full-screen overlay that slides up from the bottom of the screen
- * Supports swipe-to-dismiss from anywhere and click-to-close
+ * Full-screen overlay sliding from bottom.
+ * Supports swipe-to-dismiss and click-to-close.
  */
 export function BottomSheet({ isOpen, onClose, children, showChevron = true }: BottomSheetProps) {
     const dragRef = useSwipeToDismiss({ isOpen, onClose, threshold: PLAYER_SIZES.SWIPE_THRESHOLD });
@@ -32,7 +31,7 @@ export function BottomSheet({ isOpen, onClose, children, showChevron = true }: B
                 className={`${styles.bottomSheet} ${isOpen ? styles.bottomSheetOpen : ''}`}
                 data-bottom-sheet
             >
-                {/* Header - Chevron for track view, drag bar for others */}
+                {/* Header - Chevron or drag handle */}
                 <div
                     className={styles.dragHandle}
                     onClick={showChevron ? onClose : undefined}

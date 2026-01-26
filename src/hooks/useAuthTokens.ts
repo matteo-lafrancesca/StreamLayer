@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getInitialTokens } from '@services/api/auth';
+import { tokenManager } from '@services/tokenManager';
 
 interface UseAuthTokensProps {
     projectId: string;
@@ -13,28 +14,44 @@ interface UseAuthTokensReturn {
 }
 
 /**
- * Hook pour gérer l'authentification et les tokens
- * @param projectId - ID du projet
- * @returns Tokens et setters
+ * Hook to manage authentication and tokens.
+ * @param projectId - Project ID.
+ * @returns Tokens and setters.
  */
 export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensReturn {
-    const [accessToken, setAccessToken] = useState<string | null>(null);
-    const [refreshToken, setRefreshToken] = useState<string | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(tokenManager.getAccessToken());
+    const [refreshToken, setRefreshToken] = useState<string | null>(tokenManager.getRefreshToken());
 
     useEffect(() => {
+        // Initialize projectId in manager
+        tokenManager.setProjectId(projectId);
+
+        // Subscribe to token changes
+        const unsubscribe = tokenManager.subscribe((newAccessToken) => {
+            setAccessToken(newAccessToken);
+            setRefreshToken(tokenManager.getRefreshToken());
+        });
+
+        // Retrieve initial tokens
         getInitialTokens(projectId)
             .then((tokens) => {
-                setAccessToken(tokens.access_token);
-                setRefreshToken(tokens.refresh_token);
+                // Via the manager, this triggers notification and state update
+                tokenManager.setTokens(tokens.access_token, tokens.refresh_token);
             })
             .catch((error) => {
-                console.error('Erreur lors de la récupération des tokens:', error);
+                console.error('Error retrieving tokens:', error);
             });
+
+        return () => {
+            unsubscribe();
+        };
     }, [projectId]);
 
     return {
         accessToken,
         refreshToken,
+        // Manual setters update local state,
+        // ideally we should go through the manager for any global change
         setAccessToken,
         setRefreshToken,
     };

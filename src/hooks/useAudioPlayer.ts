@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import Hls from 'hls.js';
-import { getTrackStreamUrl } from '@services/api/tracks';
+import { useHlsLoader } from './useHlsLoader';
 
 interface UseAudioPlayerProps {
     trackId: number | null;
@@ -8,11 +7,11 @@ interface UseAudioPlayerProps {
     volume: number;
     shouldPlay: boolean;
     onEnded?: () => void;
-    onError?: () => void; // Callback appelé après échec de retry
+    onError?: () => void; // Callback called after retry failure
 }
 
 interface UseAudioPlayerReturn {
-    audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
     duration: number;
     isPlaying: boolean;
     isBuffering: boolean;
@@ -20,8 +19,8 @@ interface UseAudioPlayerReturn {
 }
 
 /**
- * Hook to manage HLS audio playback
- * Handles initialization of Hls.js and the audio element, and provides playback controls
+ * Hook to manage audio playback
+ * Orchestrates the audio element and delegates streaming logic to useHlsLoader
  */
 export function useAudioPlayer({
     trackId,
@@ -32,11 +31,9 @@ export function useAudioPlayer({
     onError,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const hlsRef = useRef<Hls | null>(null);
-    const retryCountRef = useRef<number>(0); // Compteur de retries
-    const bufferingTimeoutRef = useRef<number | null>(null); // Timeout pour buffering bloqué
-    const MAX_RETRIES = 2;
-    const BUFFERING_TIMEOUT = 10000; // 10 secondes max de buffering
+    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+    const bufferingTimeoutRef = useRef<number | null>(null); // Timeout for stalled buffering
+    const BUFFERING_TIMEOUT = 10000; // 10 seconds max buffering
 
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -47,17 +44,19 @@ export function useAudioPlayer({
         const audio = new Audio();
         audio.preload = 'metadata';
         audioRef.current = audio;
+        setAudioElement(audio);
 
         return () => {
             audio.pause();
             audio.src = '';
             audioRef.current = null;
+            setAudioElement(null);
         };
     }, []);
 
     // Setup event listeners on audio element
     useEffect(() => {
-        const audio = audioRef.current;
+        const audio = audioElement; // Use state instance
         if (!audio) return;
 
         const handleDurationChange = () => {
@@ -76,7 +75,7 @@ export function useAudioPlayer({
         const handleWaiting = () => {
             setIsBuffering(true);
 
-            // Démarrer un timeout de buffering (10s max)
+            // Start a buffering timeout (10s max)
             bufferingTimeoutRef.current = setTimeout(() => {
                 console.error('[Audio] Buffering timeout (10s), skipping to next track');
                 onError?.();
@@ -86,7 +85,7 @@ export function useAudioPlayer({
         const handlePlaying = () => {
             setIsBuffering(false);
 
-            // Annuler le timeout si la lecture reprend
+            // Cancel timeout if playback resumes
             if (bufferingTimeoutRef.current) {
                 clearTimeout(bufferingTimeoutRef.current);
                 bufferingTimeoutRef.current = null;
@@ -114,134 +113,30 @@ export function useAudioPlayer({
             audio.removeEventListener('playing', handlePlaying);
             audio.removeEventListener('ended', handleEnded);
 
-            // Cleanup: annuler le timeout si le composant démonte
+            // Cleanup: cancel timeout on unmount
             if (bufferingTimeoutRef.current) {
                 clearTimeout(bufferingTimeoutRef.current);
                 bufferingTimeoutRef.current = null;
             }
         };
-    }, [onEnded, onError]);
+    }, [audioElement, onEnded, onError]); // Dep on audioElement
 
-    // Load track when trackId changes
+    // Delegate stream loading to the specialized hook
+    useHlsLoader({
+        trackId,
+        accessToken,
+        audioElement, // Pass reactive state
+        onError: () => onError?.(),
+        onStreamReady: () => {
+            setIsBuffering(false);
+        }
+    });
+
+    // Reset loop states when track changes
     useEffect(() => {
-        const audio = audioRef.current;
-        const retryTimeouts: number[] = []; // Stocker tous les timeouts pour cleanup
-
-        // Immediately reset states when track changes (for instant UI update)
         setDuration(0);
         setIsPlaying(false);
-
-        if (!audio || !trackId) {
-            // Clean up if no track
-            if (hlsRef.current) {
-                hlsRef.current.destroy();
-                hlsRef.current = null;
-            }
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-            }
-            return;
-        }
-
-        const streamUrl = getTrackStreamUrl(trackId, accessToken ?? undefined);
-
-        // Check if HLS is supported
-        if (Hls.isSupported()) {
-            // Destroy previous instance if exists
-            if (hlsRef.current) {
-                hlsRef.current.destroy();
-            }
-
-            const hls = new Hls({
-                enableWorker: true,
-                lowLatencyMode: false,
-                xhrSetup: (xhr, url) => {
-                    // Add authorization query param to ALL requests (manifest + segments)
-                    if (accessToken) {
-                        const separator = url.includes('?') ? '&' : '?';
-                        const urlWithAuth = `${url}${separator}authorization=${encodeURIComponent(accessToken)}`;
-                        xhr.open('GET', urlWithAuth, true);
-                    }
-                },
-            });
-
-            hlsRef.current = hls;
-
-            hls.loadSource(streamUrl);
-            hls.attachMedia(audio);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                // Stream is ready, reset retry counter
-                retryCountRef.current = 0;
-                setIsBuffering(false);
-            });
-
-            hls.on(Hls.Events.ERROR, (_event, data) => {
-                if (data.fatal) {
-                    console.error(`[HLS Error] Type: ${data.type}, Details:`, data.details, `(Retry ${retryCountRef.current}/${MAX_RETRIES})`);
-
-                    // Vérifier si on a atteint le max de retries
-                    if (retryCountRef.current >= MAX_RETRIES) {
-                        console.error('[HLS] Max retries reached, skipping to next track');
-                        hls.destroy();
-                        retryCountRef.current = 0; // Reset pour la prochaine track
-                        onError?.(); // Notifier l'échec -> passer à la track suivante
-                        return;
-                    }
-
-                    // Incrémenter le compteur de retry
-                    retryCountRef.current++;
-
-                    // Délai avant retry (1 seconde) pour donner le temps au backend de générer les fichiers
-                    const retryTimeout = setTimeout(() => {
-                        // Vérifier que l'instance HLS est toujours valide (pas détruite entre temps)
-                        if (!hlsRef.current || hlsRef.current !== hls) {
-                            console.log('[HLS] Instance destroyed during retry, aborting');
-                            return;
-                        }
-
-                        // Tentative de récupération selon le type d'erreur
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log(`[HLS] Retry #${retryCountRef.current}: Network error (${data.details}), reloading manifest...`);
-                                // Pour les erreurs réseau (notamment 404 manifest), recharger le manifest
-                                hls.loadSource(streamUrl);
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log(`[HLS] Retry #${retryCountRef.current}: Media error, recovering...`);
-                                hls.recoverMediaError();
-                                break;
-                            default:
-                                console.error('[HLS] Unrecoverable error type');
-                                hls.destroy();
-                                retryCountRef.current = 0;
-                                onError?.();
-                                break;
-                        }
-                    }, 1000); // Attendre 1 seconde entre chaque retry
-
-                    // Stocker le timeout pour cleanup
-                    retryTimeouts.push(retryTimeout);
-                }
-            });
-        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            // Native HLS support (Safari)
-            audio.src = streamUrl;
-        } else {
-            console.error('HLS is not supported in this browser');
-        }
-
-        return () => {
-            // Cleanup: annuler tous les timeouts de retry
-            retryTimeouts.forEach(clearTimeout);
-
-            if (hlsRef.current) {
-                hlsRef.current.destroy();
-                hlsRef.current = null;
-            }
-        };
-    }, [trackId, accessToken, onError]);
+    }, [trackId]);
 
     // Sync volume
     useEffect(() => {

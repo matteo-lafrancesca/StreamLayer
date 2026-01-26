@@ -1,7 +1,7 @@
 import { StreamLayer } from '@components/StreamLayer';
 
 function App() {
-  // TODO: Récupérer le projectId depuis les props ou la config
+  // TODO: Get projectId from props or config
   const projectId = '34';
 
   return (

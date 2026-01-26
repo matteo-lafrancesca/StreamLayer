@@ -12,9 +12,9 @@ export interface ExpandedPlayerHeaderMobileProps {
 }
 
 /**
- * Mobile-specific header component for expanded player view
- * Displays dynamic title and navigation based on current view
- * Mobile has different navigation flow
+ * Mobile header for expanded view.
+ * Dynamic title and navigation.
+ * Handles mobile specific navigation.
  */
 export function ExpandedPlayerHeaderMobile({
     currentView,
@@ -27,7 +27,7 @@ export function ExpandedPlayerHeaderMobile({
         return null;
     }
 
-    // Helper function to render header content based on view
+    // Render header content based on view
     const renderHeaderContent = () => {
         switch (currentView) {
             case 'playlist':

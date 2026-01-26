@@ -11,25 +11,25 @@ export function PlaylistView() {
     const { selectedPlaylist, playTrackFromPlaylist, playbackControls, playingTrack, isPlaying, setIsPlaying, setCurrentView, setSelectedPlaylist: resetSelectedPlaylist, accessToken } = usePlayer();
     const { tracks, error } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
 
-    // Extraire les IDs d'albums uniques pour le préchargement
+    // Extract unique album IDs for preloading
     const albumIds = useMemo(() => {
         if (!tracks) return [];
         const uniqueIds = new Set(tracks.map(track => track.id_album));
         return Array.from(uniqueIds);
     }, [tracks]);
 
-    // Précharger les images en arrière-plan (ne bloque pas l'affichage)
+    // Preload images in background (non-blocking)
     usePreloadPlaylistImages(
         selectedPlaylist?.id,
         albumIds,
-        'l', // Taille pour la cover de playlist (header)
-        's'  // Taille pour les covers d'albums (lignes)
+        'l', // Size for playlist cover (header)
+        's'  // Size for album covers (rows)
     );
 
-    // Redirection automatique vers la vue projet en cas d'erreur (ex: playlist supprimée)
+    // Auto-redirect to project view on error (e.g., deleted playlist)
     useEffect(() => {
         if (error) {
-            // Attendre un court instant pour laisser l'utilisateur voir qu'il y a eu une erreur
+            // Wait briefly to show error message
             const timeoutId = setTimeout(() => {
                 resetSelectedPlaylist(null);
                 setCurrentView('project');
@@ -39,17 +39,17 @@ export function PlaylistView() {
         }
     }, [error, resetSelectedPlaylist, setCurrentView]);
 
-    // Handler pour lire tous les titres
+    // Handler to play all tracks
     const handlePlayAll = useCallback(() => {
         if (tracks && tracks.length > 0) {
             playTrackFromPlaylist(0, tracks);
         }
     }, [tracks, playTrackFromPlaylist]);
 
-    // Handler pour lecture aléatoire
+    // Handler for shuffle play
     const handleShufflePlay = useCallback(() => {
         if (tracks && tracks.length > 0) {
-            // Active le shuffle puis lance le premier track
+            // Enable shuffle then play first track
             playbackControls.onShuffle();
             playTrackFromPlaylist(0);
         }
@@ -66,17 +66,17 @@ export function PlaylistView() {
     if (error) {
         return (
             <div className={styles.errorMessage}>
-                Erreur lors du chargement des tracks
+                Erreur lors du chargement des pistes
             </div>
         );
     }
 
-    // Distinction entre "en cours de chargement" et "playlist vide"
-    // Si tracks est null et pas d'erreur, c'est que le lazy loading n'a pas encore commencé ou renvoyé de données
+    // Distinguish between 'loading' and 'empty playlist'
+    // If tracks is null and no error, lazy loading hasn't started or returned data
     if (!tracks) {
         return (
             <div className={styles.statusMessage}>
-                Chargement des tracks...
+                Chargement des pistes...
             </div>
         );
     }
@@ -110,10 +110,10 @@ export function PlaylistView() {
                             index={index + 1}
                             onClick={() => {
                                 if (isCurrentTrack) {
-                                    // Toggle play/pause pour la track en cours
+                                    // Toggle play/pause for current track
                                     setIsPlaying(!isPlaying);
                                 } else {
-                                    // Jouer une nouvelle track
+                                    // Play new track
                                     playTrackFromPlaylist(index, tracks);
                                 }
                             }}

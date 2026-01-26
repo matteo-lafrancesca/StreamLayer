@@ -3,7 +3,7 @@
  */
 
 /**
- * MediaBar props for Desktop - includes isExpanded state
+ * MediaBar props for Desktop (includes isExpanded).
  */
 export interface MediaBarDesktopProps {
     isExpanded: boolean;
@@ -11,7 +11,7 @@ export interface MediaBarDesktopProps {
 }
 
 /**
- * MediaBar props for Mobile - only needs onExpandToggle
+ * MediaBar props for Mobile.
  */
 export interface MediaBarMobileProps {
     onExpandToggle: () => void;
@@ -19,7 +19,7 @@ export interface MediaBarMobileProps {
 
 /**
  * @deprecated Use MediaBarDesktopProps or MediaBarMobileProps instead
- * Generic MediaBar props - kept for backwards compatibility
+ * Generic MediaBar props (backwards compatibility).
  */
 export type MediaBarProps = MediaBarDesktopProps;
 

@@ -3,10 +3,10 @@ import type { Album } from '@definitions/album';
 import { fetchJson } from './client';
 
 /**
- * Récupère les informations d'un album par son ID
- * @param albumId - L'ID de l'album
- * @param accessToken - Token d'accès optionnel
- * @returns Les informations complètes de l'album
+ * Fetches album info by ID.
+ * @param albumId - Album ID.
+ * @param accessToken - Optional access token.
+ * @returns Complete album info.
  */
 export async function getAlbumInfo(albumId: number, accessToken?: string): Promise<Album> {
     return fetchJson<Album>(`/albums/${albumId}`, { accessToken });

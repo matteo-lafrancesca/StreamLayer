@@ -12,8 +12,8 @@ export interface ExpandedPlayerHeaderProps {
 }
 
 /**
- * Header component for expanded player view (Desktop)
- * Displays dynamic title and navigation based on current view
+ * Header for expanded player view (Desktop).
+ * Dynamic title and navigation based on current view.
  */
 export function ExpandedPlayerHeader({
     currentView,

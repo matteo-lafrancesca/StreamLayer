@@ -26,7 +26,6 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, isPlayingSt
                         <PlayingIndicator />
                     ) : null}
                 </div>
-
                 {/* Hover state */}
                 {isPlaying && isPlayingState ? (
                     <Pause className={styles.playIcon} fill="currentColor" />
@@ -46,7 +45,7 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, isPlayingSt
                 <div className={styles.title}>{displayInfo.title}</div>
                 <div className={styles.artist}>{displayInfo.artist}</div>
             </div>
-        </div>
+        </div >
     );
 }
 

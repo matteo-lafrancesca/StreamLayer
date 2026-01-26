@@ -10,11 +10,11 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 /**
- * Composant bouton iconique avec option d'agrandissement de la zone cliquable
- * @param size - Taille du bouton ('md' ou 'lg')
- * @param icon - Icône à afficher (composant Lucide React)
- * @param enlargeHitbox - Si true, agrandit la zone cliquable sans décalage visuel
- * @param className - Classes CSS supplémentaires
+ * Icon button component with hit area enlargement option.
+ * @param size - Button size ('md' or 'lg').
+ * @param icon - Icon to display.
+ * @param enlargeHitbox - If true, enlarges clickable area without visual shift.
+ * @param className - Additional CSS classes.
  */
 export function IconButton({
     size = 'md',

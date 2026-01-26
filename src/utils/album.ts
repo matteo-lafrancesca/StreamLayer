@@ -2,38 +2,38 @@ import type { Album } from '@definitions/album';
 import { getAlbumCoverUrl, type CoverSize } from '../services/api/covers';
 
 /**
- * Récupère le titre d'un album
- * @param album - L'album
- * @returns Titre de l'album
+ * Gets album title.
+ * @param album - Album object.
+ * @returns Album title.
  */
 export function getAlbumTitle(album: Album): string {
     return album.title || 'Album inconnu';
 }
 
 /**
- * Récupère le nom des artistes d'un album
- * @param album - L'album
- * @returns Noms des artistes séparés par des virgules
+ * Gets album artists names.
+ * @param album - Album object.
+ * @returns Comma-separated artist names.
  */
 export function getAlbumArtistsNames(album: Album): string {
     return album.artists.map(artist => artist.name).join(', ');
 }
 
 /**
- * Récupère l'URL de la cover d'un album
- * @param album - L'album
- * @param size - Taille de la cover
- * @returns URL de la cover
+ * Gets album cover URL.
+ * @param album - Album object.
+ * @param size - Cover size.
+ * @returns Cover URL.
  */
 export function getAlbumCover(album: Album, size: CoverSize = 'm'): string {
     return getAlbumCoverUrl(album.id, size);
 }
 
 /**
- * Récupère les informations d'affichage d'un album
- * @param album - L'album
- * @param coverSize - Taille de la cover
- * @returns Objet avec les infos formatées
+ * Gets album display info.
+ * @param album - Album object.
+ * @param coverSize - Cover size.
+ * @returns Formatted info object.
  */
 export function getAlbumDisplayInfo(album: Album, coverSize: CoverSize = 'm') {
     return {

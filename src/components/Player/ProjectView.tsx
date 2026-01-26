@@ -67,7 +67,7 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
                                     {displayInfo.title}
                                 </div>
                                 <div className={styles.playlistMeta}>
-                                    {displayInfo.nbTracks} tracks
+                                    {displayInfo.nbTracks} titres
                                 </div>
                             </div>
                         </div>

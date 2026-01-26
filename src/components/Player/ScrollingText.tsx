@@ -3,8 +3,7 @@ import styles from '@styles/ScrollingText.module.css';
 import type { ScrollingTextProps } from '@definitions/player';
 
 /**
- * ScrollingText Component
- * Displays text with smooth horizontal scrolling animation when content overflows
+ * Displays text with smooth horizontal scrolling animation.
  */
 export function ScrollingText({ text, className = '', speed = 30 }: ScrollingTextProps) {
     const { shouldScroll, translateX, containerRef, contentRef } = useScrollingAnimation(text, speed);

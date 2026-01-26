@@ -37,7 +37,7 @@ interface PlayerContextType {
     volume: number;
     setVolume: (volume: number) => void;
 
-    // Durée totale (change peu souvent, peut rester dans le contexte)
+    // Total duration (rarely changes, kept in context)
     duration: number;
     isBuffering: boolean;
 
@@ -112,7 +112,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         onEnded: () => {
             // Auto-play next track based on queue and repeat mode
             if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
-                // Si mode répétition 1, on remet à 0 et on joue
+                // If repeat one, reset to 0 and play
                 audioPlayer.audioRef.current.currentTime = 0;
                 audioPlayer.audioRef.current.play().catch(console.error);
                 if (!isPlaying) setIsPlaying(true);
@@ -123,9 +123,9 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
             }
         },
         onError: () => {
-            // En cas d'échec de chargement après retries, passer à la track suivante
+            // If loading fails after retries, skip to next
             console.log('[PlayerContext] Track loading failed, skipping to next');
-            // Forcer l'arrêt du playback pour éviter un état UI incohérent
+            // Force stop playback to avoid inconsistent UI state
             setIsPlaying(false);
 
             if (queueManager.canPlayNext) {
@@ -138,6 +138,9 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     useEffect(() => {
         if (queueManager.currentTrack && queueManager.currentTrack.id !== playingTrack?.id) {
             setPlayingTrack(queueManager.currentTrack);
+        } else if (!queueManager.currentTrack && playingTrack) {
+            // If queue is cleared, stop immediately
+            setPlayingTrack(null);
         }
     }, [queueManager.currentTrack, playingTrack]);
 
@@ -151,9 +154,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         onRepeat: queueManager.toggleRepeat,
     });
 
-    // NOTE: Progress/Time logic has been moved to useTrackProgress hook to prevent global re-renders
-
-    // Function to play a track from the playlist (creates new queue)
+    // Play a track from playlist (creates new queue)
     const playTrackFromPlaylist = useCallback((trackIndex: number, tracks?: Track[]) => {
         const tracksToPlay = tracks || playlistTracks;
         if (tracksToPlay && tracksToPlay.length > 0) {
@@ -181,7 +182,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
             return;
         }
 
-        // If we have all tracks and we're playing from this playlist, update the queue
+        // If we have all tracks and are playing from this playlist, update the queue
         if (
             playingFromPlaylist &&
             playlistTracks &&
@@ -191,7 +192,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
             queueManager.totalTracks < selectedPlaylist.nb_items
         ) {
             console.log('[PlayerContext] All tracks loaded, updating queue with full playlist');
-            // Find the current track index in the full list
+            // Find current track index in full list
             const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
             if (currentTrackIndex >= 0) {
                 queueManager.setQueue(playlistTracks, currentTrackIndex);
@@ -202,7 +203,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
     // Auto-play when track changes
     useEffect(() => {
         if (playingTrack) {
-            // Reset logic is handled locally in hooks or by audio player
+            // Reset logic is handled locally or by audio player
             setIsPlaying(true);
         }
     }, [playingTrack?.id]);

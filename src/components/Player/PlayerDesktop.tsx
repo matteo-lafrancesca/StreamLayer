@@ -10,8 +10,8 @@ import sharedStyles from '@styles/PlayerShared.module.css';
 import styles from '@styles/PlayerDesktop.module.css';
 
 /**
- * Desktop Player Component
- * Full-featured player with expandable content area
+ * Desktop Player Component.
+ * Full-featured player with expandable content area.
  */
 export function PlayerDesktop() {
     const { currentView, setCurrentView, selectedPlaylist, isCompact } = usePlayer();
@@ -37,7 +37,7 @@ export function PlayerDesktop() {
                         <ProgressSlider />
                     </>
                 ) : (
-                    // Normal Mode: Show expandable content and full media bar
+                    // Normal Mode: Show expandable content area and full media bar
                     <>
                         {/* Expandable Content Area */}
                         <div

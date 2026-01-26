@@ -3,8 +3,8 @@ import { usePlayer } from '@context/PlayerContext';
 import { formatDuration } from '@utils/time';
 
 /**
- * Hook to handle track progress locally without triggering global re-renders
- * Connects directly to the audio element reference
+ * Hook for local track progress without global re-renders.
+ * Connects directly to the audio element requestAnimationFrame loop.
  */
 export function useTrackProgress() {
     const { audioRef, isPlaying } = usePlayer();
@@ -34,7 +34,7 @@ export function useTrackProgress() {
         }
     }, [audioRef]);
 
-    // Loop for smooth updates during playback
+    // Playback sync loop
     useEffect(() => {
         if (isPlaying) {
             const loop = () => {
@@ -64,7 +64,7 @@ export function useTrackProgress() {
                 const newTime = (positionPercent / 100) * total;
                 audioRef.current.currentTime = newTime;
 
-                // Update local state immediately for responsiveness
+                // Optimistic update
                 setCurrentTime(newTime);
                 setProgress(positionPercent);
             }

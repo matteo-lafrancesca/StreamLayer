@@ -9,8 +9,7 @@ interface AlbumCoverOrPlaceholderProps {
 }
 
 /**
- * AlbumCoverOrPlaceholder Component
- * Displays album cover if track exists, otherwise shows placeholder
+ * Displays album cover if track exists, otherwise shows placeholder.
  */
 export function AlbumCoverOrPlaceholder({ track, size, className }: AlbumCoverOrPlaceholderProps) {
     if (!track) {

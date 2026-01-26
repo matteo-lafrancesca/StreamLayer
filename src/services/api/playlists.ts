@@ -10,9 +10,9 @@ interface GetPlaylistsParams {
 }
 
 /**
- * Récupère la liste des playlists (type 1)
- * @param params - Paramètres de la requête (projectId, limit, offset, accessToken)
- * @returns Liste paginée des playlists
+ * Fetches playlists list (type 1).
+ * @param params - Request params (projectId, limit, offset, accessToken).
+ * @returns Paginated list of playlists.
  */
 export async function getPlaylists({
     projectId,
@@ -32,9 +32,9 @@ interface GetPlaylistTracksParams {
 }
 
 /**
- * Récupère les tracks d'une playlist
- * @param params - Paramètres de la requête (playlistId, limit, offset, accessToken)
- * @returns Liste paginée des tracks de la playlist
+ * Fetches tracks of a playlist.
+ * @param params - Request params (playlistId, limit, offset, accessToken).
+ * @returns Paginated list of tracks.
  */
 export async function getPlaylistTracks({
     playlistId,
