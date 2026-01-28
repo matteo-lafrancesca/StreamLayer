@@ -14,9 +14,11 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    /* Reset to perfect center */
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 4px;
+    /* Very tight gap to keep bar and buttons associated */
     align-items: center;
     justify-content: center;
     width: 50%;

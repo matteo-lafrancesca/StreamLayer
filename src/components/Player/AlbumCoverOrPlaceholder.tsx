@@ -1,6 +1,6 @@
 import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
-
 import { type CoverSize } from '@services/api/covers';
+import placeholderImg from '@assets/placeholder.png';
 
 interface AlbumCoverOrPlaceholderProps {
     track?: { id_album: number } | null;
@@ -15,7 +15,7 @@ export function AlbumCoverOrPlaceholder({ track, size, className }: AlbumCoverOr
     if (!track) {
         return (
             <img
-                src="/img/placeholder.png"
+                src={placeholderImg}
                 alt="Album cover"
                 className={className}
             />

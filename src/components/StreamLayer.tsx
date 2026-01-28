@@ -18,13 +18,15 @@ export interface StreamLayerProps {
  */
 export function StreamLayer({ projectId, children }: StreamLayerProps) {
     return (
-        <AuthProvider projectId={projectId}>
-            <PlayerUIProvider>
-                <PlayerProvider>
-                    {children}
-                    <Player />
-                </PlayerProvider>
-            </PlayerUIProvider>
-        </AuthProvider>
+        <div className="sl-root">
+            <AuthProvider projectId={projectId}>
+                <PlayerUIProvider>
+                    <PlayerProvider>
+                        {children}
+                        <Player />
+                    </PlayerProvider>
+                </PlayerUIProvider>
+            </AuthProvider>
+        </div>
     );
 }

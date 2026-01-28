@@ -3,7 +3,7 @@
 .playbackControls {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
     justify-content: center;
 }
 

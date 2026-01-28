@@ -23,10 +23,10 @@ export function Button({
     ...props
 }: ButtonProps) {
     const classes = [
-        'btn',
-        `btn-${variant}`,
-        size !== 'md' ? `btn-${size}` : '',
-        pill ? 'btn-pill' : '',
+        'sl-btn',
+        `sl-btn-${variant}`,
+        size !== 'md' ? `sl-btn-${size}` : '',
+        pill ? 'sl-btn-pill' : '',
         className,
     ]
         .filter(Boolean)

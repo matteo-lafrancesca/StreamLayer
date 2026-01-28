@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useHlsLoader } from './useHlsLoader';
 
 interface UseAudioPlayerProps {
@@ -30,14 +30,15 @@ export function useAudioPlayer({
     onEnded,
     onError,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
-    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(() => {
+    // Create a stable audio element instance (never changes)
+    const audioElement = useMemo(() => {
         const audio = new Audio();
         audio.preload = 'metadata';
         return audio;
-    });
+    }, []);
 
     const audioRef = useRef<HTMLAudioElement | null>(audioElement);
-    // Ensure ref is always in sync (though state is stable here)
+    // Ensure ref is always in sync
     if (audioRef.current !== audioElement) {
         audioRef.current = audioElement;
     }

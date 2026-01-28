@@ -28,12 +28,12 @@ export function Card({
     ...props
 }: CardProps) {
     const classes = [
-        'card',
-        hover && !hoverPrimary ? 'hover-lift' : '',
-        hoverPrimary ? 'card-hover-primary' : '',
-        xl ? 'card-xl' : '',
-        padding === 'md' ? 'card-padding' : '',
-        padding === 'sm' ? 'card-padding-sm' : '',
+        'sl-card',
+        hover && !hoverPrimary ? 'sl-hover-lift' : '',
+        hoverPrimary ? 'sl-card-hover-primary' : '',
+        xl ? 'sl-card-xl' : '',
+        padding === 'md' ? 'sl-card-padding' : '',
+        padding === 'sm' ? 'sl-card-padding-sm' : '',
         className,
     ]
         .filter(Boolean)

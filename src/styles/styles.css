@@ -1,17 +1,132 @@
-* {
+/**
+ * StreamLayer Widget - Scoped Styles
+ * Base styles scoped to .sl-root for widget isolation
+ * LOAD THIS FILE FIRST!
+ */
+
+/* ==========================================================================
+   1. ISOLATION ROOT
+   ========================================================================== */
+.sl-root {
+  /* Reset box-sizing for the widget */
+  box-sizing: border-box;
+
+  /* Defend against host styles leaking in */
+  text-align: left;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Force base typography (wins over host body styles) */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  color: #222222;
+  font-weight: 400;
+
+  /* Reset minimal layout props */
   margin: 0;
   padding: 0;
+  border: 0;
+}
+
+/* ==========================================================================
+   2. AGGRESSIVE RESET (Scoped)
+   Reset all standard elements to avoid inheriting host styles
+   ========================================================================== */
+
+/* Box sizing reset for EVERYTHING inside */
+/* ==========================================================================
+   2. TARGETED NORMALIZATION (Scoped)
+   Reset only what's necessary to ensure consistency without breaking internal layout
+   ========================================================================== */
+
+/* 2.1 Box Sizing (CRITICAL) */
+.sl-root *,
+.sl-root *::before,
+.sl-root *::after {
   box-sizing: border-box;
 }
 
-body {
-  font-family: sans-serif;
-  min-height: 100vh;
-  line-height: 1.5;
-  background-color: rgb(111, 192, 131);
+/* 2.2 Layout & Block elements 
+   Don't reset everything blindly. Just ensure standard behavior. */
+.sl-root body,
+.sl-root h1,
+.sl-root h2,
+.sl-root h3,
+.sl-root h4,
+.sl-root h5,
+.sl-root h6,
+.sl-root p,
+.sl-root figure,
+.sl-root blockquote,
+.sl-root dl,
+.sl-root dd {
+  margin: 0;
 }
 
-button {
-  padding: 8px 16px;
-  cursor: pointer;
+/* 2.3 Typography Defaults (scoped) */
+.sl-root h1,
+.sl-root h2,
+.sl-root h3,
+.sl-root h4,
+.sl-root h5,
+.sl-root h6 {
+  font-size: inherit;
+  font-weight: inherit;
 }
+
+/* 2.4 Lists */
+.sl-root ul,
+.sl-root ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2.5 Images & Inteactive */
+.sl-root img,
+.sl-root picture,
+.sl-root video,
+.sl-root canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* SVGs are special: they are often icons. 
+   Don't force display: block which increases specificity 
+   and breaks 'display: none' in components. */
+.sl-root svg {
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+/* 2.6 Buttons (CRITICAL ISOLATION)
+   Buttons are the most common source of host css leakage.
+   We reset them to look unstyled so our components can style them. */
+.sl-root button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+/* 2.7 Inputs & Textareas */
+.sl-root input,
+.sl-root textarea,
+.sl-root select,
+.sl-root button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 2.8 Links */
+.sl-root a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* DEV HELPERS section moved to dev.css */

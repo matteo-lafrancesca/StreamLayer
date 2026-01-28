@@ -1,11 +1,12 @@
 /**
  * Utility Classes - StreamLayer
  * Classes CSS réutilisables pour éviter la duplication
+ * IMPORTANT: Toutes les classes sont préfixées avec 'sl-' pour éviter les conflits
  */
 
 /* ========== BUTTONS ========== */
 
-.btn {
+.sl-btn {
     padding: var(--spacing-sm) var(--spacing-lg);
     border: none;
     border-radius: var(--radius-md);
@@ -19,64 +20,64 @@
     text-decoration: none;
 }
 
-.btn-primary {
+.sl-btn-primary {
     background: var(--gradient-primary);
     color: var(--color-white);
     box-shadow: var(--shadow-primary);
 }
 
-.btn-primary:hover {
+.sl-btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-primary-hover);
 }
 
-.btn-secondary {
+.sl-btn-secondary {
     background: var(--color-gray-100);
     color: var(--text-primary);
 }
 
-.btn-secondary:hover {
+.sl-btn-secondary:hover {
     background: var(--color-gray-200);
 }
 
-.btn-ghost {
+.sl-btn-ghost {
     background: rgba(255, 255, 255, 0.05);
     color: var(--color-white);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.btn-ghost:hover {
+.sl-btn-ghost:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.btn-accent {
+.sl-btn-accent {
     background: var(--gradient-accent);
     color: var(--color-white);
     box-shadow: var(--shadow-accent);
 }
 
-.btn-accent:hover {
+.sl-btn-accent:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-accent-hover);
 }
 
-.btn-pill {
+.sl-btn-pill {
     border-radius: var(--radius-pill);
 }
 
-.btn-lg {
+.sl-btn-lg {
     padding: 0.75rem 2rem;
     font-size: var(--font-size-base);
 }
 
-.btn-sm {
+.sl-btn-sm {
     padding: 0.5rem 1rem;
     font-size: var(--font-size-xs);
 }
 
 /* ========== ICON BUTTONS ========== */
 
-.icon-btn {
+.sl-icon-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -88,24 +89,24 @@
     color: inherit;
 }
 
-.icon-btn:hover {
+.sl-icon-btn:hover {
     opacity: 0.7;
 }
 
-.icon-btn-lg {
+.sl-icon-btn-lg {
     padding: var(--spacing-md);
     font-size: var(--font-size-2xl);
 }
 
 /* Hitbox élargie sans décalage visuel */
-.icon-btn-hitbox {
+.sl-icon-btn-hitbox {
     padding: var(--hitbox-padding);
     margin: calc(-1 * var(--hitbox-padding));
 }
 
 /* ========== CARDS ========== */
 
-.card {
+.sl-card {
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -113,96 +114,96 @@
     transition: var(--transition-all);
 }
 
-.card:hover {
+.sl-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-xl);
 }
 
-.card-hover-primary:hover {
+.sl-card-hover-primary:hover {
     box-shadow: 0 20px 48px rgba(99, 102, 241, 0.15);
     border-color: rgba(99, 102, 241, 0.2);
 }
 
-.card-xl {
+.sl-card-xl {
     border-radius: var(--radius-3xl);
 }
 
-.card-padding {
+.sl-card-padding {
     padding: var(--spacing-2xl);
 }
 
-.card-padding-sm {
+.sl-card-padding-sm {
     padding: var(--spacing-lg);
 }
 
 /* ========== CONTAINERS ========== */
 
-.container-flex {
+.sl-container-flex {
     display: flex;
     align-items: center;
 }
 
-.container-flex-col {
+.sl-container-flex-col {
     display: flex;
     flex-direction: column;
 }
 
-.container-flex-center {
+.sl-container-flex-center {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.container-grid {
+.sl-container-grid {
     display: grid;
     gap: var(--spacing-lg);
 }
 
-.gap-xs {
+.sl-gap-xs {
     gap: var(--spacing-xs);
 }
 
-.gap-sm {
+.sl-gap-sm {
     gap: var(--spacing-sm);
 }
 
-.gap-md {
+.sl-gap-md {
     gap: var(--spacing-md);
 }
 
-.gap-lg {
+.sl-gap-lg {
     gap: var(--spacing-lg);
 }
 
-.gap-xl {
+.sl-gap-xl {
     gap: var(--spacing-xl);
 }
 
 /* ========== TEXT UTILITIES ========== */
 
-.text-truncate {
+.sl-text-truncate {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.text-primary {
+.sl-text-primary {
     color: var(--text-primary);
 }
 
-.text-secondary {
+.sl-text-secondary {
     color: var(--text-secondary);
 }
 
-.text-tertiary {
+.sl-text-tertiary {
     color: var(--text-tertiary);
 }
 
-.text-white {
+.sl-text-white {
     color: var(--color-white);
 }
 
-.text-gradient {
+.sl-text-gradient {
     background: var(--gradient-text-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -210,199 +211,199 @@
 }
 
 /* Font sizes */
-.text-xs {
+.sl-text-xs {
     font-size: var(--font-size-xs);
 }
 
-.text-sm {
+.sl-text-sm {
     font-size: var(--font-size-sm);
 }
 
-.text-base {
+.sl-text-base {
     font-size: var(--font-size-base);
 }
 
-.text-lg {
+.sl-text-lg {
     font-size: var(--font-size-lg);
 }
 
-.text-xl {
+.sl-text-xl {
     font-size: var(--font-size-xl);
 }
 
-.text-2xl {
+.sl-text-2xl {
     font-size: var(--font-size-2xl);
 }
 
 /* Font weights */
-.font-light {
+.sl-font-light {
     font-weight: var(--font-weight-light);
 }
 
-.font-normal {
+.sl-font-normal {
     font-weight: var(--font-weight-normal);
 }
 
-.font-medium {
+.sl-font-medium {
     font-weight: var(--font-weight-medium);
 }
 
-.font-semibold {
+.sl-font-semibold {
     font-weight: var(--font-weight-semibold);
 }
 
-.font-bold {
+.sl-font-bold {
     font-weight: var(--font-weight-bold);
 }
 
-.font-extrabold {
+.sl-font-extrabold {
     font-weight: var(--font-weight-extrabold);
 }
 
 /* ========== IMAGES ========== */
 
-.cover-sm {
+.sl-cover-sm {
     width: var(--player-cover-sm);
     height: var(--player-cover-sm);
     border-radius: var(--radius-md);
     object-fit: cover;
 }
 
-.cover-md {
+.sl-cover-md {
     width: var(--player-cover-md);
     height: var(--player-cover-md);
     border-radius: var(--radius-sm);
     object-fit: cover;
 }
 
-.cover-round {
+.sl-cover-round {
     border-radius: var(--radius-round);
 }
 
 /* ========== GRADIENTS ========== */
 
-.gradient-primary {
+.sl-gradient-primary {
     background: var(--gradient-primary);
 }
 
-.gradient-primary-vibrant {
+.sl-gradient-primary-vibrant {
     background: var(--gradient-primary-vibrant);
 }
 
-.gradient-accent {
+.sl-gradient-accent {
     background: var(--gradient-accent);
 }
 
 /* ========== SHADOWS ========== */
 
-.shadow-sm {
+.sl-shadow-sm {
     box-shadow: var(--shadow-sm);
 }
 
-.shadow-md {
+.sl-shadow-md {
     box-shadow: var(--shadow-md);
 }
 
-.shadow-lg {
+.sl-shadow-lg {
     box-shadow: var(--shadow-lg);
 }
 
-.shadow-xl {
+.sl-shadow-xl {
     box-shadow: var(--shadow-xl);
 }
 
 /* ========== BORDERS ========== */
 
-.border-radius-sm {
+.sl-border-radius-sm {
     border-radius: var(--radius-sm);
 }
 
-.border-radius-md {
+.sl-border-radius-md {
     border-radius: var(--radius-md);
 }
 
-.border-radius-lg {
+.sl-border-radius-lg {
     border-radius: var(--radius-lg);
 }
 
-.border-radius-xl {
+.sl-border-radius-xl {
     border-radius: var(--radius-xl);
 }
 
-.border-radius-round {
+.sl-border-radius-round {
     border-radius: var(--radius-round);
 }
 
-.border-radius-pill {
+.sl-border-radius-pill {
     border-radius: var(--radius-pill);
 }
 
 /* ========== HOVER EFFECTS ========== */
 
-.hover-lift {
+.sl-hover-lift {
     transition: var(--transition-transform);
 }
 
-.hover-lift:hover {
+.sl-hover-lift:hover {
     transform: translateY(-2px);
 }
 
-.hover-scale {
+.sl-hover-scale {
     transition: var(--transition-transform);
 }
 
-.hover-scale:hover {
+.sl-hover-scale:hover {
     transform: scale(1.05);
 }
 
-.hover-opacity {
+.sl-hover-opacity {
     transition: var(--transition-opacity);
 }
 
-.hover-opacity:hover {
+.sl-hover-opacity:hover {
     opacity: 0.6;
 }
 
 /* ========== BACKGROUNDS ========== */
 
-.bg-primary {
+.sl-bg-primary {
     background-color: var(--bg-primary);
 }
 
-.bg-secondary {
+.sl-bg-secondary {
     background-color: var(--bg-secondary);
 }
 
-.bg-dark {
+.sl-bg-dark {
     background-color: var(--bg-dark);
 }
 
 /* ========== UTILITIES DIVERSES ========== */
 
-.no-select {
+.sl-no-select {
     user-select: none;
     -webkit-user-select: none;
 }
 
-.cursor-pointer {
+.sl-cursor-pointer {
     cursor: pointer;
 }
 
-.overflow-hidden {
+.sl-overflow-hidden {
     overflow: hidden;
 }
 
-.position-relative {
+.sl-position-relative {
     position: relative;
 }
 
-.position-absolute {
+.sl-position-absolute {
     position: absolute;
 }
 
 /* ========== ANIMATIONS PRÉDÉFINIES ========== */
 
-@keyframes fade-in {
+@keyframes sl-fade-in {
     from {
         opacity: 0;
     }
@@ -412,7 +413,7 @@
     }
 }
 
-@keyframes fade-in-up {
+@keyframes sl-fade-in-up {
     from {
         opacity: 0;
         transform: translateY(30px);
@@ -424,7 +425,7 @@
     }
 }
 
-@keyframes slide-in-right {
+@keyframes sl-slide-in-right {
     from {
         transform: translateX(100%);
     }
@@ -434,7 +435,7 @@
     }
 }
 
-@keyframes scale-in {
+@keyframes sl-scale-in {
     from {
         transform: scale(0.9);
         opacity: 0;
@@ -446,7 +447,7 @@
     }
 }
 
-@keyframes pulse {
+@keyframes sl-pulse {
 
     0%,
     100% {
@@ -458,22 +459,22 @@
     }
 }
 
-.animate-fade-in {
-    animation: fade-in var(--animation-duration-base) ease;
+.sl-animate-fade-in {
+    animation: sl-fade-in var(--animation-duration-base) ease;
 }
 
-.animate-fade-in-up {
-    animation: fade-in-up var(--animation-duration-base) ease;
+.sl-animate-fade-in-up {
+    animation: sl-fade-in-up var(--animation-duration-base) ease;
 }
 
-.animate-slide-in-right {
-    animation: slide-in-right var(--animation-duration-base) ease;
+.sl-animate-slide-in-right {
+    animation: sl-slide-in-right var(--animation-duration-base) ease;
 }
 
-.animate-scale-in {
-    animation: scale-in var(--animation-duration-base) ease;
+.sl-animate-scale-in {
+    animation: sl-scale-in var(--animation-duration-base) ease;
 }
 
-.animate-pulse {
-    animation: pulse 2s infinite;
+.sl-animate-pulse {
+    animation: sl-pulse 2s infinite;
 }

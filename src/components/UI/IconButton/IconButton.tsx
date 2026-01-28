@@ -24,9 +24,9 @@ export function IconButton({
     ...props
 }: IconButtonProps) {
     const classes = [
-        'icon-btn',
-        size === 'lg' ? 'icon-btn-lg' : '',
-        enlargeHitbox ? 'icon-btn-hitbox' : '',
+        'sl-icon-btn',
+        size === 'lg' ? 'sl-icon-btn-lg' : '',
+        enlargeHitbox ? 'sl-icon-btn-hitbox' : '',
         className,
     ]
         .filter(Boolean)

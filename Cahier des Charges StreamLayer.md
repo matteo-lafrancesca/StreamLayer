@@ -247,3 +247,6 @@ Paramètres principaux :
 - Bug barre de son laisse des points gris 
 - Chargement pochette lent
 - Musique ne se lance jamais de temps en temps
+
+- Progress Bar ne fonctionne pas bien sur BJ
+- La police change en fonction du site 

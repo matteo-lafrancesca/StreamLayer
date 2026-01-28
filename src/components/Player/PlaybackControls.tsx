@@ -25,10 +25,10 @@ export function PlaybackControls({
             repeat: PLAYER_SIZES.MOBILE.ICON_SMALL
         }
         : {
-            shuffle: PLAYER_SIZES.DESKTOP.ICON_SMALL,
-            skip: PLAYER_SIZES.DESKTOP.ICON_LARGE,
-            play: PLAYER_SIZES.DESKTOP.PLAY_BUTTON,
-            repeat: PLAYER_SIZES.DESKTOP.ICON_SMALL
+            shuffle: 18, // Standard small (was 20)
+            skip: 20,    // Subtle increase (was 22)
+            play: 24,    // Distinct but not huge (was 26)
+            repeat: 18   // Standard small (was 20)
         };
 
     return (

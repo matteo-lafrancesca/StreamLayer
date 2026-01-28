@@ -33,7 +33,8 @@
 }
 
 .playIcon {
-    display: none;
+    display: none !important;
+    /* Force hide by default to prevent valid global overrides */
     width: 16px;
     height: 16px;
     color: var(--text-primary);
