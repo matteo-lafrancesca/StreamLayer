@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 import { getTrackStreamUrl } from '@services/api/tracks';
 import { tokenManager } from '@services/tokenManager';
+import { appendAuthToUrl } from '@utils/hls';
 
 interface UseHlsLoaderProps {
     trackId: number | null;
@@ -81,10 +82,11 @@ export function useHlsLoader({
                 const hls = new Hls({
                     enableWorker: true,
                     lowLatencyMode: false,
+
+                    // ... inside useHlsLoader ...
                     xhrSetup: (xhr, url) => {
                         if (accessToken) {
-                            const separator = url.includes('?') ? '&' : '?';
-                            const urlWithAuth = `${url}${separator}authorization=${encodeURIComponent(accessToken)}`;
+                            const urlWithAuth = appendAuthToUrl(url, accessToken);
                             xhr.open('GET', urlWithAuth, true);
                         }
                     },

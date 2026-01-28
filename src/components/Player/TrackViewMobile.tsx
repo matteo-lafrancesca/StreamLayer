@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { AuthenticatedImage } from './AuthenticatedImage';
 import { ScrollingText } from './ScrollingText';
@@ -9,36 +10,40 @@ import { IconButton } from '@components/UI';
 import { ListMusic, ListVideo } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/TrackViewMobile.module.css';
-import type { Track } from '@types/track';
+import type { Track } from '@definitions/track';
 
 /**
  * Animated Cover Component
  * Handles the transition between two covers.
  */
-function AnimatedCover({ track, direction }: { track: Track | null, direction: 'next' | 'prev' | null }) {
+function AnimatedCover({ track, direction, onAnimationEnd }: { track: Track | null, direction: 'next' | 'prev' | null, onAnimationEnd?: () => void }) {
     const [displayTrack, setDisplayTrack] = useState<Track | null>(track);
     const [prevTrack, setPrevTrack] = useState<Track | null>(null);
     const [animating, setAnimating] = useState(false);
     const timeoutRef = useRef<number | null>(null);
 
-    // Sync prop changes to state for animation
-    useEffect(() => {
-        if (track?.id !== displayTrack?.id) {
-            if (direction) {
-                setPrevTrack(displayTrack);
-                setDisplayTrack(track);
-                setAnimating(true);
-
-                if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                timeoutRef.current = window.setTimeout(() => {
-                    setAnimating(false);
-                    setPrevTrack(null);
-                }, 300);
-            } else {
-                setDisplayTrack(track); // No animation if no direction (init)
-            }
+    // 1. Derived State: Detect change and update state immediately (during render)
+    if (track?.id !== displayTrack?.id) {
+        if (direction) {
+            setPrevTrack(displayTrack);
+            setDisplayTrack(track);
+            setAnimating(true);
+        } else {
+            setDisplayTrack(track);
         }
-    }, [track, direction]);
+    }
+
+    // 2. Effect: Handle animation cleanup side-effect
+    useEffect(() => {
+        if (animating) {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = window.setTimeout(() => {
+                setAnimating(false);
+                setPrevTrack(null);
+                if (onAnimationEnd) onAnimationEnd();
+            }, 300);
+        }
+    }, [animating, onAnimationEnd]);
 
     // Cleanup
     useEffect(() => {
@@ -93,11 +98,14 @@ export function TrackViewMobile() {
         isPlaying,
         setIsPlaying,
         playbackControls,
+        queue // Access queue
+    } = usePlayer();
+
+    const {
         setIsSeeking,
         setCurrentView,
         selectedPlaylist,
-        queue // Access queue
-    } = usePlayer();
+    } = usePlayerUI();
 
     // Swipe Logic
     const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | null>(null);
@@ -120,6 +128,21 @@ export function TrackViewMobile() {
 
     const handleTouchMove = (e: React.TouchEvent) => {
         touchEnd.current = e.targetTouches[0].clientX;
+    };
+
+    // Handlers for button clicks
+    const handlePrevious = () => {
+        setSlideDirection('prev');
+        playbackControls.onPrevious();
+    };
+
+    const handleNext = () => {
+        setSlideDirection('next');
+        playbackControls.onNext();
+    };
+
+    const handleAnimationEnd = () => {
+        setSlideDirection(null);
     };
 
     const handleTouchEnd = () => {
@@ -166,6 +189,7 @@ export function TrackViewMobile() {
                     <AnimatedCover
                         track={optimisticTrack || playingTrack}
                         direction={slideDirection}
+                        onAnimationEnd={handleAnimationEnd}
                     />
                 </div>
 
@@ -197,8 +221,8 @@ export function TrackViewMobile() {
                         isPlaying={isPlaying}
                         onPlayPause={() => setIsPlaying(!isPlaying)}
                         onShuffle={playbackControls.onShuffle}
-                        onPrevious={playbackControls.onPrevious}
-                        onNext={playbackControls.onNext}
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
                         onRepeat={playbackControls.onRepeat}
                         variant="mobile"
                     />

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { useAuth } from '@context/AuthContext';
 import { fetchAlbumCover, type CoverSize } from '@services/api/covers';
 import { useDebouncedImage } from './useDebouncedImage';
 
@@ -11,7 +11,7 @@ export function useAlbumCover(
     albumId: number | null | undefined,
     size: CoverSize = 'm'
 ): string | null {
-    const { accessToken } = usePlayer();
+    const { accessToken } = useAuth();
 
     // Prepare dependencies for the hook
     const shouldLoad = !!albumId && !!accessToken;

@@ -1,4 +1,5 @@
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { IconButton } from '@components/UI';
 import { Play, Pause, Maximize2 } from 'lucide-react';
@@ -12,9 +13,9 @@ export function CompactMediaBar() {
     const {
         playingTrack,
         isPlaying,
-        setIsPlaying,
-        setIsCompact
+        setIsPlaying
     } = usePlayer();
+    const { setIsCompact } = usePlayerUI();
 
     return (
         <div className={styles.compactMediaBar}>

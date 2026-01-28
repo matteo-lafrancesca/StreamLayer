@@ -11,16 +11,13 @@ interface FetchOptions extends RequestInit {
  * Handles base URL, auth headers, and JSON parsing.
  */
 
-export async function fetchJson<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+export async function apiFetch(endpoint: string, options: FetchOptions = {}): Promise<Response> {
     const { accessToken, ...customOptions } = options;
 
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        .../* @ts-ignore HeadersInit compatibility */ customOptions.headers as Record<string, string>,
+        ...customOptions.headers as Record<string, string>,
     };
 
-    // Use passed accessToken, or fall back to tokenManager if not provided?
-    // Usually we respect the passed one, but if we retry, we override.
     let currentToken = accessToken;
 
     if (currentToken) {
@@ -54,6 +51,17 @@ export async function fetchJson<T>(endpoint: string, options: FetchOptions = {})
             throw error;
         }
     }
+
+    return response;
+}
+
+export async function fetchJson<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers as Record<string, string>,
+    };
+
+    const response = await apiFetch(endpoint, { ...options, headers });
 
     if (!response.ok) {
         throw new Error(`API Error (${response.status}): ${response.statusText}`);

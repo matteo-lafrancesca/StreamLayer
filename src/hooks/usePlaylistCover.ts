@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { useAuth } from '@context/AuthContext';
 import { fetchPlaylistCover, type CoverSize } from '@services/api/covers';
 import { useDebouncedImage } from './useDebouncedImage';
 
@@ -11,7 +11,7 @@ export function usePlaylistCover(
     playlistId: number | null | undefined,
     size: CoverSize = 'm'
 ): string | null {
-    const { accessToken } = usePlayer();
+    const { accessToken } = useAuth();
 
     // Prepare dependencies
     const shouldLoad = !!playlistId && !!accessToken;

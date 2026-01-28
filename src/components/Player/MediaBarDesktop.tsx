@@ -1,4 +1,5 @@
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { useMediaBarNavigation } from '@hooks/useMediaBarNavigation';
 import { useCompactMode } from '@hooks/useCompactMode';
 import { useAlbumCover } from '@hooks/useAlbumCover';
@@ -24,11 +25,14 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         volume,
         setVolume,
         playbackControls,
+        playingTrack,
+    } = usePlayer();
+
+    const {
         setIsSeeking,
         selectedPlaylist,
         currentView,
-        playingTrack,
-    } = usePlayer();
+    } = usePlayerUI();
 
     // Extract navigation and compact mode logic to hooks
     const { handleOpenPlaylist, handleOpenQueue } = useMediaBarNavigation(isExpanded, onExpandToggle);

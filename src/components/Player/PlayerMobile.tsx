@@ -4,7 +4,7 @@ import { ViewRenderer } from './ViewRenderer';
 import { ExpandedPlayerHeaderMobile } from './ExpandedPlayerHeaderMobile';
 import { BottomSheet } from './BottomSheet';
 import { ProgressSlider } from './ProgressSlider';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
 import { MOBILE_PLAYER_STYLES } from '@constants/mobilePlayerStyles';
 import sharedStyles from '@styles/PlayerShared.module.css';
@@ -15,7 +15,7 @@ import styles from '@styles/PlayerMobile.module.css';
  * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay.
  */
 export function PlayerMobile() {
-    const { currentView, setCurrentView, selectedPlaylist } = usePlayer();
+    const { currentView, setCurrentView, selectedPlaylist } = usePlayerUI();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';

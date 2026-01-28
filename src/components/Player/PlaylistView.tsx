@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { usePlayer } from '@context/PlayerContext';
+import { useAuth } from '@context/AuthContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
 import { usePreloadPlaylistImages } from '@hooks/usePreloadPlaylistImages';
 import { PlaylistHeader } from './PlaylistHeader';
@@ -8,7 +10,9 @@ import { PlaylistTrackRow } from './PlaylistTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function PlaylistView() {
-    const { selectedPlaylist, playTrackFromPlaylist, playbackControls, playingTrack, isPlaying, setIsPlaying, setCurrentView, setSelectedPlaylist: resetSelectedPlaylist, accessToken } = usePlayer();
+    const { playTrackFromPlaylist, playbackControls, playingTrack, isPlaying, setIsPlaying } = usePlayer();
+    const { selectedPlaylist, setCurrentView, setSelectedPlaylist: resetSelectedPlaylist } = usePlayerUI();
+    const { accessToken } = useAuth();
     const { tracks, error } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
 
     // Extract unique album IDs for preloading

@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { useCallback, useContext } from 'react';
+import { AuthContext } from '@context/AuthContext';
 import { refreshTokens } from '@services/api/auth';
 
 /**
@@ -7,15 +7,18 @@ import { refreshTokens } from '@services/api/auth';
  * @param providedAccessToken - Optional access token to avoid circular dependency
  */
 export function useApi(providedAccessToken?: string | null) {
-    // Only call usePlayer if accessToken is not provided (avoid circular dependency)
-    const playerContext = providedAccessToken === undefined ? usePlayer() : null;
+    // Always call local context hook to respect Rules of Hooks
+    // usage of useContext(AuthContext) allows this access to be safe (returns undefined) 
+    // even if outside the provider, preventing crashes when providedAccessToken is used.
+    const authContext = useContext(AuthContext);
+
     const {
         projectId = '',
         accessToken: contextAccessToken = null,
         refreshToken = null,
         setAccessToken = () => { },
         setRefreshToken = () => { }
-    } = playerContext || {};
+    } = (providedAccessToken === undefined ? authContext : {}) || {};
 
     const accessToken = providedAccessToken ?? contextAccessToken;
 

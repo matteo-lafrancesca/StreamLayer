@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { AuthContext } from '@context/AuthContext';
 import { useApi } from './useApi';
+import { persistentCache } from '../cache/PersistentCache';
 
 interface UseDataFetcherOptions<T> {
     fetcher: (token: string) => Promise<T>;
@@ -29,9 +30,10 @@ export function useDataFetcher<T>({
     inFlightMap,
     accessToken: providedAccessToken,
 }: UseDataFetcherOptions<T>): UseDataFetcherResult<T> {
-    // Only call usePlayer if accessToken is not provided (avoid circular dependency)
-    const playerContext = providedAccessToken === undefined ? usePlayer() : null;
-    const accessToken = providedAccessToken ?? playerContext?.accessToken ?? null;
+    // Always call context to respect Rules of Hooks
+    // usage of useContext(AuthContext) is safe here.
+    const authContext = useContext(AuthContext);
+    const accessToken = providedAccessToken ?? authContext?.accessToken ?? null;
     const { authenticatedCall } = useApi(providedAccessToken);
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(enabled);
@@ -51,7 +53,7 @@ export function useDataFetcher<T>({
             return;
         }
 
-        // 1. Immediate cache check
+        // 1. Immediate cache check (Memory)
         if (cacheKey && cacheMap) {
             const cached = cacheMap.get(cacheKey);
             if (cached) {
@@ -69,7 +71,6 @@ export function useDataFetcher<T>({
             inFlightMap.get(cacheKey)!
                 .then((result) => {
                     setData(result);
-                    // Update cache if necessary (in case primary fetcher didn't)
                     if (cacheMap && !cacheMap.has(cacheKey)) {
                         cacheMap.set(cacheKey, result);
                     }
@@ -83,35 +84,66 @@ export function useDataFetcher<T>({
             return;
         }
 
-        // 3. Launch new request
-        const fetchPromise = authenticatedCall(async (token) => {
-            return await fetcherRef.current(token);
-        });
+        // 3. Persistent Cache + Network Strategy
+        const loadData = async () => {
+            // A. Check Persistent Cache (Disk)
+            if (cacheKey) {
+                try {
+                    const storedData = await persistentCache.get<T>('data', String(cacheKey));
+                    if (storedData) {
+                        // Found in disk!
+                        setData(storedData);
+                        setLoading(false); // Stop loading immediately
 
-        // Register in in-flight map
-        if (cacheKey && inFlightMap) {
-            inFlightMap.set(cacheKey, fetchPromise);
-        }
+                        // Hydrate Memory Cache
+                        if (cacheMap) cacheMap.set(cacheKey, storedData);
 
-        fetchPromise
-            .then((result) => {
-                setData(result);
-                // Cache result
-                if (cacheKey && cacheMap) {
-                    cacheMap.set(cacheKey, result);
+                        // Optional: Background revalidation could go here
+                        return;
+                    }
+                } catch (err) {
+                    console.warn(`[DataFetcher] Persistent cache error:`, err);
                 }
-            })
-            .catch((err) => {
-                console.error('[DataFetcher] Error:', err);
-                setError(err instanceof Error ? err : new Error('Unknown error'));
-            })
-            .finally(() => {
-                // Cleanup in-flight map
-                if (cacheKey && inFlightMap) {
-                    inFlightMap.delete(cacheKey);
-                }
-                setLoading(false);
+            }
+
+            // B. Launch Network Request
+            const fetchPromise = authenticatedCall(async (token) => {
+                return await fetcherRef.current(token);
             });
+
+            // Register in in-flight map
+            if (cacheKey && inFlightMap) {
+                inFlightMap.set(cacheKey, fetchPromise);
+            }
+
+            fetchPromise
+                .then((result) => {
+                    setData(result);
+                    // Cache result (Memory)
+                    if (cacheKey && cacheMap) {
+                        cacheMap.set(cacheKey, result);
+                    }
+                    // Cache result (Disk)
+                    if (cacheKey) {
+                        persistentCache.set('data', String(cacheKey), result).catch(err => {
+                            console.warn(`[DataFetcher] Failed to persist ${cacheKey}:`, err);
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.error('[DataFetcher] Error:', err);
+                    setError(err instanceof Error ? err : new Error('Unknown error'));
+                })
+                .finally(() => {
+                    if (cacheKey && inFlightMap) {
+                        inFlightMap.delete(cacheKey);
+                    }
+                    setLoading(false);
+                });
+        };
+
+        loadData();
+
     }, [accessToken, authenticatedCall, cacheKey, enabled, cacheMap, inFlightMap]);
 
     return { data, loading, error };

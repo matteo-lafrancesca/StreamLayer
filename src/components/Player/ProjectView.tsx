@@ -1,4 +1,5 @@
-import { usePlayer } from '@context/PlayerContext';
+import { useAuth } from '@context/AuthContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlaylists } from '@hooks/usePlaylists';
 import { getPlaylistDisplayInfo } from '@utils/playlist';
 import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
@@ -10,7 +11,8 @@ interface ProjectViewProps {
 }
 
 export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
-    const { projectId, setSelectedPlaylist, isExpanded } = usePlayer();
+    const { projectId } = useAuth();
+    const { setSelectedPlaylist, isExpanded } = usePlayerUI();
     const { playlists, loading, error } = usePlaylists({
         projectId,
         autoRefresh: true,

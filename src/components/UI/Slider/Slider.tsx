@@ -39,11 +39,12 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
 
     // Sync local state with props, UNLESS user is dragging
     // Prevents global timer from jumping cursor during interaction
-    useEffect(() => {
-        if (!isDragging) {
-            setLocalValue(value);
-        }
-    }, [value, isDragging]);
+    // Sync local state with props, UNLESS user is dragging
+    // Prevents global timer from jumping cursor during interaction
+    // "Update State During Render" pattern to avoid double-render
+    if (!isDragging && localValue !== value) {
+        setLocalValue(value);
+    }
 
     const fillClasses = [styles.sliderFill, variant === 'spotify' ? styles.spotify : '', variant === 'thin' ? styles.thin : '']
         .filter(Boolean)

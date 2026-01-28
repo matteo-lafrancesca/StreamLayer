@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 
 /**
  * Custom hook for MediaBar navigation logic
@@ -10,7 +11,8 @@ import { usePlayer } from '@context/PlayerContext';
  * @returns Navigation handlers for playlist and queue
  */
 export function useMediaBarNavigation(isExpanded: boolean, onExpandToggle: () => void) {
-    const { currentView, setCurrentView, selectedPlaylist, playingFromPlaylist, setSelectedPlaylist } = usePlayer();
+    const { currentView, setCurrentView, selectedPlaylist, setSelectedPlaylist } = usePlayerUI();
+    const { playingFromPlaylist } = usePlayer();
 
     /**
      * Handles opening the playlist/project view

@@ -1,3 +1,4 @@
+import { apiFetch } from './client';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export type CoverSize = 's' | 'm' | 'l';
@@ -54,10 +55,8 @@ async function fetchCoverWithDeduplication(
         return inFlightRequests.get(key)!;
     }
 
-    const promise = fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-        },
+    const promise = apiFetch(url, {
+        accessToken,
         // Important: fetch in 'cors' mode if needed (default usually fine)
     })
         .then(async (response) => {

@@ -30,8 +30,18 @@ export function useAudioPlayer({
     onEnded,
     onError,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(() => {
+        const audio = new Audio();
+        audio.preload = 'metadata';
+        return audio;
+    });
+
+    const audioRef = useRef<HTMLAudioElement | null>(audioElement);
+    // Ensure ref is always in sync (though state is stable here)
+    if (audioRef.current !== audioElement) {
+        audioRef.current = audioElement;
+    }
+
     const bufferingTimeoutRef = useRef<number | null>(null); // Timeout for stalled buffering
     const BUFFERING_TIMEOUT = 10000; // 10 seconds max buffering
 
@@ -39,21 +49,18 @@ export function useAudioPlayer({
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
 
-    // Initialize audio element once
+    // Cleanup audio element on unmount
     useEffect(() => {
-        const audio = new Audio();
-        audio.preload = 'metadata';
-        audioRef.current = audio;
-        setAudioElement(audio);
-
         return () => {
-            audio.pause();
-            audio.removeAttribute('src'); // Avoids loading current page as access token
-            audio.load(); // Reset element
+            if (audioElement) {
+                audioElement.pause();
+                audioElement.removeAttribute('src'); // Avoids loading current page as access token
+                audioElement.load(); // Reset element
+            }
             audioRef.current = null;
-            setAudioElement(null);
+            // setAudioElement(null); // No need to set state on unmount
         };
-    }, []);
+    }, []); // Empty dep array as audioElement is stable from creation
 
     // Setup event listeners on audio element
     useEffect(() => {

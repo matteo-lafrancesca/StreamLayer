@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getPlaylistTracks } from '@services/api/playlists';
 import type { Track } from '@definitions/track';
+import { persistentCache } from '../cache/PersistentCache';
 
 const BATCH_SIZE = 10; // Batch size: 10 tracks
 
@@ -45,7 +46,7 @@ export function usePlaylistTracksLazy(
             return;
         }
 
-        // Check full cache
+        // 1. Check Memory Cache
         const cached = fullTracksCache.get(playlistId);
         if (cached) {
             setTracks(cached);
@@ -90,13 +91,13 @@ export function usePlaylistTracksLazy(
                 const actualTotal = expectedTotal ?? response.count_item;
 
                 if (isFirst) {
-                    console.log('[LazyLoad] First batch loaded:', response.items.length, '/', actualTotal);
+                    // console.log('[LazyLoad] First batch loaded:', response.items.length, '/', actualTotal);
                     setTracks(response.items);
                     setTotalCount(actualTotal);
                     setLoading(false);
                     currentOffsetRef.current = response.items.length;
                 } else {
-                    console.log('[LazyLoad] Batch loaded:', response.items.length, 'tracks (total:', offset + response.items.length, '/', actualTotal, ')');
+                    // console.log('[LazyLoad] Batch loaded:', response.items.length, 'tracks (total:', offset + response.items.length, '/', actualTotal, ')');
                     setTracks(prevTracks => {
                         const newTracks = prevTracks ? [...prevTracks, ...response.items] : response.items;
                         currentOffsetRef.current = newTracks.length;
@@ -104,6 +105,7 @@ export function usePlaylistTracksLazy(
                         // Cache if all tracks loaded
                         if (newTracks.length >= actualTotal) {
                             fullTracksCache.set(playlistId, newTracks);
+                            persistentCache.set('data', `playlist-tracks-${playlistId}`, newTracks).catch(console.warn);
                             console.log('[LazyLoad] All tracks loaded and cached');
                         }
 
@@ -137,8 +139,28 @@ export function usePlaylistTracksLazy(
             }
         };
 
-        // Start loading
-        loadBatch(0, true);
+        // 2. Initial Async Check (Disk) then Load
+        const init = async () => {
+            try {
+                const storedTracks = await persistentCache.get<Track[]>('data', `playlist-tracks-${playlistId}`);
+                if (storedTracks) {
+                    // Found in Disk
+                    if (!isMounted.current) return;
+                    setTracks(storedTracks);
+                    setTotalCount(storedTracks.length);
+                    setLoading(false);
+                    setIsLoadingMore(false);
+                    fullTracksCache.set(playlistId, storedTracks); // Hydrate memory
+                    loadingRef.current = false;
+                    return;
+                }
+            } catch (e) { console.warn(e); }
+
+            // Not found, start batch loading
+            loadBatch(0, true);
+        };
+
+        init();
 
         return () => {
             isMounted.current = false;

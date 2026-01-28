@@ -3,7 +3,7 @@ import { CompactMediaBar } from './CompactMediaBar';
 import { ViewRenderer } from './ViewRenderer';
 import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
 import { ProgressSlider } from './ProgressSlider';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import sharedStyles from '@styles/PlayerShared.module.css';
@@ -14,7 +14,7 @@ import styles from '@styles/PlayerDesktop.module.css';
  * Full-featured player with expandable content area.
  */
 export function PlayerDesktop() {
-    const { currentView, setCurrentView, selectedPlaylist, isCompact } = usePlayer();
+    const { currentView, setCurrentView, selectedPlaylist, isCompact } = usePlayerUI();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     return (

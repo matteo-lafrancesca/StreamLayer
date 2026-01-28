@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { QueueTrackRow } from './QueueTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function QueueView() {
-    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, selectedPlaylist, playingFromPlaylist } = usePlayer();
+    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist } = usePlayer();
+    const { selectedPlaylist } = usePlayerUI();
 
     // Separate current track from upcoming tracks
     const { currentTrack, upcomingTracks } = useMemo(() => {

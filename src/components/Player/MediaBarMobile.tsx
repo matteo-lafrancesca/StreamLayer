@@ -1,4 +1,5 @@
 import { usePlayer } from '@context/PlayerContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
 import { useAlbumCover } from '@hooks/useAlbumCover';
 import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
@@ -16,13 +17,17 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     const {
         isPlaying,
         setIsPlaying,
-        setCurrentView,
         playingTrack,
     } = usePlayer();
+    const { setCurrentView, isExpanded, currentView } = usePlayerUI();
 
     const handleExpand = () => {
-        setCurrentView('track'); // Set to track view before expanding
-        onExpandToggle();
+        if (isExpanded && currentView !== 'track') {
+            setCurrentView('track');
+        } else {
+            setCurrentView('track'); // Set to track view before expanding
+            onExpandToggle();
+        }
     };
 
     // Check if cover is loaded

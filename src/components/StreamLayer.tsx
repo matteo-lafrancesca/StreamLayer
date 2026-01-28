@@ -1,5 +1,7 @@
 import { type ReactNode } from 'react';
 import { PlayerProvider } from '@context/PlayerContext';
+import { AuthProvider } from '@context/AuthContext';
+import { PlayerUIProvider } from '@context/PlayerUIContext';
 import { Player } from '@components/Player/Player';
 
 export interface StreamLayerProps {
@@ -16,9 +18,13 @@ export interface StreamLayerProps {
  */
 export function StreamLayer({ projectId, children }: StreamLayerProps) {
     return (
-        <PlayerProvider projectId={projectId}>
-            {children}
-            <Player />
-        </PlayerProvider>
+        <AuthProvider projectId={projectId}>
+            <PlayerUIProvider>
+                <PlayerProvider>
+                    {children}
+                    <Player />
+                </PlayerProvider>
+            </PlayerUIProvider>
+        </AuthProvider>
     );
 }

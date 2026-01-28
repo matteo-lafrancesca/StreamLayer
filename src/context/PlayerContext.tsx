@@ -3,9 +3,11 @@ import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 import { usePlaybackControls } from '@hooks/usePlaybackControls';
 import { useAudioPlayer } from '@hooks/useAudioPlayer';
-import { useAuthTokens } from '@hooks/useAuthTokens';
 import { useQueueManager } from '@hooks/useQueueManager';
 import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
+import { useTrackPreloader } from '@hooks/useTrackPreloader';
+import { useAuth } from './AuthContext';
+import { usePlayerUI } from './PlayerUIContext';
 
 interface PlaybackControls {
     isShuffled: boolean;
@@ -17,20 +19,13 @@ interface PlaybackControls {
 }
 
 interface PlayerContextType {
-    // Auth state
-    projectId: string;
-    accessToken: string | null;
-    setAccessToken: (token: string | null) => void;
-    refreshToken: string | null;
-    setRefreshToken: (token: string | null) => void;
-
     // Playback state
     // Audio Ref for direct access
     audioRef: RefObject<HTMLAudioElement | null>;
 
     // Playback state
     playingTrack: Track | null;
-    setPlayingTrack: (track: Track | null) => void;
+
     playTrackFromPlaylist: (trackIndex: number, tracks?: Track[]) => void;
     isPlaying: boolean;
     setIsPlaying: (isPlaying: boolean) => void;
@@ -41,29 +36,11 @@ interface PlayerContextType {
     duration: number;
     isBuffering: boolean;
 
-    // UI state
-    selectedPlaylist: Playlist | null;
-    setSelectedPlaylist: (playlist: Playlist | null) => void;
+    // Playlist logic (queue generation source)
     playingFromPlaylist: Playlist | null;
-    selectedTrack: Track | null;
-    setSelectedTrack: (track: Track | null) => void;
-
-    // Player expansion state
-    isExpanded: boolean;
-    setIsExpanded: (isExpanded: boolean) => void;
-    currentView: 'playlist' | 'project' | 'queue' | 'track';
-    setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
-
-    // Player compact mode state
-    isCompact: boolean;
-    setIsCompact: (isCompact: boolean) => void;
 
     // Queue state
     queue: Track[];
-
-    // Seek state
-    isSeeking: boolean;
-    setIsSeeking: (isSeeking: boolean) => void;
 
     // Playback controls
     playbackControls: PlaybackControls;
@@ -72,27 +49,13 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 interface PlayerProviderProps {
-    projectId: string;
     children: ReactNode;
 }
 
-export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
-    // Auth tokens
-    const { accessToken, refreshToken, setAccessToken, setRefreshToken } = useAuthTokens({ projectId });
-
-    // Playback state
-    const [playingTrack, setPlayingTrack] = useState<Track | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(70);
-
-    // UI state
-    const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
-    const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);
-    const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [currentView, setCurrentView] = useState<'playlist' | 'project' | 'queue' | 'track'>('project');
-    const [isSeeking, setIsSeeking] = useState(false);
-    const [isCompact, setIsCompact] = useState(false);
+export function PlayerProvider({ children }: PlayerProviderProps) {
+    // Consume other contexts
+    const { accessToken } = useAuth();
+    const { selectedPlaylist, selectedTrack } = usePlayerUI();
 
     // Load playlist tracks (pass accessToken to avoid circular dependency)
     const { tracks: playlistTracks } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
@@ -102,6 +65,18 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         tracks: playlistTracks,
         initialTrack: selectedTrack,
     });
+
+    // Playback state
+    // Derived directly from QueueManager to avoid state duplication and sync loops
+    const playingTrack = queueManager.currentTrack;
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [volume, setVolume] = useState(70);
+
+    // Queue generation state
+    const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);
+
+    // Session Preloader (Preload next 5 tracks)
+    useTrackPreloader(queueManager.queue, queueManager.currentIndex, accessToken);
 
     // Audio player with HLS support
     const audioPlayer = useAudioPlayer({
@@ -134,15 +109,7 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         },
     });
 
-    // Sync queue track to playing track (one-way: queue is the source of truth)
-    useEffect(() => {
-        if (queueManager.currentTrack && queueManager.currentTrack.id !== playingTrack?.id) {
-            setPlayingTrack(queueManager.currentTrack);
-        } else if (!queueManager.currentTrack && playingTrack) {
-            // If queue is cleared, stop immediately
-            setPlayingTrack(null);
-        }
-    }, [queueManager.currentTrack, playingTrack]);
+
 
     // Playback controls (connected to queue manager)
     const playbackControlsHook = usePlaybackControls({
@@ -218,41 +185,36 @@ export function PlayerProvider({ projectId, children }: PlayerProviderProps) {
         onRepeat: playbackControlsHook.handleRepeat,
     }), [playbackControlsHook]);
 
+
+    const contextValue = useMemo(() => ({
+        playingTrack,
+
+        playTrackFromPlaylist,
+        isPlaying,
+        setIsPlaying,
+        volume,
+        setVolume,
+        audioRef: audioPlayer.audioRef,
+        duration: audioPlayer.duration,
+        isBuffering: audioPlayer.isBuffering,
+        queue: queueManager.queue,
+        playbackControls,
+        playingFromPlaylist,
+    }), [
+        playingTrack,
+        playTrackFromPlaylist,
+        isPlaying,
+        volume,
+        audioPlayer.audioRef,
+        audioPlayer.duration,
+        audioPlayer.isBuffering,
+        queueManager.queue,
+        playbackControls,
+        playingFromPlaylist
+    ]);
+
     return (
-        <PlayerContext.Provider
-            value={{
-                projectId,
-                accessToken,
-                setAccessToken,
-                refreshToken,
-                setRefreshToken,
-                playingTrack,
-                setPlayingTrack,
-                playTrackFromPlaylist,
-                selectedPlaylist,
-                setSelectedPlaylist,
-                playingFromPlaylist,
-                selectedTrack,
-                setSelectedTrack,
-                isPlaying,
-                setIsPlaying,
-                volume,
-                setVolume,
-                audioRef: audioPlayer.audioRef,
-                duration: audioPlayer.duration,
-                isBuffering: audioPlayer.isBuffering,
-                isExpanded,
-                setIsExpanded,
-                currentView,
-                setCurrentView,
-                queue: queueManager.queue,
-                playbackControls,
-                isSeeking,
-                setIsSeeking,
-                isCompact,
-                setIsCompact,
-            }}
-        >
+        <PlayerContext.Provider value={contextValue}>
             {children}
         </PlayerContext.Provider>
     );

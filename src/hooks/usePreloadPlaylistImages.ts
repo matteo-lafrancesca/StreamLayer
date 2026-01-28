@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { useAuth } from '@context/AuthContext';
 import { fetchAlbumCover, fetchPlaylistCover, type CoverSize } from '@services/api/covers';
 import { hasCachedImage, setCachedImage } from '../cache/imageCache';
+import { persistentCache } from '../cache/PersistentCache';
 
 const PRIORITY_LIMIT = 8; // Number of albums to load with priority
 
@@ -11,9 +12,9 @@ export function usePreloadPlaylistImages(
     playlistCoverSize: CoverSize = 'l',
     albumCoverSize: CoverSize = 's'
 ): { loading: boolean; error: Error | null } {
-    const { accessToken } = usePlayer();
+    const { accessToken } = useAuth();
 
-    // Calculate initial state: only block if playlist or first 8 albums missing
+    // Calculate initial state: only block if playlist or first 8 albums missing from MEMORY
     const [loading, setLoading] = useState(() => {
         if (!accessToken || !playlistId || albumIds.length === 0) return true;
 
@@ -35,55 +36,70 @@ export function usePreloadPlaylistImages(
         }
 
         const playlistCacheKey = `playlist-${playlistId}-${playlistCoverSize}`;
+
+        // Helper to ensure image is in memory (Disk -> Network -> Memory)
+        const ensureImageLoaded = async (key: string, fetcher: () => Promise<string>) => {
+            if (hasCachedImage(key)) return;
+
+            // 1. Check Disk
+            const storedBlob = await persistentCache.get<Blob>('images', key);
+            if (storedBlob) {
+                setCachedImage(key, URL.createObjectURL(storedBlob));
+                return;
+            }
+
+            // 2. Fetch Network
+            const url = await fetcher();
+
+            // 3. Persist
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                await persistentCache.set('images', key, blob);
+            } catch (err) {
+                console.warn(`[usePreload] Failed to persist ${key}:`, err);
+            }
+
+            setCachedImage(key, url);
+        };
+
         const priorityPromises: Promise<void>[] = [];
 
         // 1. PRIORITY HANDLING (Playlist + first 8 albums)
 
         // Load playlist cover if needed
-        if (!hasCachedImage(playlistCacheKey)) {
-            priorityPromises.push(
-                fetchPlaylistCover(playlistId, playlistCoverSize, accessToken)
-                    .then((url) => setCachedImage(playlistCacheKey, url))
-                    .catch((err) => console.error(`Playlist error:`, err))
-            );
-        }
+        priorityPromises.push(
+            ensureImageLoaded(playlistCacheKey, () => fetchPlaylistCover(playlistId, playlistCoverSize, accessToken))
+                .catch((err) => console.error(`Playlist load error:`, err))
+        );
 
-        // Identify missing priority albums
+        // Identify priority albums
         const priorityIds = albumIds.slice(0, PRIORITY_LIMIT);
         priorityIds.forEach((albumId) => {
             const key = `album-${albumId}-${albumCoverSize}`;
-            if (!hasCachedImage(key)) {
-                priorityPromises.push(
-                    fetchAlbumCover(albumId, albumCoverSize, accessToken)
-                        .then((url) => setCachedImage(key, url))
-                        .catch((err) => console.error(`Priority album error ${albumId}:`, err))
-                );
-            }
+            priorityPromises.push(
+                ensureImageLoaded(key, () => fetchAlbumCover(albumId, albumCoverSize, accessToken))
+                    .catch((err) => console.error(`Priority album error ${albumId}:`, err))
+            );
         });
 
         // 2. REMAINING ITEMS (Background loading)
         const remainingIds = albumIds.slice(PRIORITY_LIMIT);
-        remainingIds.forEach((albumId) => {
-            const key = `album-${albumId}-${albumCoverSize}`;
-            if (!hasCachedImage(key)) {
-                // Launch fetch WITHOUT adding to priorityPromises (background)
-                // Fills cache in background without blocking UI
-                fetchAlbumCover(albumId, albumCoverSize, accessToken)
-                    .then((url) => setCachedImage(key, url))
-                    .catch(() => { }); // Silent failure for background
-            }
-        });
+
+        // Process remaining in chunks or just fire and forget (with small delay to prioritize UI)
+        setTimeout(() => {
+            remainingIds.forEach((albumId) => {
+                const key = `album-${albumId}-${albumCoverSize}`;
+                ensureImageLoaded(key, () => fetchAlbumCover(albumId, albumCoverSize, accessToken))
+                    .catch(() => { });
+            });
+        }, 500);
 
         // 3. UNBLOCK INTERFACE
-        if (priorityPromises.length === 0) {
-            setLoading(false);
-            return;
-        }
-
+        // We set loading=true initially, now wait for priority
         setLoading(true);
         setError(null);
 
-        // Wait only for priority promises
         Promise.all(priorityPromises)
             .then(() => setLoading(false))
             .catch((err) => {
