@@ -101,5 +101,6 @@
     background-color: var(--color-gray-300);
     animation: breathing 1s cubic-bezier(0.4, 0.0, 0.6, 1.0) infinite;
     border-radius: var(--radius-sm);
+    margin: var(--hitbox-padding) 0;
     height: 4px;
 }
