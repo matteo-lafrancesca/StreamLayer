@@ -2,10 +2,15 @@
 
 .mediaBarLeft {
     display: flex;
+    flex: 0 1 auto;
     align-items: center;
     gap: var(--spacing-md);
     justify-content: flex-start;
-    flex: 1;
+
+    width: 25%;
+    min-width: 0;
+    max-width: 25%;
+    flex-shrink: 1;
 }
 
 .trackInfoLarge {
@@ -13,7 +18,7 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-    max-width: 200px;
+    flex: 1;
     overflow: hidden;
 }
 
@@ -37,7 +42,7 @@
 /* Tablet Compact */
 @media (max-width: 992px) {
     .trackInfoLarge {
-        max-width: 150px;
+        flex: 1;
     }
 }
 
@@ -48,6 +53,8 @@
     .mediaBarLeft {
         flex: 1;
         min-width: 0;
+        max-width: none;
+        width: auto;
     }
 
     /* Keep same cover size as desktop */

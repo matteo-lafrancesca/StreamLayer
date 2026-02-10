@@ -56,8 +56,6 @@ export function PlayerMobile() {
                         <ExpandedPlayerHeaderMobile
                             currentView={currentView}
                             setCurrentView={setCurrentView}
-                            selectedPlaylist={selectedPlaylist}
-                            onExpandToggle={onExpandToggle}
                         />
 
                         {/* Content Area - using ViewRenderer */}

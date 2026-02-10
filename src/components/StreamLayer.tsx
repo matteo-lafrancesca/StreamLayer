@@ -3,6 +3,7 @@ import { PlayerProvider } from '@context/PlayerContext';
 import { AuthProvider } from '@context/AuthContext';
 import { PlayerUIProvider } from '@context/PlayerUIContext';
 import { Player } from '@components/Player/Player';
+import { DragDropWrapper } from '@components/DragDropWrapper';
 
 export interface StreamLayerProps {
     /** StreamLayer project ID */
@@ -22,8 +23,10 @@ export function StreamLayer({ projectId, children }: StreamLayerProps) {
             <AuthProvider projectId={projectId}>
                 <PlayerUIProvider>
                     <PlayerProvider>
-                        {children}
-                        <Player />
+                        <DragDropWrapper>
+                            {children}
+                            <Player />
+                        </DragDropWrapper>
                     </PlayerProvider>
                 </PlayerUIProvider>
             </AuthProvider>

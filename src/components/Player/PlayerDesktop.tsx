@@ -1,3 +1,5 @@
+import { IconButton } from '@components/UI';
+import { X } from 'lucide-react';
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { CompactMediaBar } from './CompactMediaBar';
 import { ViewRenderer } from './ViewRenderer';
@@ -20,12 +22,16 @@ export function PlayerDesktop() {
     return (
         <div className={styles.playerContainer}>
             <div
-                className={`${styles.player} ${isCompact ? styles.playerCompact : ''}`}
+                className={`
+                    ${styles.player} 
+                    ${isCompact ? styles.playerCompact : ''}
+                    ${currentView === 'queue' ? styles.playerTransparent : ''}
+                `}
                 style={{
                     height: isExpanded
                         ? `${PLAYER_SIZES.DESKTOP.EXPANDED_HEIGHT}px`
                         : `${PLAYER_SIZES.DESKTOP.COLLAPSED_HEIGHT}px`,
-                    width: isCompact ? `${PLAYER_SIZES.DESKTOP.COMPACT_WIDTH}px` : undefined // Undefined lets CSS handle default
+                    width: isCompact ? `${PLAYER_SIZES.DESKTOP.COMPACT_WIDTH}px` : undefined
                 }}
             >
                 {isCompact ? (
@@ -41,18 +47,36 @@ export function PlayerDesktop() {
                     <>
                         {/* Expandable Content Area */}
                         <div
-                            className={`
-                                ${sharedStyles.expandableContent} 
-                                ${isExpanded ? sharedStyles.expanded : sharedStyles.collapsed}
-                            `}
+                            className={currentView === 'queue'
+                                ? sharedStyles.queuePanel
+                                : `
+                                    ${sharedStyles.expandableContent} 
+                                    ${isExpanded ? sharedStyles.expanded : sharedStyles.collapsed}
+                                `
+                            }
                         >
-                            {/* Header */}
-                            <ExpandedPlayerHeader
-                                currentView={currentView}
-                                setCurrentView={setCurrentView}
-                                selectedPlaylist={selectedPlaylist}
-                                onExpandToggle={onExpandToggle}
-                            />
+                            {/* Queue Panel Header */}
+                            {currentView === 'queue' && (
+                                <div className={sharedStyles.queueHeader}>
+                                    <span className={sharedStyles.queueTitle}>File d'attente</span>
+                                    <IconButton
+                                        icon={<X size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
+                                        onClick={onExpandToggle}
+                                        title="Fermer la file d'attente"
+                                        enlargeHitbox
+                                    />
+                                </div>
+                            )}
+
+                            {/* Header - Hidden in Queue Mode */}
+                            {currentView !== 'queue' && (
+                                <ExpandedPlayerHeader
+                                    currentView={currentView}
+                                    setCurrentView={setCurrentView}
+                                    selectedPlaylist={selectedPlaylist}
+                                    onExpandToggle={onExpandToggle}
+                                />
+                            )}
 
                             {/* Content Area - using ViewRenderer */}
                             <div className={sharedStyles.expandableContentScroll}>
@@ -64,7 +88,11 @@ export function PlayerDesktop() {
                         </div>
 
                         {/* MediaBar - Absolutely positioned at bottom */}
-                        <div className={`${sharedStyles.mediaBarSection} ${isExpanded ? styles.borderTop : ''}`}>
+                        <div className={`
+                            ${sharedStyles.mediaBarSection} 
+                            ${isExpanded ? styles.borderTop : ''}
+                            ${currentView === 'queue' ? sharedStyles.mediaBarQueueMode : ''}
+                        `}>
                             <MediaBarDesktop
                                 isExpanded={isExpanded}
                                 onExpandToggle={onExpandToggle}

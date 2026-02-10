@@ -98,7 +98,7 @@ export function TrackViewMobile() {
         isPlaying,
         setIsPlaying,
         playbackControls,
-        queue // Access queue
+        queue
     } = usePlayer();
 
     const {

@@ -1,5 +1,5 @@
-import { IconButton } from '@components/UI';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+// import { IconButton } from '@components/UI'; // Unused
+import { ArrowLeft } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import type { Playlist } from '@definitions/playlist';
 import styles from '@styles/ExpandedPlayerHeader.module.css';
@@ -7,8 +7,8 @@ import styles from '@styles/ExpandedPlayerHeader.module.css';
 export interface ExpandedPlayerHeaderMobileProps {
     currentView: 'playlist' | 'project' | 'queue' | 'track';
     setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
-    selectedPlaylist: Playlist | null;
-    onExpandToggle: () => void;
+    // selectedPlaylist: Playlist | null; // Unused
+    // onExpandToggle: () => void; // Unused
 }
 
 /**
@@ -19,8 +19,6 @@ export interface ExpandedPlayerHeaderMobileProps {
 export function ExpandedPlayerHeaderMobile({
     currentView,
     setCurrentView,
-    selectedPlaylist,
-    onExpandToggle
 }: ExpandedPlayerHeaderMobileProps) {
     // Track view doesn't have a header (handled by BottomSheet chevron)
     if (currentView === 'track') {
@@ -40,9 +38,6 @@ export function ExpandedPlayerHeaderMobile({
                         >
                             <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
                         </button>
-                        <h2 className={styles.headerTitle}>
-                            {selectedPlaylist?.metadata.title || 'Playlist'}
-                        </h2>
                     </div>
                 );
 
@@ -56,9 +51,6 @@ export function ExpandedPlayerHeaderMobile({
                         >
                             <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
                         </button>
-                        <h2 className={styles.headerTitle}>
-                            File d'attente
-                        </h2>
                     </div>
                 );
 
@@ -73,9 +65,6 @@ export function ExpandedPlayerHeaderMobile({
                         >
                             <ArrowLeft size={PLAYER_SIZES.MOBILE.ICON_SMALL} />
                         </button>
-                        <h2 className={styles.headerTitle}>
-                            Playlists du projet
-                        </h2>
                     </div>
                 );
         }
@@ -84,16 +73,6 @@ export function ExpandedPlayerHeaderMobile({
     return (
         <div className={styles.expandedPlayerHeader}>
             {renderHeaderContent()}
-
-            {/* Close Button */}
-            <div className={styles.closeButtonWrapper}>
-                <IconButton
-                    icon={<ChevronDown size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
-                    onClick={onExpandToggle}
-                    title="Fermer le lecteur"
-                    enlargeHitbox
-                />
-            </div>
         </div>
     );
 }

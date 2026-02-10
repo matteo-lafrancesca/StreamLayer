@@ -7,37 +7,40 @@
     align-items: center;
     width: 100%;
     height: 100%;
+    cursor: pointer;
+    /* Click anywhere to expand */
+    padding: 0 var(--spacing-lg) 0 0;
 }
 
 .mediaBarCenter {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    /* Reset to perfect center */
+    /* Reverting to flex layout */
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: 4px;
     /* Very tight gap to keep bar and buttons associated */
     align-items: center;
     justify-content: center;
-    width: 50%;
-    min-width: 400px;
-    max-width: 800px;
+    max-width: 600px;
+    /* Limit max width for aesthetics */
+    min-width: 280px;
+    /* Ensure controls don't get crushed */
+    padding: 0 var(--spacing-sm);
+    /* Do not set cursor: default here to allow click-through for expand */
 }
 
 .mediaBarRight {
     display: flex;
+    flex: 0 1 auto;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--spacing-lg);
-    /* flex: 1; Removed flex */
-}
-
-.viewControls {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xl);
+    width: 25%;
+    min-width: 0;
+    max-width: 25%;
+    padding-right: 0;
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 .activeButton {

@@ -18,57 +18,31 @@ export interface ExpandedPlayerHeaderProps {
 export function ExpandedPlayerHeader({
     currentView,
     setCurrentView,
-    selectedPlaylist,
     onExpandToggle
 }: ExpandedPlayerHeaderProps) {
-    const renderHeaderContent = () => {
-        switch (currentView) {
-            case 'playlist':
-                return (
-                    <div className={styles.headerTitleRow}>
-                        <button
-                            onClick={() => setCurrentView('project')}
-                            className={styles.backButton}
-                            title="Retour aux projets"
-                        >
-                            <ArrowLeft size={PLAYER_SIZES.DESKTOP.ICON_LARGE} />
-                        </button>
-                        <h2 className={styles.headerTitle}>
-                            {selectedPlaylist?.metadata.title || 'Playlist'}
-                        </h2>
-                    </div>
-                );
-
-            case 'queue':
-                return (
-                    <div className={styles.headerTitleRow}>
-                        <h2 className={styles.headerTitle} style={{ marginLeft: 0 }}>
-                            File d'attente
-                        </h2>
-                    </div>
-                );
-
-            case 'track':
-                return null; // No header for track view
-
-            case 'project':
-            default:
-                return (
-                    <div className={styles.headerTitleRow}>
-                        <h2 className={styles.headerTitle} style={{ marginLeft: 0 }}>
-                            Playlists du projet
-                        </h2>
-                    </div>
-                );
-        }
-    };
 
     return (
         <div className={styles.expandedPlayerHeader}>
-            {renderHeaderContent()}
+            {/* Left: Back Button (only in Playlist view) */}
+            <div className={styles.leftSection}>
+                {currentView === 'playlist' && (
+                    <button
+                        onClick={() => setCurrentView('project')}
+                        className={styles.backButton}
+                        title="Retour aux projets"
+                    >
+                        <ArrowLeft size={PLAYER_SIZES.DESKTOP.ICON_LARGE} />
+                    </button>
+                )}
+            </div>
 
-            {/* Close Button */}
-            <div className={styles.closeButtonWrapper}>
+            {/* Center: Segmented Control */}
+            <div className={styles.centerSection}>
+                {/* Segmented Control Removed - Views are now distinct windows */}
+            </div>
+
+            {/* Right: Close Button */}
+            <div className={styles.rightSection}>
                 <IconButton
                     icon={<ChevronDown size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                     onClick={onExpandToggle}

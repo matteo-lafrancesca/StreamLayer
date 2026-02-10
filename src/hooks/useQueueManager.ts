@@ -15,12 +15,13 @@ interface UseQueueManagerReturn {
     canPlayNext: boolean;
     canPlayPrevious: boolean;
     playNext: () => void;
-    playPrevious: (currentTime: number) => void;
+    playPrevious: () => void;
     toggleShuffle: () => void;
     toggleRepeat: () => void;
     setQueue: (tracks: Track[], startIndex?: number) => void;
     playTrackAtIndex: (index: number) => void;
     playTrackById: (trackId: number) => void;
+    reorderQueue: (oldIndex: number, newIndex: number) => void;
     queue: Track[];
 }
 
@@ -103,19 +104,14 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
     }, [currentIndex, totalTracks, repeatMode]);
 
     // Play previous track (restart if > 3s into current track)
-    const playPrevious = useCallback((currentTime: number) => {
-        // If more than 3 seconds into the track, restart it
-        if (currentTime > 3) {
-            // Caller should handle seeking to 0
-            return;
-        }
-
+    // Play previous track
+    const playPrevious = useCallback(() => {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
         } else if (repeatMode === 'all') {
             setCurrentIndex(totalTracks - 1); // Loop to end
         }
-        // If at the start and repeat is 'off', restart current track
+        // If at the start and repeat is 'off', do nothing (PlayerContext handles seek to 0 if needed)
     }, [currentIndex, totalTracks, repeatMode]);
 
     // Toggle shuffle
@@ -139,6 +135,47 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
             return newShuffled;
         });
     }, [originalTracks, currentTrack]);
+
+    // Reorder queue (for drag & drop)
+    const reorderQueue = useCallback((oldIndex: number, newIndex: number) => {
+        if (oldIndex === newIndex) return;
+
+        if (isShuffled) {
+            setShuffledTracks(prev => {
+                const newQueue = [...prev];
+                const [removed] = newQueue.splice(oldIndex, 1);
+                newQueue.splice(newIndex, 0, removed);
+
+                // Update current index if the current track moved
+                if (oldIndex === currentIndex) {
+                    setCurrentIndex(newIndex);
+                } else if (oldIndex < currentIndex && newIndex >= currentIndex) {
+                    setCurrentIndex(prevIndex => prevIndex - 1);
+                } else if (oldIndex > currentIndex && newIndex <= currentIndex) {
+                    setCurrentIndex(prevIndex => prevIndex + 1);
+                }
+
+                return newQueue;
+            });
+        } else {
+            setOriginalTracks(prev => {
+                const newQueue = [...prev];
+                const [removed] = newQueue.splice(oldIndex, 1);
+                newQueue.splice(newIndex, 0, removed);
+
+                // Update current index if the current track moved
+                if (oldIndex === currentIndex) {
+                    setCurrentIndex(newIndex);
+                } else if (oldIndex < currentIndex && newIndex >= currentIndex) {
+                    setCurrentIndex(prevIndex => prevIndex - 1);
+                } else if (oldIndex > currentIndex && newIndex <= currentIndex) {
+                    setCurrentIndex(prevIndex => prevIndex + 1);
+                }
+
+                return newQueue;
+            });
+        }
+    }, [isShuffled, currentIndex]);
 
     // Toggle repeat mode
     const toggleRepeat = useCallback(() => {
@@ -179,6 +216,7 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
         setQueue,
         playTrackAtIndex,
         playTrackById,
+        reorderQueue,
         queue: activeTrackList,
     };
 }

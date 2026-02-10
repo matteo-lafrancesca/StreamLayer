@@ -41,6 +41,7 @@ interface PlayerContextType {
 
     // Queue state
     queue: Track[];
+    reorderQueue: (oldIndex: number, newIndex: number) => void;
 
     // Playback controls
     playbackControls: PlaybackControls;
@@ -79,8 +80,12 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     useTrackPreloader(queueManager.queue, queueManager.currentIndex, accessToken);
 
     // Audio player with HLS support
+    const nextTrack = queueManager.queue[queueManager.currentIndex + 1];
+    const prevTrack = queueManager.queue[queueManager.currentIndex - 1];
     const audioPlayer = useAudioPlayer({
         trackId: playingTrack?.id ?? null,
+        nextTrackId: nextTrack?.id ?? null,
+        prevTrackId: prevTrack?.id ?? null,
         accessToken,
         volume,
         shouldPlay: isPlaying,
@@ -116,7 +121,22 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         isShuffled: queueManager.isShuffled,
         repeatMode: queueManager.repeatMode,
         onShuffle: queueManager.toggleShuffle,
-        onPrevious: () => queueManager.playPrevious(audioPlayer.audioRef.current?.currentTime || 0),
+        onPrevious: () => {
+            const currentTime = audioPlayer.audioRef.current?.currentTime || 0;
+            if (currentTime > 5) {
+                // If more than 5s, restart current track
+                audioPlayer.seek(0);
+                if (!isPlaying && playingTrack) setIsPlaying(true);
+            } else {
+                if (queueManager.canPlayPrevious) {
+                    queueManager.playPrevious();
+                } else {
+                    // If can't go back (first track) and below 5s, restart anyway
+                    audioPlayer.seek(0);
+                    if (!isPlaying && playingTrack) setIsPlaying(true);
+                }
+            }
+        },
         onNext: queueManager.playNext,
         onRepeat: queueManager.toggleRepeat,
     });
@@ -200,6 +220,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         queue: queueManager.queue,
         playbackControls,
         playingFromPlaylist,
+        reorderQueue: queueManager.reorderQueue,
     }), [
         playingTrack,
         playTrackFromPlaylist,
@@ -210,7 +231,8 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         audioPlayer.isBuffering,
         queueManager.queue,
         playbackControls,
-        playingFromPlaylist
+        playingFromPlaylist,
+        queueManager.reorderQueue
     ]);
 
     return (

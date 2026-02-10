@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { StreamLayer } from '@components/StreamLayer';
-// Styles - ORDER MATTERS!
-import '@styles/styles.css';        // 1. Reset & Base (Must be first)
-import '@styles/design-tokens.css'; // 2. Variables
-import '@styles/utilities.css';     // 3. Utility Classes
+
+import '@styles/styles.css';
+import '@styles/design-tokens.css';
+import '@styles/utilities.css';
 
 export interface StreamLayerConfig {
     projectId: string;
@@ -41,12 +41,10 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
             throw new Error(`Container element with id "${containerId}" not found`);
         }
 
-        // Cleanup existing instance if any
         if (instances.has(containerId)) {
             destroyStreamLayer(containerId);
         }
 
-        // Create root and render
         const root = ReactDOM.createRoot(container);
         instances.set(containerId, root);
 
@@ -58,12 +56,10 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
             </React.StrictMode>
         );
 
-        // Call onReady callback
         if (onReady) {
             setTimeout(onReady, 0);
         }
 
-        // Return cleanup function
         return () => destroyStreamLayer(containerId);
 
     } catch (error) {
@@ -92,22 +88,33 @@ export default {
     destroyStreamLayer
 };
 
-// AUTO-INITIALIZATION LOGIC
-// Allows usage like: <script src="..." data-project-id="34" data-container-id="my-widget"></script>
+
 if (typeof document !== 'undefined') {
     try {
-        const currentScript = document.currentScript as HTMLScriptElement;
+        console.log('[StreamLayer] Script loaded, attempting to find configuration...');
+        let currentScript = document.currentScript as HTMLScriptElement;
 
-        // If loaded via <script> tag with attributes
+        if (!currentScript) {
+            console.log('[StreamLayer] document.currentScript is null, trying querySelector fallback...');
+            currentScript = document.querySelector('script[data-project-id="34"]') as HTMLScriptElement ||
+                document.querySelector('script[data-project-id]') as HTMLScriptElement;
+        }
+
+        if (currentScript) {
+            console.log('[StreamLayer] Found script element:', currentScript);
+        } else {
+            console.error('[StreamLayer] Could not find script element with data-project-id');
+        }
+
         if (currentScript && currentScript.dataset.projectId) {
             const projectId = currentScript.dataset.projectId;
             const containerId = currentScript.dataset.containerId || 'stream-layer-widget';
 
+            console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);
+
             const autoInit = () => {
-                // Ensure container exists (create if missing and simple usage implied)
                 let container = document.getElementById(containerId);
 
-                // Auto-create container if missing
                 if (!container) {
                     console.log(`[StreamLayer] Container #${containerId} not found, creating it automatically.`);
                     container = document.createElement('div');
@@ -122,7 +129,6 @@ if (typeof document !== 'undefined') {
                 });
             };
 
-            // Wait for DOM if needed
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', autoInit);
             } else {

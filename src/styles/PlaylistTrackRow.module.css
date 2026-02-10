@@ -45,7 +45,7 @@
 }
 
 .row:hover .playIcon {
-    display: block;
+    display: block !important;
 }
 
 .trackContent {

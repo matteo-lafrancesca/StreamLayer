@@ -1,29 +1,113 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { QueueTrackRow } from './QueueTrackRow';
 import styles from '@styles/PlayerViews.module.css';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    type DragStartEvent,
+    type Modifier,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
+const restrictToVerticalAxis: Modifier = ({ transform }) => {
+    return {
+        ...transform,
+        x: 0,
+    };
+};
+
+// Custom modifier to compensate for parent container transforms
+// The playerContainer has transform: translateX(-50%) which creates a new containing block
+// for position: fixed, causing DragOverlay coordinates to be offset
+const compensateForTransforms: Modifier = ({ transform }) => {
+    // The offset appears to be related to the parent transforms
+    // Since playerContainer uses translateX(-50%), we need to compensate
+    return {
+        ...transform,
+        // Keep x at 0 (vertical lock)
+        x: 0,
+        // No Y adjustment needed - let dnd-kit handle it naturally
+        y: transform.y,
+    };
+};
 
 export function QueueView() {
-    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist } = usePlayer();
+    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
     const { selectedPlaylist } = usePlayerUI();
+    const [activeId, setActiveId] = useState<string | null>(null);
+
+    // Sensors for drag detection
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Start dragging after moving 8px to prevent accidental drags on clicks
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     // Separate current track from upcoming tracks
     const { currentTrack, upcomingTracks } = useMemo(() => {
         if (!queue || queue.length === 0 || !playingTrack) {
-            return { currentTrack: null, upcomingTracks: [] };
+            return { currentTrack: null, upcomingTracks: [], startIndex: 0 };
         }
 
         const currentIndex = queue.findIndex(track => track.id === playingTrack.id);
         if (currentIndex === -1) {
-            return { currentTrack: null, upcomingTracks: queue };
+            // Should not happen theoretically if playingTrack is in queue
+            return { currentTrack: null, upcomingTracks: queue, startIndex: 0 };
         }
 
         return {
             currentTrack: queue[currentIndex],
-            upcomingTracks: queue.slice(currentIndex + 1)
+            upcomingTracks: queue.slice(currentIndex + 1),
+            startIndex: currentIndex + 1
         };
     }, [queue, playingTrack]);
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            // Find indexes in likely the whole queue or just the upcoming part?
+            // We need to map back to the MAIN queue indexes.
+
+            // "active.id" is the track ID as string (see QueueTrackRow)
+            // But we need the index in the FULL queue.
+
+            const oldIndex = queue.findIndex((item) => item.id.toString() === active.id);
+            const newIndex = queue.findIndex((item) => item.id.toString() === over?.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                reorderQueue(oldIndex, newIndex);
+            }
+        }
+
+        setActiveId(null);
+    };
+
+    // Find active track object for overlay
+    const activeTrack = useMemo(() => {
+        if (!activeId) return null;
+        return queue.find(t => t.id.toString() === activeId);
+    }, [activeId, queue]);
 
     if (!queue || queue.length === 0) {
         return (
@@ -55,25 +139,38 @@ export function QueueView() {
                 </div>
             )}
 
-            {/* Up Next */}
             {upcomingTracks.length > 0 && (
-                <div className={styles.queueSection}>
-                    <h3 className={styles.sectionTitle}>
-                        À suivre dans : {(playingFromPlaylist || selectedPlaylist)?.metadata?.title || 'Playlist'}
-                    </h3>
-                    {upcomingTracks.map((track) => {
-                        const realIndex = queue.findIndex(t => t === track);
-                        return (
-                            <QueueTrackRow
-                                key={`${track.id}-${realIndex}`}
-                                track={track}
-                                onClick={() => playTrackFromPlaylist(realIndex, queue)}
-                                isPlaying={false}
-                                isPlayingState={false}
-                            />
-                        );
-                    })}
-                </div>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    modifiers={[restrictToVerticalAxis]}
+                >
+                    <div className={styles.queueSection}>
+                        <h3 className={styles.sectionTitle}>
+                            À suivre dans : {(playingFromPlaylist || selectedPlaylist)?.metadata?.title || 'Playlist'}
+                        </h3>
+                        <SortableContext
+                            items={upcomingTracks.map(t => t.id.toString())}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {upcomingTracks.map((track) => {
+                                const realIndex = queue.findIndex(t => t === track);
+                                return (
+                                    <QueueTrackRow
+                                        key={track.id}
+                                        id={track.id.toString()}
+                                        track={track}
+                                        onClick={() => playTrackFromPlaylist(realIndex, queue)}
+                                        isPlaying={false}
+                                        isPlayingState={false}
+                                    />
+                                );
+                            })}
+                        </SortableContext>
+                    </div>
+                </DndContext>
             )}
         </div>
     );

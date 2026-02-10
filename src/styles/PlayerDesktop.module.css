@@ -4,10 +4,8 @@
     position: fixed;
     bottom: 20px;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: calc(var(--player-width-desktop) / -2);
     z-index: var(--z-player);
-    transform-origin: bottom center;
-    will-change: transform;
 }
 
 @media (max-width: 750px) {
@@ -26,6 +24,12 @@
     user-select: none;
     -webkit-user-select: none;
     transition: width var(--transition-base), height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.playerTransparent {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 /* Border top when expanded - Desktop specific */

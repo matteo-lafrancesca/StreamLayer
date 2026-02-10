@@ -8,10 +8,58 @@
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background var(--transition-base);
+    /* For dnd-kit transform */
+    touch-action: none;
+    background: var(--bg-secondary);
 }
 
 .row:hover {
     background: var(--color-gray-300);
+}
+
+/* Drag Handle */
+.dragHandle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: grab;
+    padding: 4px;
+    color: var(--text-secondary);
+    cursor: grab;
+    padding: 4px;
+}
+
+.dragHandle:hover {
+    color: var(--text-primary);
+}
+
+
+
+/* Also show handle if it's being dragged via class added by dnd-kit overlay if needed, 
+   but dnd-kit usually clones the element. 
+   We can force it visible if the row is being dragged (we'll add a class for that) 
+*/
+.isDragging .dragHandle {
+    opacity: 1;
+    cursor: grabbing;
+}
+
+.isDragging {
+    position: relative;
+    opacity: 1;
+    background: var(--bg-secondary);
+    cursor: grabbing;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.overlay {
+    opacity: 1 !important;
+    background: var(--bg-secondary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    z-index: 9999;
 }
 
 /* Play control area */
@@ -42,7 +90,7 @@
 }
 
 .row:hover .playIcon {
-    display: block;
+    display: block !important;
 }
 
 .cover {

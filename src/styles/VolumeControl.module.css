@@ -14,7 +14,8 @@
 }
 
 .volumeBarContainer {
-    width: 80px;
+    width: 100px;
+    max-width: 100px;
     cursor: pointer;
     padding: var(--hitbox-padding) 0;
     margin: calc(-1 * var(--spacing-xs)) 0;

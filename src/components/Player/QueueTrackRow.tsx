@@ -1,9 +1,10 @@
 import { memo } from 'react';
 import type { Track } from '@definitions/track';
 import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
-import { PlayingIndicator } from './PlayingIndicator';
 import { getTrackDisplayInfo } from '@utils/track';
-import { Play, Pause } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import styles from '@styles/QueueTrackRow.module.css';
 
 interface QueueTrackRowProps {
@@ -11,28 +12,62 @@ interface QueueTrackRowProps {
     onClick: () => void;
     isPlaying?: boolean;
     isPlayingState?: boolean;
+    id?: string; // ID for dnd-kit
+    isOverlay?: boolean;
 }
 
-function QueueTrackRowComponent({ track, onClick, isPlaying = false, isPlayingState = false }: QueueTrackRowProps) {
+function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverlay = false }: QueueTrackRowProps) {
     const displayInfo = getTrackDisplayInfo(track, 's');
 
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
+        id: id || track.id.toString(),
+        disabled: isOverlay
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: 1, // Keep full opacity even when dragging
+        touchAction: 'none',
+    };
+
+    // Override style if it's an overlay (pure visual) - don't spread style to avoid inherited opacity
+    const finalStyle = isOverlay ? {
+        cursor: 'grabbing',
+        touchAction: 'none',
+        opacity: 1,
+    } : style;
+
     return (
-        <div className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} onClick={onClick}>
-            {/* Playing indicator or play/pause icon */}
-            <div className={styles.playControl}>
-                {/* Default state */}
-                <div className={styles.playControlContent}>
-                    {isPlaying && isPlayingState ? (
-                        <PlayingIndicator />
-                    ) : null}
+        <div
+            ref={setNodeRef}
+            style={finalStyle}
+            className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''} ${!isOverlay && isDragging ? styles.isDragging : ''} ${isOverlay ? styles.overlay : ''}`}
+        >
+            {/* Drag Handle - Only show if not playing current track (which isn't sortable usually, or is separate) */}
+            {!isPlaying && (
+                <div
+                    className={styles.dragHandle}
+                    {...attributes}
+                    {...listeners}
+                    onClick={(e) => e.stopPropagation()} // Prevent click from triggering row click
+                >
+                    <GripVertical size={16} />
                 </div>
-                {/* Hover state */}
-                {isPlaying && isPlayingState ? (
-                    <Pause className={styles.playIcon} fill="currentColor" />
-                ) : (
-                    <Play className={styles.playIcon} fill="currentColor" />
-                )}
-            </div>
+            )}
+
+            {/* Play/Pause Control - Needs stopPropagation to not trigger row click if handled separately, 
+                but here row click handles play, so maybe we want that. 
+                Original didn't have specific click handler on icon, just row.
+            */}
+
 
             <AuthenticatedImage
                 type="album"
@@ -41,11 +76,12 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, isPlayingSt
                 alt={displayInfo.title}
                 className={styles.cover}
             />
-            <div className={styles.trackInfo}>
+
+            <div className={styles.trackInfo} onClick={onClick}>
                 <div className={styles.title}>{displayInfo.title}</div>
                 <div className={styles.artist}>{displayInfo.artist}</div>
             </div>
-        </div >
+        </div>
     );
 }
 
