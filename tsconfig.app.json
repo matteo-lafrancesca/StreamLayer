@@ -42,6 +42,9 @@
       "@context/*": [
         "./src/context/*"
       ],
+      "@cache/*": [
+        "./src/cache/*"
+      ],
       "@services/*": [
         "./src/services/*"
       ],

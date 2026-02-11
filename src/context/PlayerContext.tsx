@@ -182,7 +182,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             // Find current track index in full list
             const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
             if (currentTrackIndex >= 0) {
-                queueManager.setQueue(playlistTracks, currentTrackIndex);
+                queueManager.setQueue(playlistTracks, currentTrackIndex, { keepState: true });
             }
         }
     }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager]);

@@ -1,3 +1,22 @@
+/**
+ * @deprecated This hook is deprecated. Use `useCachedData` from `@hooks/cache/useCachedData` instead.
+ * 
+ * Migration example:
+ * ```ts
+ * // Old:
+ * const { data, loading, error } = useDataFetcher({
+ *   fetcher: (token) => fetchData(token),
+ *   cacheKey: 'my-key',
+ * });
+ * 
+ * // New:
+ * const { data, loading, error } = useCachedData({
+ *   key: 'my-key',
+ *   fetcher: (token) => fetchData(token),
+ * });
+ * ```
+ */
+
 import { useState, useEffect, useRef, useContext } from 'react';
 import { AuthContext } from '@context/AuthContext';
 import { useApi } from './useApi';

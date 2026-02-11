@@ -1,6 +1,6 @@
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
-import { useAlbumCover } from '@hooks/useAlbumCover';
+import { useCover } from '@hooks/useCover';
 import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
@@ -31,7 +31,7 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     };
 
     // Check if cover is loaded
-    const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
+    const coverUrl = useCover('album', playingTrack?.id_album, 's');
     // Hide if track exists but cover not loaded
     const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 

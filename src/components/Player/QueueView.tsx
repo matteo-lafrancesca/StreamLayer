@@ -11,42 +11,17 @@ import {
     useSensor,
     useSensors,
     type DragEndEvent,
-    type DragStartEvent,
-    type Modifier,
 } from '@dnd-kit/core';
 import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-
-const restrictToVerticalAxis: Modifier = ({ transform }) => {
-    return {
-        ...transform,
-        x: 0,
-    };
-};
-
-// Custom modifier to compensate for parent container transforms
-// The playerContainer has transform: translateX(-50%) which creates a new containing block
-// for position: fixed, causing DragOverlay coordinates to be offset
-const compensateForTransforms: Modifier = ({ transform }) => {
-    // The offset appears to be related to the parent transforms
-    // Since playerContainer uses translateX(-50%), we need to compensate
-    return {
-        ...transform,
-        // Keep x at 0 (vertical lock)
-        x: 0,
-        // No Y adjustment needed - let dnd-kit handle it naturally
-        y: transform.y,
-    };
-};
+import { compensateForTransforms, restrictToVerticalAxis } from '@utils/dndModifiers';
 
 export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
     const { selectedPlaylist } = usePlayerUI();
-    const [activeId, setActiveId] = useState<string | null>(null);
-
     // Sensors for drag detection
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -78,10 +53,6 @@ export function QueueView() {
         };
     }, [queue, playingTrack]);
 
-    const handleDragStart = (event: DragStartEvent) => {
-        setActiveId(event.active.id as string);
-    };
-
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
@@ -99,15 +70,7 @@ export function QueueView() {
                 reorderQueue(oldIndex, newIndex);
             }
         }
-
-        setActiveId(null);
     };
-
-    // Find active track object for overlay
-    const activeTrack = useMemo(() => {
-        if (!activeId) return null;
-        return queue.find(t => t.id.toString() === activeId);
-    }, [activeId, queue]);
 
     if (!queue || queue.length === 0) {
         return (
@@ -119,9 +82,6 @@ export function QueueView() {
 
     return (
         <div className={styles.scrollContainer}>
-            <div className={styles.header}>
-                <h2>File d'attente</h2>
-            </div>
 
             {/* Now Playing */}
             {currentTrack && (
@@ -143,9 +103,8 @@ export function QueueView() {
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
-                    modifiers={[restrictToVerticalAxis]}
+                    modifiers={[restrictToVerticalAxis, compensateForTransforms]}
                 >
                     <div className={styles.queueSection}>
                         <h3 className={styles.sectionTitle}>
@@ -170,6 +129,8 @@ export function QueueView() {
                             })}
                         </SortableContext>
                     </div>
+
+
                 </DndContext>
             )}
         </div>

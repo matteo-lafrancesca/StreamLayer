@@ -1,6 +1,4 @@
-import { useAlbumCover } from '@hooks/useAlbumCover';
-import { usePlaylistCover } from '@hooks/usePlaylistCover';
-import { type CoverSize } from '@services/api/covers';
+import { useCover, type CoverSize } from '@hooks/useCover';
 import placeholderImg from '@assets/placeholder.png';
 
 interface AuthenticatedImageProps {
@@ -23,11 +21,7 @@ export function AuthenticatedImage({
     id,
     size = 'm',
 }: AuthenticatedImageProps) {
-    const albumBlobUrl = useAlbumCover(type === 'album' ? id : null, size);
-    const playlistBlobUrl = usePlaylistCover(type === 'playlist' ? id : null, size);
-
-    // Use whichever blob is active
-    const blobUrl = type === 'album' ? albumBlobUrl : playlistBlobUrl;
+    const blobUrl = useCover(type, id, size);
 
     // Common style to hide alt text
     const imgStyle: React.CSSProperties = {

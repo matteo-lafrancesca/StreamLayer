@@ -15,7 +15,7 @@ import styles from '@styles/PlayerMobile.module.css';
  * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay.
  */
 export function PlayerMobile() {
-    const { currentView, setCurrentView, selectedPlaylist } = usePlayerUI();
+    const { currentView, setCurrentView } = usePlayerUI();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';

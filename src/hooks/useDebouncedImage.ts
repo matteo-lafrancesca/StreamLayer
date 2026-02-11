@@ -1,3 +1,20 @@
+/**
+ * @deprecated This hook is deprecated. Use `useCachedImage` from `@hooks/cache/useCachedImage` instead.
+ * 
+ * Migration example:
+ * ```ts
+ * // Old:
+ * const imageUrl = useDebouncedImage(shouldLoad, cacheKey, fetchFn, 200);
+ * 
+ * // New:
+ * const imageUrl = useCachedImage({
+ *   key: shouldLoad ? cacheKey : null,
+ *   fetcher: fetchFn,
+ *   debounce: 200,
+ * });
+ * ```
+ */
+
 import { useState, useEffect } from 'react';
 import { getCachedImage, setCachedImage } from '../cache/imageCache';
 import { persistentCache } from '../cache/PersistentCache';

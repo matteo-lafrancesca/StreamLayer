@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { Track } from '@definitions/track';
 
 interface UseQueueManagerProps {
@@ -18,7 +18,7 @@ interface UseQueueManagerReturn {
     playPrevious: () => void;
     toggleShuffle: () => void;
     toggleRepeat: () => void;
-    setQueue: (tracks: Track[], startIndex?: number) => void;
+    setQueue: (tracks: Track[], startIndex?: number, options?: { keepState?: boolean }) => void;
     playTrackAtIndex: (index: number) => void;
     playTrackById: (trackId: number) => void;
     reorderQueue: (oldIndex: number, newIndex: number) => void;
@@ -60,6 +60,18 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
     const [originalTracks, setOriginalTracks] = useState<Track[]>([]);
     const [shuffledTracks, setShuffledTracks] = useState<Track[]>([]);
 
+    // Use refs to avoid dependency issues in callbacks
+    const shuffledTracksRef = useRef<Track[]>([]);
+    const originalTracksRef = useRef<Track[]>([]);
+    const currentIndexRef = useRef<number>(0);
+
+    // Keep refs in sync with state (single useEffect to minimize hook count)
+    useEffect(() => {
+        shuffledTracksRef.current = shuffledTracks;
+        originalTracksRef.current = originalTracks;
+        currentIndexRef.current = currentIndex;
+    }, [shuffledTracks, originalTracks, currentIndex]);
+
     // Active track list (shuffled or original)
     const activeTrackList = useMemo(() => {
         return isShuffled ? shuffledTracks : originalTracks;
@@ -78,12 +90,39 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
     const canPlayPrevious = repeatMode === 'all' || currentIndex > 0;
 
     // Set queue (called when playlist changes or loads)
-    const setQueue = useCallback((newTracks: Track[], startIndex: number = 0) => {
+    const setQueue = useCallback((newTracks: Track[], startIndex: number = 0, options: { keepState?: boolean } = {}) => {
         setOriginalTracks(newTracks);
-        setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
-        setCurrentIndex(startIndex);
-        setIsShuffled(false); // Reset shuffle when queue changes
-    }, []);
+
+        if (options.keepState) {
+            // Update mode: preserve shuffle and current track/index if possible
+            if (isShuffled) {
+                const current = shuffledTracksRef.current[currentIndexRef.current];
+                const exists = newTracks.find(t => t.id === current?.id);
+
+                if (exists) {
+                    // Re-shuffle everything
+                    const newShuffled = shuffleArray(newTracks, exists);
+                    setShuffledTracks(newShuffled);
+                    setCurrentIndex(0);
+                } else {
+                    // Current track removed? Fallback to standard reset
+                    setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
+                    setCurrentIndex(startIndex);
+                }
+            } else {
+                // Not shuffled: Find where the current track is in the new list
+                const current = originalTracksRef.current[currentIndexRef.current];
+                const newIndex = newTracks.findIndex(t => t.id === current?.id);
+                setCurrentIndex(newIndex !== -1 ? newIndex : startIndex);
+            }
+        } else {
+            // Default reset
+            setOriginalTracks(newTracks);
+            setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
+            setCurrentIndex(startIndex);
+            setIsShuffled(false);
+        }
+    }, [isShuffled]);
 
     // Play next track
     const playNext = useCallback(() => {
@@ -201,7 +240,7 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
         }
     }, [activeTrackList]);
 
-    return {
+    return useMemo(() => ({
         currentTrack,
         currentIndex,
         totalTracks,
@@ -218,5 +257,22 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
         playTrackById,
         reorderQueue,
         queue: activeTrackList,
-    };
+    }), [
+        currentTrack,
+        currentIndex,
+        totalTracks,
+        isShuffled,
+        repeatMode,
+        canPlayNext,
+        canPlayPrevious,
+        playNext,
+        playPrevious,
+        toggleShuffle,
+        toggleRepeat,
+        setQueue,
+        playTrackAtIndex,
+        playTrackById,
+        reorderQueue,
+        activeTrackList
+    ]);
 }

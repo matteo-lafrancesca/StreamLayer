@@ -28,9 +28,9 @@
 }
 
 .title {
-    font-size: var(--font-size-xxl);
-    font-weight: var(--font-weight-bold);
-    line-height: 1.2;
+    font-size: var(--font-size-5xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+    line-height: 1.1;
     margin: 0;
 }
 

@@ -1,6 +1,6 @@
 import { Slider } from '@components/UI';
 import { usePlayer } from '@context/PlayerContext';
-import { useTrackProgress } from '@hooks/useTrackProgress';
+import { useSeekableProgress } from '@hooks/useSeekableProgress';
 import styles from '@styles/ProgressBar.module.css';
 
 interface ProgressBarProps {
@@ -11,7 +11,18 @@ interface ProgressBarProps {
 
 export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarProps) {
     const { playingTrack } = usePlayer();
-    const { progress, formattedCurrentTime, formattedRemainingTime, seek, duration } = useTrackProgress();
+
+    const {
+        progress,
+        formattedCurrentTime,
+        formattedRemainingTime,
+        duration,
+        isDragging,
+        dragProgress,
+        handleSeekStart,
+        handleSeekChange,
+        handleSeekEnd
+    } = useSeekableProgress();
 
     // Determine state
     const isDisabled = !playingTrack;
@@ -23,6 +34,17 @@ export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarPr
     if (isDisabled) stateClass = styles.disabled;
     else if (isLoading) stateClass = styles.loading;
 
+    // Wrap handlers to include onSeek callbacks
+    const onDragStart = (val: number) => {
+        handleSeekStart(val);
+        onSeekStart?.();
+    };
+
+    const onDragEnd = (val: number) => {
+        handleSeekEnd(val);
+        onSeekEnd?.();
+    };
+
     return (
         <div className={`${styles.progressSection} ${className || ''}`}>
             <span className={styles.timeText} style={{ visibility: isActive ? 'visible' : 'hidden' }}>
@@ -32,12 +54,12 @@ export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarPr
                 <div className={styles.breathingWrapper} />
             ) : (
                 <Slider
-                    value={progress}
-                    onChange={seek}
+                    value={isDragging ? dragProgress : progress}
+                    onChange={handleSeekChange}
                     variant="default"
                     className={`${styles.progressBar} ${stateClass}`}
-                    onDragStart={onSeekStart}
-                    onDragEnd={onSeekEnd}
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
                     showThumb={isActive}
                 />
             )}

@@ -1,10 +1,19 @@
+/**
+ * Hook to fetch playlists for a project
+ * REFACTORED to use useCachedData
+ */
+
 import { getPlaylists } from '@services/api/playlists';
 import type { Playlist } from '@definitions/playlist';
-import { useDataFetcher } from './useDataFetcher';
+import { useCachedData } from './cache/useCachedData';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createCacheManager } from '@cache/CacheManager';
 
-// Simple in-memory cache for playlists
-const playlistsCache = new Map<string, Playlist[]>();
+// Shared cache manager for playlists
+const playlistsCache = createCacheManager<Playlist[]>('data', {
+    ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxItems: 20, // Cache up to 20 projects
+});
 
 interface UsePlaylistsResult {
     playlists: Playlist[] | null;
@@ -16,7 +25,7 @@ interface UsePlaylistsResult {
 interface UsePlaylistsOptions {
     projectId: string;
     autoRefresh?: boolean;
-    refreshTrigger?: boolean; // Option to trigger refresh
+    refreshTrigger?: boolean;
 }
 
 export function usePlaylists(
@@ -29,33 +38,24 @@ export function usePlaylists(
         : projectIdOrOptions;
 
     const { projectId, autoRefresh: autoRefreshOption = false, refreshTrigger } = options;
-    const [refreshKey, setRefreshKey] = useState(0); // State instead of Ref to trigger re-render
+    const [refreshKey, setRefreshKey] = useState(0);
     const previousRefreshTrigger = useRef(refreshTrigger);
 
-    const { data: playlists, loading, error } = useDataFetcher<Playlist[]>({
+    const { data: playlists, loading, error, refetch } = useCachedData<Playlist[]>({
+        key: `playlists-${projectId}-${refreshKey}`,
         fetcher: async (token) => {
             const response = await getPlaylists({ projectId, limit: 100, offset: 0, accessToken: token });
             return response.items;
         },
-        cacheKey: `${projectId}-${refreshKey}`, // Use state here
-        cacheMap: playlistsCache,
         enabled: !!projectId,
+        cacheManager: playlistsCache,
     });
 
     // Function to force refresh
     const refreshPlaylists = useCallback(() => {
-        // Invalidate only this project's cache
-        const keysToDelete: string[] = [];
-        playlistsCache.forEach((_, key) => {
-            if (key.startsWith(`${projectId}-`)) {
-                keysToDelete.push(key);
-            }
-        });
-        keysToDelete.forEach(key => playlistsCache.delete(key));
-
-        // Increment to force new fetch
+        // Increment to force new fetch with new cache key
         setRefreshKey((prev: number) => prev + 1);
-    }, [projectId]);
+    }, []);
 
     // Auto-refresh on mount if requested
     useEffect(() => {

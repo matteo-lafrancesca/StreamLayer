@@ -1,7 +1,7 @@
 // import { IconButton } from '@components/UI'; // Unused
 import { ArrowLeft } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
-import type { Playlist } from '@definitions/playlist';
+
 import styles from '@styles/ExpandedPlayerHeader.module.css';
 
 export interface ExpandedPlayerHeaderMobileProps {

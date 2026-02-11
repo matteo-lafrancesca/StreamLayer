@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useSlider } from '@hooks/useSlider';
 import styles from '@styles/Slider.module.css';
 
@@ -8,8 +8,8 @@ export interface SliderProps {
     variant?: 'default' | 'spotify' | 'thin';
     showThumb?: boolean;
     className?: string;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
+    onDragStart?: (value: number) => void;
+    onDragEnd?: (value: number) => void;
 }
 
 /**
@@ -26,19 +26,8 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         onChange(newValue);
     }, [onChange]);
 
-    const { ref, handleMouseDown, isDragging } = useSlider(handleSliderChange);
+    const { ref, handleMouseDown, isDragging } = useSlider(handleSliderChange, onDragStart, onDragEnd);
 
-    // Notify parent of drag start/end
-    useEffect(() => {
-        if (isDragging) {
-            onDragStart?.();
-        } else {
-            onDragEnd?.();
-        }
-    }, [isDragging, onDragStart, onDragEnd]);
-
-    // Sync local state with props, UNLESS user is dragging
-    // Prevents global timer from jumping cursor during interaction
     // Sync local state with props, UNLESS user is dragging
     // Prevents global timer from jumping cursor during interaction
     // "Update State During Render" pattern to avoid double-render

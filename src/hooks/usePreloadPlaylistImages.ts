@@ -1,3 +1,8 @@
+/**
+ * Hook to preload playlist and album covers
+ * Uses direct cache access instead of hooks to avoid Rules of Hooks violations
+ */
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@context/AuthContext';
 import { fetchAlbumCover, fetchPlaylistCover, type CoverSize } from '@services/api/covers';

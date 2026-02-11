@@ -1,11 +1,18 @@
+/**
+ * Hook to fetch album details
+ * REFACTORED to use useCachedData
+ */
+
 import { getAlbumInfo } from '@services/api/albums';
 import type { Album } from '@definitions/album';
-import { useDataFetcher } from './useDataFetcher';
+import { useCachedData } from './cache/useCachedData';
+import { createCacheManager } from '@cache/CacheManager';
 
-// Simple in-memory cache for albums (data)
-const albumsCache = new Map<number, Album>();
-// Cache for in-flight requests (promises)
-const albumsPromiseCache = new Map<number, Promise<Album>>();
+// Shared cache manager for albums
+const albumsCache = createCacheManager<Album>('data', {
+    ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxItems: 100, // Cache up to 100 albums
+});
 
 interface UseAlbumResult {
     album: Album | null;
@@ -19,14 +26,12 @@ interface UseAlbumResult {
  * @returns Album data, loading state, and potential error.
  */
 export function useAlbum(albumId: number | null | undefined): UseAlbumResult {
-    const { data: album, loading, error } = useDataFetcher<Album>({
+    const { data: album, loading, error } = useCachedData<Album>({
+        key: albumId ?? null,
         fetcher: (token) => getAlbumInfo(albumId!, token),
-        cacheKey: albumId!,
-        cacheMap: albumsCache,
-        inFlightMap: albumsPromiseCache,
         enabled: !!albumId,
+        cacheManager: albumsCache,
     });
 
     return { album, loading, error };
 }
-

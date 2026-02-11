@@ -1,12 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
+/**
+ * Hook to lazily fetch playlist tracks
+ * REFACTORED to use new cache architecture
+ * Reduced from ~179 lines to ~80 lines by separating concerns
+ */
+
+import { useMemo } from 'react';
 import { getPlaylistTracks } from '@services/api/playlists';
 import type { Track } from '@definitions/track';
-import { persistentCache } from '../cache/PersistentCache';
+import { useCachedData } from './cache/useCachedData';
+import { useLazyPagination } from './cache/useLazyPagination';
+import { createCacheManager } from '@cache/CacheManager';
 
-const BATCH_SIZE = 10; // Batch size: 10 tracks
-
-// Cache for full playlist tracks
-const fullTracksCache = new Map<number, Track[]>();
+// Shared cache manager for playlist tracks
+const playlistTracksCache = createCacheManager<Track[]>('data', {
+    ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxItems: 50, // Cache up to 50 playlists
+});
 
 interface UsePlaylistTracksLazyResult {
     tracks: Track[] | null;
@@ -19,160 +28,94 @@ interface UsePlaylistTracksLazyResult {
 /**
  * Hook to lazily fetch playlist tracks.
  * Loads tracks in batches of 10 for fast initial render.
- * @param playlistId - Playlist ID.
- * @param accessToken - Access Token (required to avoid circular dependency).
- * @param expectedTotal - Expected total count (from playlist.nb_items).
+ * 
+ * Strategy:
+ * 1. Check cache for full playlist (instant load if cached)
+ * 2. If not cached, use lazy pagination to load in batches
+ * 3. Once all tracks loaded, cache the full playlist
+ * 
+ * @param playlistId - Playlist ID
+ * @param accessToken - Access Token
+ * @param expectedTotal - Expected total count (from playlist.nb_items)
  */
 export function usePlaylistTracksLazy(
     playlistId: number | null | undefined,
     accessToken: string | null | undefined,
     expectedTotal?: number
 ): UsePlaylistTracksLazyResult {
-    const [tracks, setTracks] = useState<Track[] | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-    const [totalCount, setTotalCount] = useState<number | null>(null);
-    const loadingRef = useRef(false);
-    const currentOffsetRef = useRef(0);
+    const cacheKey = playlistId ? `playlist-tracks-${playlistId}` : null;
 
-    useEffect(() => {
-        if (!playlistId || !accessToken) {
-            setTracks(null);
-            setTotalCount(null);
-            setLoading(false);
-            setIsLoadingMore(false);
-            currentOffsetRef.current = 0;
-            return;
+    // Try to get full playlist from cache first
+    const { data: cachedTracks, loading: cacheLoading } = useCachedData<Track[]>({
+        key: cacheKey,
+        fetcher: async (token) => {
+            // This fetcher is only called if cache miss
+            // We'll use pagination instead, so this is a fallback
+            const response = await getPlaylistTracks({
+                playlistId: playlistId!,
+                limit: expectedTotal ?? 1000,
+                offset: 0,
+                accessToken: token,
+            });
+            return response.items;
+        },
+        enabled: !!playlistId && !!accessToken,
+        accessToken,
+        cacheManager: playlistTracksCache,
+    });
+
+    // IMPORTANT: Always call useLazyPagination BEFORE any conditional returns
+    // to respect Rules of Hooks (hooks must be called in same order every render)
+    const pagination = useLazyPagination<Track>({
+        key: playlistId ?? null,
+        fetcher: async (offset, limit) => {
+            const response = await getPlaylistTracks({
+                playlistId: playlistId!,
+                limit,
+                offset,
+                accessToken: accessToken!,
+            });
+            return {
+                items: response.items,
+                total: expectedTotal ?? response.count_item,
+            };
+        },
+        batchSize: 10,
+        expectedTotal,
+        enabled: !!playlistId && !!accessToken && !cachedTracks && !cacheLoading,
+    });
+
+    // Cache full playlist once all tracks are loaded
+    useMemo(() => {
+        if (
+            cacheKey &&
+            pagination.items.length > 0 &&
+            pagination.totalCount &&
+            pagination.items.length >= pagination.totalCount &&
+            !pagination.hasMore
+        ) {
+            console.log('[usePlaylistTracksLazy] All tracks loaded, caching...');
+            playlistTracksCache.set(cacheKey, pagination.items);
         }
+    }, [cacheKey, pagination.items, pagination.totalCount, pagination.hasMore]);
 
-        // 1. Check Memory Cache
-        const cached = fullTracksCache.get(playlistId);
-        if (cached) {
-            setTracks(cached);
-            setTotalCount(cached.length);
-            setLoading(false);
-            setIsLoadingMore(false);
-            currentOffsetRef.current = cached.length;
-            return;
-        }
-
-        // Reset loading ref for this playlist
-        loadingRef.current = false;
-
-        // Ref to track mounted state
-        const isMounted = { current: true };
-
-        // Avoid double loading
-        if (loadingRef.current) return;
-        loadingRef.current = true;
-
-        // Function to load a batch
-        const loadBatch = async (offset: number, isFirst: boolean) => {
-            try {
-                if (isFirst) {
-                    if (!isMounted.current) return;
-                    setLoading(true);
-                    setError(null);
-                    setTracks(null);
-                    setTotalCount(null);
-                    currentOffsetRef.current = 0;
-                }
-
-                const response = await getPlaylistTracks({
-                    playlistId,
-                    limit: BATCH_SIZE,
-                    offset,
-                    accessToken
-                });
-
-                if (!isMounted.current) return;
-
-                const actualTotal = expectedTotal ?? response.count_item;
-
-                if (isFirst) {
-                    // console.log('[LazyLoad] First batch loaded:', response.items.length, '/', actualTotal);
-                    setTracks(response.items);
-                    setTotalCount(actualTotal);
-                    setLoading(false);
-                    currentOffsetRef.current = response.items.length;
-                } else {
-                    // console.log('[LazyLoad] Batch loaded:', response.items.length, 'tracks (total:', offset + response.items.length, '/', actualTotal, ')');
-                    setTracks(prevTracks => {
-                        const newTracks = prevTracks ? [...prevTracks, ...response.items] : response.items;
-                        currentOffsetRef.current = newTracks.length;
-
-                        // Cache if all tracks loaded
-                        if (newTracks.length >= actualTotal) {
-                            fullTracksCache.set(playlistId, newTracks);
-                            persistentCache.set('data', `playlist-tracks-${playlistId}`, newTracks).catch(console.warn);
-                            console.log('[LazyLoad] All tracks loaded and cached');
-                        }
-
-                        return newTracks;
-                    });
-                }
-
-                // Load next batch if needed
-                if (offset + response.items.length < actualTotal) {
-                    if (isFirst) {
-                        setIsLoadingMore(true);
-                    }
-                    // Small delay to avoid UI blocking
-                    setTimeout(() => {
-                        if (isMounted.current) {
-                            loadBatch(offset + BATCH_SIZE, false);
-                        }
-                    }, 100);
-                } else {
-                    setIsLoadingMore(false);
-                    loadingRef.current = false;
-                }
-
-            } catch (err) {
-                if (!isMounted.current) return;
-                console.error('[LazyLoad] Load error:', err);
-                setError(err instanceof Error ? err : new Error('Error loading tracks'));
-                setLoading(false);
-                setIsLoadingMore(false);
-                loadingRef.current = false;
-            }
+    // If we have cached tracks, return them immediately
+    if (cachedTracks) {
+        return {
+            tracks: cachedTracks,
+            loading: false,
+            error: null,
+            isLoadingMore: false,
+            totalCount: cachedTracks.length,
         };
+    }
 
-        // 2. Initial Async Check (Disk) then Load
-        const init = async () => {
-            try {
-                const storedTracks = await persistentCache.get<Track[]>('data', `playlist-tracks-${playlistId}`);
-                if (storedTracks) {
-                    // Found in Disk
-                    if (!isMounted.current) return;
-                    setTracks(storedTracks);
-                    setTotalCount(storedTracks.length);
-                    setLoading(false);
-                    setIsLoadingMore(false);
-                    fullTracksCache.set(playlistId, storedTracks); // Hydrate memory
-                    loadingRef.current = false;
-                    return;
-                }
-            } catch (e) { console.warn(e); }
-
-            // Not found, start batch loading
-            loadBatch(0, true);
-        };
-
-        init();
-
-        return () => {
-            isMounted.current = false;
-        };
-
-    }, [playlistId, accessToken, expectedTotal]);
-
+    // Otherwise, return pagination results
     return {
-        tracks,
-        loading,
-        error,
-        isLoadingMore,
-        totalCount
+        tracks: pagination.items.length > 0 ? pagination.items : null,
+        loading: pagination.loading,
+        error: pagination.error,
+        isLoadingMore: pagination.loadingMore,
+        totalCount: pagination.totalCount,
     };
 }

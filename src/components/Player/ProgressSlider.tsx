@@ -1,5 +1,5 @@
 import { Slider } from '@components/UI';
-import { useTrackProgress } from '@hooks/useTrackProgress';
+import { useSeekableProgress } from '@hooks/useSeekableProgress';
 import sharedStyles from '@styles/PlayerShared.module.css';
 
 interface ProgressSliderProps {
@@ -11,15 +11,24 @@ interface ProgressSliderProps {
  * @param interactive - Whether slider responds to input (default: true).
  */
 export function ProgressSlider({ interactive = true }: ProgressSliderProps) {
-    const { progress, seek } = useTrackProgress();
+    const {
+        progress,
+        isDragging,
+        dragProgress,
+        handleSeekStart,
+        handleSeekChange,
+        handleSeekEnd
+    } = useSeekableProgress(interactive);
 
     return (
         <div className={sharedStyles.progressSlider}>
             <Slider
-                value={progress}
-                onChange={interactive ? seek : () => { }}
+                value={isDragging ? dragProgress : progress}
+                onChange={handleSeekChange}
                 showThumb={false}
                 variant="thin"
+                onDragStart={handleSeekStart}
+                onDragEnd={handleSeekEnd}
             />
         </div>
     );

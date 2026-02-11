@@ -1,7 +1,7 @@
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { useCompactMode } from '@hooks/useCompactMode';
-import { useAlbumCover } from '@hooks/useAlbumCover';
+import { useCover } from '@hooks/useCover';
 import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
@@ -37,7 +37,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
     const { enableCompactMode } = useCompactMode();
 
     // Check if cover is loaded
-    const coverUrl = useAlbumCover(playingTrack?.id_album, 's');
+    const coverUrl = useCover('album', playingTrack?.id_album, 's');
     // Hide only if track exists but cover is not loaded yet
     const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 
