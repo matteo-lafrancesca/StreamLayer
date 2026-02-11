@@ -9,14 +9,15 @@ interface BottomSheetProps {
     onClose: () => void;
     children: ReactNode;
     showChevron?: boolean;
+    disabled?: boolean;
 }
 
 /**
  * Full-screen overlay sliding from bottom.
  * Supports swipe-to-dismiss and click-to-close.
  */
-export function BottomSheet({ isOpen, onClose, children, showChevron = true }: BottomSheetProps) {
-    const dragRef = useSwipeToDismiss({ isOpen, onClose, threshold: PLAYER_SIZES.SWIPE_THRESHOLD });
+export function BottomSheet({ isOpen, onClose, children, showChevron = true, disabled = false }: BottomSheetProps) {
+    const dragRef = useSwipeToDismiss({ isOpen, onClose, threshold: PLAYER_SIZES.SWIPE_THRESHOLD, disabled });
 
     return (
         <>

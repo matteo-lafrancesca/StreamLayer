@@ -1,14 +1,19 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { PlayerProvider } from '@context/PlayerContext';
 import { AuthProvider } from '@context/AuthContext';
 import { PlayerUIProvider } from '@context/PlayerUIContext';
 import { Player } from '@components/Player/Player';
+import type { ThemeConfig } from '../types/Theme';
+import { generateThemeVariables } from '../utils/theme';
+import { themes, defaultTheme } from '../config/themes';
 
 export interface StreamLayerProps {
     /** StreamLayer project ID */
     projectId: string;
     /** App content with access to audio context */
     children?: ReactNode;
+    /** Optional theme configuration or theme name to override default styles */
+    theme?: string | ThemeConfig;
 }
 
 /**
@@ -16,9 +21,21 @@ export interface StreamLayerProps {
  * Encapsulates audio logic and player UI.
  * Wrap your app or content with this component.
  */
-export function StreamLayer({ projectId, children }: StreamLayerProps) {
+export function StreamLayer({ projectId, children, theme }: StreamLayerProps) {
+    const themeStyles = useMemo(() => {
+        let themeConfig: ThemeConfig | undefined;
+
+        if (typeof theme === 'string') {
+            themeConfig = themes[theme] || defaultTheme;
+        } else {
+            themeConfig = theme;
+        }
+
+        return generateThemeVariables(themeConfig);
+    }, [theme]);
+
     return (
-        <div className="sl-root">
+        <div className="sl-root" style={themeStyles}>
             <AuthProvider projectId={projectId}>
                 <PlayerUIProvider>
                     <PlayerProvider>

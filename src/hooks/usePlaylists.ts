@@ -41,7 +41,7 @@ export function usePlaylists(
     const [refreshKey, setRefreshKey] = useState(0);
     const previousRefreshTrigger = useRef(refreshTrigger);
 
-    const { data: playlists, loading, error, refetch } = useCachedData<Playlist[]>({
+    const { data: playlists, loading, error } = useCachedData<Playlist[]>({
         key: `playlists-${projectId}-${refreshKey}`,
         fetcher: async (token) => {
             const response = await getPlaylists({ projectId, limit: 100, offset: 0, accessToken: token });

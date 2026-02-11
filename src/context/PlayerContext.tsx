@@ -71,7 +71,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     // Derived directly from QueueManager to avoid state duplication and sync loops
     const playingTrack = queueManager.currentTrack;
     const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(70);
+    const [volume, setVolume] = useState(100);
 
     // Queue generation state
     const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);

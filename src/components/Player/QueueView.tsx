@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { QueueTrackRow } from './QueueTrackRow';
@@ -21,7 +21,7 @@ import { compensateForTransforms, restrictToVerticalAxis } from '@utils/dndModif
 
 export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
-    const { selectedPlaylist } = usePlayerUI();
+    const { selectedPlaylist, setIsDragging } = usePlayerUI();
     // Sensors for drag detection
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -103,8 +103,20 @@ export function QueueView() {
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
+                    onDragStart={() => setIsDragging(true)}
+                    onDragEnd={(e) => {
+                        setIsDragging(false);
+                        handleDragEnd(e);
+                    }}
+                    onDragCancel={() => setIsDragging(false)}
                     modifiers={[restrictToVerticalAxis, compensateForTransforms]}
+                    autoScroll={{
+                        threshold: {
+                            x: 0,
+                            y: 0.2
+                        },
+                        acceleration: 25
+                    }}
                 >
                     <div className={styles.queueSection}>
                         <h3 className={styles.sectionTitle}>

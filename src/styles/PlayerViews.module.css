@@ -18,7 +18,7 @@
     cursor: pointer;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background: var(--color-white);
+    background: var(--bg-card);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: var(--spacing-sm);

@@ -17,7 +17,7 @@
 
 .sliderFill {
     height: 100%;
-    background: var(--color-black);
+    background: var(--color-slider);
     border-radius: var(--radius-sm);
     transition: width 0.1s ease;
     position: relative;
@@ -30,7 +30,7 @@
     transform: translateY(-50%);
     width: 12px;
     height: 12px;
-    background: var(--color-black);
+    background: var(--color-slider);
     border: 2px solid var(--color-white);
     border-radius: var(--radius-round);
     box-shadow: var(--shadow-sm);
@@ -66,7 +66,7 @@
 .thin {
     height: 2px;
     border-radius: 0 0 0 var(--radius-md);
-    background: var(--color-black);
+    background: var(--color-slider);
 }
 
 /* Breathing animation for loading state - Global to work across modules */

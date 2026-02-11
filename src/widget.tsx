@@ -6,10 +6,13 @@ import '@styles/styles.css';
 import '@styles/design-tokens.css';
 import '@styles/utilities.css';
 
+import type { ThemeConfig } from './types/Theme';
+
 export interface StreamLayerConfig {
     projectId: string;
     containerId?: string;
     apiUrl?: string;
+    theme?: string | ThemeConfig;
     onReady?: () => void;
     onError?: (error: Error) => void;
 }
@@ -30,6 +33,7 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
         projectId,
         containerId = 'stream-layer-widget',
         apiUrl: _apiUrl, // Reserved for future API configuration
+        theme,
         onReady,
         onError
     } = config;
@@ -52,6 +56,7 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
             <React.StrictMode>
                 <StreamLayer
                     projectId={projectId}
+                    theme={theme}
                 />
             </React.StrictMode>
         );

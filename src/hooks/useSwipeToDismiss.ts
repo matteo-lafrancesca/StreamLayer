@@ -4,6 +4,7 @@ interface UseSwipeToDismissProps {
     isOpen: boolean;
     onClose: () => void;
     threshold?: number; // Distance threshold to trigger dismiss (in px)
+    disabled?: boolean;
 }
 
 interface SwipeState {
@@ -20,7 +21,8 @@ interface SwipeState {
 export function useSwipeToDismiss({
     isOpen,
     onClose,
-    threshold = 150
+    threshold = 150,
+    disabled = false
 }: UseSwipeToDismissProps) {
     const dragRef = useRef<HTMLDivElement>(null);
     const swipeState = useRef<SwipeState>({
@@ -44,9 +46,15 @@ export function useSwipeToDismiss({
             }
         }
 
-        if (!isOpen) return;
+        if (!isOpen || disabled) return;
 
         const handleTouchStart = (e: TouchEvent) => {
+            // Check if touch started on a no-swipe element (like drag handles)
+            const target = e.target as HTMLElement;
+            if (target.closest('[data-no-swipe="true"]')) {
+                return;
+            }
+
             swipeState.current = {
                 isDragging: true,
                 startY: e.touches[0].clientY,
@@ -122,7 +130,7 @@ export function useSwipeToDismiss({
             dragElement.removeEventListener('touchmove', handleTouchMove);
             dragElement.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [isOpen, onClose, threshold]);
+    }, [isOpen, onClose, threshold, disabled]);
 
     return dragRef;
 }

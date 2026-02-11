@@ -23,6 +23,10 @@ interface PlayerUIContextType {
     // Seek state
     isSeeking: boolean;
     setIsSeeking: (isSeeking: boolean) => void;
+
+    // Drag state
+    isDragging: boolean;
+    setIsDragging: (isDragging: boolean) => void;
 }
 
 const PlayerUIContext = createContext<PlayerUIContextType | undefined>(undefined);
@@ -40,6 +44,9 @@ export function PlayerUIProvider({ children }: PlayerUIProviderProps) {
     const [isSeeking, setIsSeeking] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
 
+    // Drag state
+    const [isDragging, setIsDragging] = useState(false);
+
     const contextValue = useMemo(() => ({
         selectedPlaylist,
         setSelectedPlaylist,
@@ -53,13 +60,16 @@ export function PlayerUIProvider({ children }: PlayerUIProviderProps) {
         setIsCompact,
         isSeeking,
         setIsSeeking,
+        isDragging,
+        setIsDragging
     }), [
         selectedPlaylist,
         selectedTrack,
         isExpanded,
         currentView,
         isCompact,
-        isSeeking
+        isSeeking,
+        isDragging
     ]);
 
     return (

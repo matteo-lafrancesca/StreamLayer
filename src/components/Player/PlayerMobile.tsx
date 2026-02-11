@@ -15,7 +15,7 @@ import styles from '@styles/PlayerMobile.module.css';
  * Player stays fixed at bottom, all expanded views appear in a bottom sheet overlay.
  */
 export function PlayerMobile() {
-    const { currentView, setCurrentView } = usePlayerUI();
+    const { currentView, setCurrentView, isDragging } = usePlayerUI();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
     const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';
@@ -47,6 +47,7 @@ export function PlayerMobile() {
                 isOpen={isExpanded}
                 onClose={onExpandToggle}
                 showChevron={currentView === 'track'}
+                disabled={isDragging}
             >
                 {currentView === 'track' ? (
                     <TrackViewMobile />

@@ -16,7 +16,7 @@ export function useVolumeControl(
     const toggleMute = useCallback(() => {
         if (isMuted) {
             // Unmute: restore previous volume
-            const volumeToRestore = previousVolumeRef.current > 0 ? previousVolumeRef.current : 70;
+            const volumeToRestore = previousVolumeRef.current > 0 ? previousVolumeRef.current : 100;
             onVolumeChange(volumeToRestore);
             setIsMuted(false);
         } else {

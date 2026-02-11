@@ -58,6 +58,7 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
                     {...attributes}
                     {...listeners}
                     onClick={(e) => e.stopPropagation()} // Prevent click from triggering row click
+                    data-no-swipe="true"
                 >
                     <GripVertical size={16} />
                 </div>
