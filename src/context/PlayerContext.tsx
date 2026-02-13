@@ -26,7 +26,7 @@ interface PlayerContextType {
     // Playback state
     playingTrack: Track | null;
 
-    playTrackFromPlaylist: (trackIndex: number, tracks?: Track[]) => void;
+    playTrackFromPlaylist: (trackIndex: number, tracks?: Track[], options?: { shuffle?: boolean }) => void;
     isPlaying: boolean;
     setIsPlaying: (isPlaying: boolean) => void;
     volume: number;
@@ -142,11 +142,11 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     });
 
     // Play a track from playlist (creates new queue)
-    const playTrackFromPlaylist = useCallback((trackIndex: number, tracks?: Track[]) => {
+    const playTrackFromPlaylist = useCallback((trackIndex: number, tracks?: Track[], options?: { shuffle?: boolean }) => {
         const tracksToPlay = tracks || playlistTracks;
         if (tracksToPlay && tracksToPlay.length > 0) {
             // Create new queue starting from the clicked track
-            queueManager.setQueue(tracksToPlay, trackIndex);
+            queueManager.setQueue(tracksToPlay, trackIndex, { shuffle: options?.shuffle });
             // Set the playlist we're playing from
             setPlayingFromPlaylist(selectedPlaylist);
         }

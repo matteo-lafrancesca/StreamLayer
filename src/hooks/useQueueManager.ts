@@ -18,7 +18,7 @@ interface UseQueueManagerReturn {
     playPrevious: () => void;
     toggleShuffle: () => void;
     toggleRepeat: () => void;
-    setQueue: (tracks: Track[], startIndex?: number, options?: { keepState?: boolean }) => void;
+    setQueue: (tracks: Track[], startIndex?: number, options?: { keepState?: boolean; shuffle?: boolean }) => void;
     playTrackAtIndex: (index: number) => void;
     playTrackById: (trackId: number) => void;
     reorderQueue: (oldIndex: number, newIndex: number) => void;
@@ -90,7 +90,7 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
     const canPlayPrevious = repeatMode === 'all' || currentIndex > 0;
 
     // Set queue (called when playlist changes or loads)
-    const setQueue = useCallback((newTracks: Track[], startIndex: number = 0, options: { keepState?: boolean } = {}) => {
+    const setQueue = useCallback((newTracks: Track[], startIndex: number = 0, options: { keepState?: boolean; shuffle?: boolean } = {}) => {
         setOriginalTracks(newTracks);
 
         if (options.keepState) {
@@ -120,7 +120,7 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
             setOriginalTracks(newTracks);
             setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
             setCurrentIndex(startIndex);
-            setIsShuffled(false);
+            setIsShuffled(options.shuffle ?? false);
         }
     }, [isShuffled]);
 

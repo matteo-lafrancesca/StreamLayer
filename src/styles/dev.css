@@ -2,7 +2,7 @@
 /* This file should NEVER be imported in widget.tsx or the library build */
 
 body {
-    background-color: rgb(111, 192, 131);
+    background-color: #1A2F44;
     /* Green background for dev visibility */
     min-height: 100vh;
     margin: 0;

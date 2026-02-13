@@ -10,7 +10,7 @@ import { PlaylistTrackRow } from './PlaylistTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function PlaylistView() {
-    const { playTrackFromPlaylist, playbackControls, playingTrack, isPlaying, setIsPlaying } = usePlayer();
+    const { playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist } = usePlayer();
     const { selectedPlaylist, setCurrentView, setSelectedPlaylist: resetSelectedPlaylist } = usePlayerUI();
     const { accessToken } = useAuth();
     const { tracks, error } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
@@ -46,18 +46,32 @@ export function PlaylistView() {
     // Handler to play all tracks
     const handlePlayAll = useCallback(() => {
         if (tracks && tracks.length > 0) {
-            playTrackFromPlaylist(0, tracks);
+            // Check if this playlist is already active in the queue
+            const isPlaylistActive = playingFromPlaylist?.id === selectedPlaylist?.id;
+
+            if (isPlaylistActive) {
+                // Playlist is already in queue
+                if (isPlaying) {
+                    // Already playing, do nothing
+                    return;
+                } else {
+                    // Paused, resume playback
+                    setIsPlaying(true);
+                }
+            } else {
+                // Playlist not in queue, play first track
+                playTrackFromPlaylist(0, tracks);
+            }
         }
-    }, [tracks, playTrackFromPlaylist]);
+    }, [tracks, playTrackFromPlaylist, playingFromPlaylist, selectedPlaylist, isPlaying, setIsPlaying]);
 
     // Handler for shuffle play
     const handleShufflePlay = useCallback(() => {
         if (tracks && tracks.length > 0) {
-            // Enable shuffle then play first track
-            playbackControls.onShuffle();
-            playTrackFromPlaylist(0);
+            // Play first track with shuffle enabled
+            playTrackFromPlaylist(0, tracks, { shuffle: true });
         }
-    }, [tracks, playTrackFromPlaylist, playbackControls]);
+    }, [tracks, playTrackFromPlaylist]);
 
     if (!selectedPlaylist) {
         return (

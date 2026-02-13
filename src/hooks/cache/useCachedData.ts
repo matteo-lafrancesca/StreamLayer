@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createCacheManager, type CacheManager, type CacheOptions } from '@cache/CacheManager';
-import { cacheFirst } from '@cache/cacheStrategies';
+import { cacheFirst, staleWhileRevalidate } from '@cache/cacheStrategies';
 import { useApi } from '../useApi';
 
 export interface UseCachedDataOptions<T> extends CacheOptions {
@@ -19,6 +19,8 @@ export interface UseCachedDataOptions<T> extends CacheOptions {
     accessToken?: string | null;
     /** Shared cache manager instance (optional, creates new if not provided) */
     cacheManager?: CacheManager<T>;
+    /** Cache strategy: 'cache-first' (default) or 'stale-while-revalidate' */
+    strategy?: 'cache-first' | 'stale-while-revalidate';
 }
 
 export interface UseCachedDataResult<T> {
@@ -54,6 +56,7 @@ export function useCachedData<T>({
     enabled = true,
     accessToken: providedAccessToken,
     cacheManager: providedCacheManager,
+    strategy = 'cache-first',
     ...cacheOptions
 }: UseCachedDataOptions<T>): UseCachedDataResult<T> {
     const { authenticatedCall } = useApi(providedAccessToken);
@@ -91,11 +94,27 @@ export function useCachedData<T>({
             setError(null);
 
             try {
-                const result = await cacheFirst({
-                    cacheManager,
-                    key: cacheKey,
-                    fetcher: () => authenticatedCallRef.current((token) => fetcherRef.current(token)),
-                });
+                let result: T;
+
+                if (strategy === 'stale-while-revalidate') {
+                    result = await staleWhileRevalidate({
+                        cacheManager,
+                        key: cacheKey,
+                        fetcher: () => authenticatedCallRef.current((token) => fetcherRef.current(token)),
+                        onRevalidate: (freshData) => {
+                            // Update state when fresh data arrives from background fetch
+                            if (!cancelled) {
+                                setData(freshData);
+                            }
+                        },
+                    });
+                } else {
+                    result = await cacheFirst({
+                        cacheManager,
+                        key: cacheKey,
+                        fetcher: () => authenticatedCallRef.current((token) => fetcherRef.current(token)),
+                    });
+                }
 
                 if (!cancelled) {
                     setData(result);

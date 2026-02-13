@@ -46,7 +46,7 @@ export function PlayerMobile() {
             <BottomSheet
                 isOpen={isExpanded}
                 onClose={onExpandToggle}
-                showChevron={currentView === 'track'}
+                showChevron={false}
                 disabled={isDragging}
             >
                 {currentView === 'track' ? (

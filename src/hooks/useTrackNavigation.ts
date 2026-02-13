@@ -14,8 +14,11 @@ export function useTrackNavigation({ minSwipeDistance = 50 }: UseTrackNavigation
     const [optimisticTrack, setOptimisticTrack] = useState<Track | null>(null);
 
     // Swipe refs
-    const touchStart = useRef<number | null>(null);
-    const touchEnd = useRef<number | null>(null);
+    // Swipe refs
+    const touchStartX = useRef<number | null>(null);
+    const touchStartY = useRef<number | null>(null);
+    const touchEndX = useRef<number | null>(null);
+    const touchEndY = useRef<number | null>(null);
 
     // Reset optimistic state when real track updates to match
     useEffect(() => {
@@ -25,20 +28,33 @@ export function useTrackNavigation({ minSwipeDistance = 50 }: UseTrackNavigation
     }, [playingTrack, optimisticTrack]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
-        touchEnd.current = null;
-        touchStart.current = e.targetTouches[0].clientX;
+        touchEndX.current = null;
+        touchEndY.current = null;
+        touchStartX.current = e.targetTouches[0].clientX;
+        touchStartY.current = e.targetTouches[0].clientY;
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        touchEnd.current = e.targetTouches[0].clientX;
+        touchEndX.current = e.targetTouches[0].clientX;
+        touchEndY.current = e.targetTouches[0].clientY;
     };
 
     const handleTouchEnd = () => {
-        if (!touchStart.current || !touchEnd.current) return;
+        if (touchStartX.current === null || touchEndX.current === null || touchStartY.current === null || touchEndY.current === null) return;
 
-        const distance = touchStart.current - touchEnd.current; // + = Left Swipe, - = Right Swipe
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
+        const dx = touchStartX.current - touchEndX.current; // + = Left Swipe, - = Right Swipe
+        const dy = touchStartY.current - touchEndY.current;
+
+        // Strict vertical check: If the user moved vertically more than 30px (scrolling/dismissing), 
+        // we disable the track switch to prevent accidental skips.
+        // User request: "If the window folds, it's impossible to change track" -> No comparison, just strict veto.
+        if (Math.abs(dy) > 30) return;
+
+        // Also keep directional lock for smaller movements
+        if (Math.abs(dy) > Math.abs(dx)) return;
+
+        const isLeftSwipe = dx > minSwipeDistance;
+        const isRightSwipe = dx < -minSwipeDistance;
 
         const currentIndex = queue.findIndex(t => t.id === playingTrack?.id);
 

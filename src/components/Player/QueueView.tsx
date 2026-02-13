@@ -17,7 +17,7 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { compensateForTransforms, restrictToVerticalAxis } from '@utils/dndModifiers';
+import { compensateForTransforms, restrictToVerticalAxis, restrictToScrollContainer } from '@utils/dndModifiers';
 
 export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
@@ -109,13 +109,14 @@ export function QueueView() {
                         handleDragEnd(e);
                     }}
                     onDragCancel={() => setIsDragging(false)}
-                    modifiers={[restrictToVerticalAxis, compensateForTransforms]}
+                    modifiers={[restrictToVerticalAxis, compensateForTransforms, restrictToScrollContainer]}
                     autoScroll={{
                         threshold: {
                             x: 0,
-                            y: 0.2
+                            y: 0.15
                         },
-                        acceleration: 25
+                        acceleration: 10,
+                        interval: 5
                     }}
                 >
                     <div className={styles.queueSection}>

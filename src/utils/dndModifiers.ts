@@ -21,3 +21,22 @@ export const compensateForTransforms: Modifier = ({ transform }) => {
         y: transform.y,
     };
 };
+
+// Custom modifier to restrict dragging within the scroll container bounds
+export const restrictToScrollContainer: Modifier = ({ transform, draggingNodeRect, containerNodeRect }) => {
+    if (!draggingNodeRect || !containerNodeRect) {
+        return transform;
+    }
+
+    // Calculate the boundaries
+    const top = containerNodeRect.top - draggingNodeRect.top;
+    const bottom = containerNodeRect.bottom - draggingNodeRect.bottom;
+
+    // Constrain the Y transform to stay within bounds
+    const constrainedY = Math.min(Math.max(transform.y, top), bottom);
+
+    return {
+        ...transform,
+        y: constrainedY,
+    };
+};

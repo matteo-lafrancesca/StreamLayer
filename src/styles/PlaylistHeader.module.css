@@ -52,3 +52,46 @@
     gap: var(--spacing-md);
     margin-top: var(--spacing-sm);
 }
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .coverContainer {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .cover {
+        width: 220px;
+        height: 220px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+    }
+
+    .info {
+        width: 100%;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .title {
+        font-size: var(--font-size-3xl) !important;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .metadata {
+        font-size: var(--font-size-xs);
+    }
+
+    .controls {
+        margin-top: var(--spacing-md);
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

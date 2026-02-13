@@ -3,12 +3,10 @@ import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import cssInjectedByJs from 'vite-plugin-css-injected-by-js'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), cssInjectedByJs()],
   css: {
     modules: {
-      // Prefix all CSS module classes with 'sl-' for widget isolation
       generateScopedName: 'sl-[name]__[local]___[hash:base64:5]',
     }
   },
@@ -23,9 +21,7 @@ export default defineConfig({
       '@styles': path.resolve(__dirname, './src/styles'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@assets': path.resolve(__dirname, './src/assets'),
-      // Renamed from @types to @definitions to avoid conflict
       '@definitions': path.resolve(__dirname, './src/types'),
-      // Direct aliases for type files (Vite needs .ts extension)
       'player': path.resolve(__dirname, './src/types/player.ts'),
       'track': path.resolve(__dirname, './src/types/track.ts'),
       'album': path.resolve(__dirname, './src/types/album.ts'),
@@ -37,7 +33,6 @@ export default defineConfig({
     },
   },
   define: {
-    // Define process.env for browser builds
     'process.env': {},
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
@@ -48,9 +43,14 @@ export default defineConfig({
       formats: ['umd', 'es'],
       fileName: (format) => `stream-layer.${format}.js`
     },
+    assetsInlineLimit: 100000000, // Force inline of all assets
     rollupOptions: {
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
-        // Ensure CSS is named consistently
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM'
+        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') return 'stream-layer.css';
           return assetInfo.name || 'asset';

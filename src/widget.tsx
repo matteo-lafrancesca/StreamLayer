@@ -18,7 +18,8 @@ export interface StreamLayerConfig {
 }
 
 // Export direct du composant pour usage React
-export { StreamLayer as StreamLayerWidget };
+export { StreamLayer };
+export { StreamLayer as StreamLayerWidget }; // Garder pour rétrocompatibilité
 
 // Map pour tracker les instances
 const instances = new Map<string, ReactDOM.Root>();
@@ -90,29 +91,34 @@ export function destroyStreamLayer(containerId: string = 'stream-layer-widget'):
 // Default export pour compatibilité UMD
 export default {
     initStreamLayer,
-    destroyStreamLayer
+    destroyStreamLayer,
+    StreamLayer
 };
 
 
 if (typeof document !== 'undefined') {
     try {
-        console.log('[StreamLayer] Script loaded, attempting to find configuration...');
-        let currentScript = document.currentScript as HTMLScriptElement;
+        // Mode Script/CDN uniquement : On cherche la configuration dans le script tag actuelle
+        const currentScript = document.currentScript as HTMLScriptElement;
 
-        if (!currentScript) {
-            console.log('[StreamLayer] document.currentScript is null, trying querySelector fallback...');
-            currentScript = document.querySelector('script[data-project-id="34"]') as HTMLScriptElement ||
-                document.querySelector('script[data-project-id]') as HTMLScriptElement;
+        // On ne tente l'auto-init que si data-project-id est trouvé, 
+        // sinon on suppose que c'est un usage en librairie (import)
+
+        let scriptWithConfig: HTMLScriptElement | null = currentScript;
+
+        if (!scriptWithConfig) {
+            // Fallback pour certains cas de chargement async, mais on reste prudent
+            const found = document.querySelector('script[data-project-id]') as HTMLScriptElement;
+            // Vérifier si ce script semble bien être stream-layer pour éviter les faux positifs
+            if (found && (found.src.includes('stream-layer') || found.id === 'stream-layer-script')) {
+                scriptWithConfig = found;
+            }
         }
 
-        if (currentScript) {
-            console.log('[StreamLayer] Found script element:', currentScript);
-        } else {
-            console.error('[StreamLayer] Could not find script element with data-project-id');
-        }
+        if (scriptWithConfig && scriptWithConfig.dataset.projectId) {
+            console.log('[StreamLayer] Auto-initializing from script tag...');
+            const projectId = scriptWithConfig.dataset.projectId;
 
-        if (currentScript && currentScript.dataset.projectId) {
-            const projectId = currentScript.dataset.projectId;
             const containerId = currentScript.dataset.containerId || 'stream-layer-widget';
 
             console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);

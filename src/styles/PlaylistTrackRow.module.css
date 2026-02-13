@@ -114,6 +114,7 @@
 }
 
 /* Responsive: masquer la colonne album en dessous de 700px */
+/* Responsive: masquer la colonne album en dessous de 700px */
 @container (max-width: 700px) {
     .row {
         grid-template-columns: 40px 1fr 80px;
@@ -121,5 +122,50 @@
 
     .album {
         display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .row {
+        /* Mobile: Single column, let trackContent handle flex layout */
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md) var(--spacing-md);
+        gap: var(--spacing-md);
+        height: 72px;
+    }
+
+    .index,
+    .indexContent,
+    .album,
+    .duration {
+        display: none !important;
+    }
+
+    .title {
+        font-size: var(--font-size-md);
+    }
+
+    .artist {
+        font-size: var(--font-size-sm);
+    }
+
+    .cover {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-sm);
+    }
+
+    /* Disable hover effects on mobile */
+    .row:hover {
+        background: transparent;
+    }
+
+    .rowPlaying:hover {
+        background: var(--color-gray-200);
+    }
+
+    /* Ensure play icon stays hidden on mobile */
+    .row:hover .playIcon {
+        display: none !important;
     }
 }

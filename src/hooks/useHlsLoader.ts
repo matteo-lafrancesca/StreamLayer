@@ -103,8 +103,8 @@ export function useHlsLoader({
                 });
 
                 hls.on(Hls.Events.ERROR, (_event, data) => {
-                    // Check for 401 on Network Error (Token expired)
-                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR && data.response?.code === 401) {
+                    // Check for 401/403 on Network Error (Token expired)
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR && (data.response?.code === 401 || data.response?.code === 403)) {
                         if (authRetryCountRef.current < MAX_AUTH_RETRIES) {
                             console.log(`[HLS] Token 401 detected, refreshing... (Attempt ${authRetryCountRef.current + 1}/${MAX_AUTH_RETRIES})`);
                             authRetryCountRef.current++;

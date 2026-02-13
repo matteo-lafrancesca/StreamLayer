@@ -68,6 +68,7 @@ export async function staleWhileRevalidate<T>({
     cacheManager,
     key,
     fetcher,
+    onRevalidate,
 }: FetchOptions<T> & {
     onRevalidate?: (freshData: T) => void;
 }): Promise<T> {
@@ -75,9 +76,22 @@ export async function staleWhileRevalidate<T>({
     const cached = await cacheManager.get(key);
 
     // 2. Start background revalidation (don't await)
-    cacheManager.fetchWithDeduplication(key, fetcher).catch((err) => {
-        console.warn(`[staleWhileRevalidate] Background fetch failed for ${key}:`, err);
-    });
+    if (onRevalidate) {
+        cacheManager.fetchWithDeduplication(key, fetcher)
+            .then((freshData) => {
+                // Only notify if data actually changed
+                if (cached === null || JSON.stringify(cached) !== JSON.stringify(freshData)) {
+                    onRevalidate(freshData);
+                }
+            })
+            .catch((err) => {
+                console.warn(`[staleWhileRevalidate] Background fetch failed for ${key}:`, err);
+            });
+    } else {
+        cacheManager.fetchWithDeduplication(key, fetcher).catch((err) => {
+            console.warn(`[staleWhileRevalidate] Background fetch failed for ${key}:`, err);
+        });
+    }
 
     // 3. Return cached data immediately (or wait for network if no cache)
     if (cached !== null) {

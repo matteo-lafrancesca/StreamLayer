@@ -13,6 +13,10 @@ export function useScrollingAnimation(text: string, speed: number = 30) {
 
     useEffect(() => {
         const checkOverflow = () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+
             if (containerRef.current && contentRef.current) {
                 const containerWidth = containerRef.current.offsetWidth;
                 const contentWidth = contentRef.current.scrollWidth;
@@ -174,9 +178,16 @@ export function useScrollingAnimation(text: string, speed: number = 30) {
 
         checkOverflow();
 
-        window.addEventListener('resize', checkOverflow);
+        const resizeObserver = new ResizeObserver(() => {
+            checkOverflow();
+        });
+
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
         return () => {
-            window.removeEventListener('resize', checkOverflow);
+            resizeObserver.disconnect();
             if (animationRef.current) {
                 cancelAnimationFrame(animationRef.current);
             }

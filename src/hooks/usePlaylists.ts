@@ -49,6 +49,7 @@ export function usePlaylists(
         },
         enabled: !!projectId,
         cacheManager: playlistsCache,
+        strategy: 'stale-while-revalidate',
     });
 
     // Function to force refresh
