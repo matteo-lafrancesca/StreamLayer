@@ -60,29 +60,38 @@ export function useCachedData<T>({
     ...cacheOptions
 }: UseCachedDataOptions<T>): UseCachedDataResult<T> {
     const { authenticatedCall } = useApi(providedAccessToken);
-    const [data, setData] = useState<T | null>(null);
-    const [loading, setLoading] = useState(enabled && key !== null);
+
+    // 1. Get Cache Manager (Static)
+    const cacheManager = providedCacheManager ?? getCacheManager<T>('default', cacheOptions);
+
+    // 2. Synchronous check to avoid flicker on first render
+    const [data, setData] = useState<T | null>(() => {
+        if (!enabled || key === null) return null;
+        // This only works for memory cache, but it's enough to avoid most flickers
+        // @ts-ignore - reaching into memoryCache for sync check if possible
+        const memEntry = cacheManager.memoryCache?.get(String(key));
+        return memEntry ? memEntry.value : null;
+    });
+
+    const [loading, setLoading] = useState(() => {
+        if (!enabled || key === null) return false;
+        // If we have memory data, we are NOT loading initially (we might revalidate later)
+        // @ts-ignore
+        return !cacheManager.memoryCache?.has(String(key));
+    });
+
     const [error, setError] = useState<Error | null>(null);
     const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-    // Get or create cache manager
-    const cacheManager = providedCacheManager ?? getCacheManager<T>('default', cacheOptions);
-
-    // Stable fetcher ref
     const fetcherRef = useRef(fetcher);
-    useEffect(() => {
-        fetcherRef.current = fetcher;
-    }, [fetcher]);
+    useEffect(() => { fetcherRef.current = fetcher; }, [fetcher]);
 
-    // Stable authenticatedCall ref to avoid infinite loops
     const authenticatedCallRef = useRef(authenticatedCall);
-    useEffect(() => {
-        authenticatedCallRef.current = authenticatedCall;
-    }, [authenticatedCall]);
+    useEffect(() => { authenticatedCallRef.current = authenticatedCall; }, [authenticatedCall]);
 
     useEffect(() => {
         if (!enabled || key === null) {
-            if (enabled && key === null) setLoading(true);
+            setLoading(false);
             return;
         }
 
@@ -90,7 +99,10 @@ export function useCachedData<T>({
         let cancelled = false;
 
         const loadData = async () => {
-            setLoading(true);
+            // Only set loading if we don't already have data from a previous render
+            // or if it's an explicit re-fetch
+            const hasData = !!data;
+            if (!hasData) setLoading(true);
             setError(null);
 
             try {
@@ -102,10 +114,7 @@ export function useCachedData<T>({
                         key: cacheKey,
                         fetcher: () => authenticatedCallRef.current((token) => fetcherRef.current(token)),
                         onRevalidate: (freshData) => {
-                            // Update state when fresh data arrives from background fetch
-                            if (!cancelled) {
-                                setData(freshData);
-                            }
+                            if (!cancelled) setData(freshData);
                         },
                     });
                 } else {

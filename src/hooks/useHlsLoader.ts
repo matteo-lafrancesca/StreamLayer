@@ -39,6 +39,10 @@ export function useHlsLoader({
     const onStreamReadyRef = useRef(onStreamReady);
     useEffect(() => { onStreamReadyRef.current = onStreamReady; }, [onStreamReady]);
 
+    // Stable Token Ref to avoid HLS destruction on refresh
+    const accessTokenRef = useRef(accessToken);
+    useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
+
     // Constants
     const MAX_RETRIES = 2;
     const MAX_AUTH_RETRIES = 1;
@@ -83,10 +87,10 @@ export function useHlsLoader({
                     enableWorker: true,
                     lowLatencyMode: false,
 
-                    // ... inside useHlsLoader ...
                     xhrSetup: (xhr, url) => {
-                        if (accessToken) {
-                            const urlWithAuth = appendAuthToUrl(url, accessToken);
+                        const currentToken = accessTokenRef.current;
+                        if (currentToken) {
+                            const urlWithAuth = appendAuthToUrl(url, currentToken);
                             xhr.open('GET', urlWithAuth, true);
                         }
                     },
@@ -171,5 +175,5 @@ export function useHlsLoader({
                 hlsRef.current = null;
             }
         };
-    }, [trackId, accessToken, audioElement]);
+    }, [trackId, audioElement]); // removed accessToken from dependencies
 }

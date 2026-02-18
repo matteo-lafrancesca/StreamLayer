@@ -38,8 +38,6 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
 
     // Check if cover is loaded
     const coverUrl = useCover('album', playingTrack?.id_album, 's');
-    // Hide only if track exists but cover is not loaded yet
-    const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 
     // Stop propagation for interactive elements to prevent expansion
     const handleInteractiveClick = (e: React.MouseEvent) => {
@@ -82,7 +80,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
 
     return (
         <div
-            className={`${styles.mediaBar} ${isVisible ? styles.visible : styles.hidden}`}
+            className={styles.mediaBar}
             onClick={handleMainClick}
             title={isExpanded && currentView !== 'queue' ? "Réduire" : "Ouvrir le lecteur"}
         >

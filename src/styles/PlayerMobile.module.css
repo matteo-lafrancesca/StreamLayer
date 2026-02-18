@@ -8,15 +8,7 @@
     /* Allows children to behave normally */
 }
 
-@media (min-width: 751px) {
-    .playerContainer {
-        display: none !important;
-    }
 
-    .mobileWrapper {
-        display: none !important;
-    }
-}
 
 .player {
     /* Styles controlled by constants/mobilePlayerStyles.ts */

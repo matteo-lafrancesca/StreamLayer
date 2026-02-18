@@ -81,6 +81,39 @@ class TokenManager {
 
         return this.refreshPromise;
     }
+
+    /**
+     * Helper to wrap any async call with authentication and auto-refresh logic.
+     * Use this in the background services or hooks.
+     */
+    public async callWithAuth<T>(apiCall: (token: string) => Promise<T>): Promise<T> {
+        if (!this.accessToken) {
+            throw new Error('No access token available');
+        }
+
+        try {
+            // Try 1: Call with current token
+            return await apiCall(this.accessToken);
+        } catch (error: any) {
+            // Check for 401/403 (standard for this API)
+            const isAuthError =
+                (error?.status === 401 || error?.status === 403) ||
+                (error instanceof Error && (error.message.includes('401') || error.message.includes('403')));
+
+            if (isAuthError && this.refreshToken) {
+                try {
+                    console.log('[TokenManager] Token issue detected, attempting refresh...');
+                    const newToken = await this.refreshAccessToken();
+                    console.log('[TokenManager] Refresh successful, retrying call...');
+                    return await apiCall(newToken);
+                } catch (refreshError) {
+                    throw refreshError;
+                }
+            }
+
+            throw error;
+        }
+    }
 }
 
 export const tokenManager = TokenManager.getInstance();

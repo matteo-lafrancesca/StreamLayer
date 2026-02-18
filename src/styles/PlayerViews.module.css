@@ -36,11 +36,16 @@
     width: 100%;
 }
 
-/* Responsive: Smaller columns for mobile */
+/* Responsive: 2 columns for smaller screens */
 @media (max-width: 600px) {
     .contentGrid {
-        grid-template-columns: repeat(auto-fill, 160px);
-        gap: var(--spacing-md);
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+
+    .scrollContainer {
+        padding: var(--spacing-sm);
     }
 }
 

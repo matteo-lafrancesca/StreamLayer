@@ -51,14 +51,9 @@ export function useLazyPagination<T>({
     const [error, setError] = useState<Error | null>(null);
     const [totalCount, setTotalCount] = useState<number | null>(null);
 
-    const loadingRef = useRef(false);
     const currentOffsetRef = useRef(0);
-
-    // Store fetcher in ref to avoid infinite loop
     const fetcherRef = useRef(fetcher);
-    useEffect(() => {
-        fetcherRef.current = fetcher;
-    }, [fetcher]);
+    useEffect(() => { fetcherRef.current = fetcher; }, [fetcher]);
 
     useEffect(() => {
         if (!enabled || key === null) {
@@ -70,26 +65,20 @@ export function useLazyPagination<T>({
             return;
         }
 
-        // Reset for new key
-        loadingRef.current = false;
-        const isMounted = { current: true };
+        let cancelled = false;
 
-        if (loadingRef.current) return;
-        loadingRef.current = true;
+        const loadBatch = async (offset: number) => {
+            const isFirst = offset === 0;
 
-        const loadBatch = async (offset: number, isFirst: boolean) => {
             try {
-                if (isFirst && isMounted.current) {
+                if (isFirst) {
                     setLoading(true);
                     setError(null);
-                    setItems([]);
-                    setTotalCount(null);
-                    currentOffsetRef.current = 0;
                 }
 
                 const response = await fetcherRef.current(offset, batchSize);
 
-                if (!isMounted.current) return;
+                if (cancelled) return;
 
                 const actualTotal = expectedTotal ?? response.total;
 
@@ -99,43 +88,36 @@ export function useLazyPagination<T>({
                     setLoading(false);
                     currentOffsetRef.current = response.items.length;
                 } else {
-                    setItems((prevItems) => {
-                        const newItems = [...prevItems, ...response.items];
-                        currentOffsetRef.current = newItems.length;
-                        return newItems;
-                    });
+                    setItems((prev) => [...prev, ...response.items]);
+                    currentOffsetRef.current += response.items.length;
                 }
 
                 // Load next batch if needed
-                if (offset + response.items.length < actualTotal) {
-                    if (isFirst) {
-                        setLoadingMore(true);
-                    }
+                if (currentOffsetRef.current < actualTotal) {
+                    setLoadingMore(true);
+                    // Use a small delay to not block the main thread too much
                     setTimeout(() => {
-                        if (isMounted.current) {
-                            loadBatch(offset + batchSize, false);
-                        }
-                    }, 100);
+                        if (!cancelled) loadBatch(currentOffsetRef.current);
+                    }, 150);
                 } else {
                     setLoadingMore(false);
-                    loadingRef.current = false;
                 }
             } catch (err) {
-                if (!isMounted.current) return;
-                console.error('[useLazyPagination] Load error:', err);
-                setError(err instanceof Error ? err : new Error('Error loading data'));
-                setLoading(false);
-                setLoadingMore(false);
-                loadingRef.current = false;
+                if (!cancelled) {
+                    console.error('[useLazyPagination] Load error:', err);
+                    setError(err instanceof Error ? err : new Error('Error loading data'));
+                    setLoading(false);
+                    setLoadingMore(false);
+                }
             }
         };
 
-        loadBatch(0, true);
+        loadBatch(0);
 
         return () => {
-            isMounted.current = false;
+            cancelled = true;
         };
-    }, [key, batchSize, expectedTotal, enabled]); // Removed 'fetcher' from dependencies
+    }, [key, batchSize, expectedTotal, enabled]);
 
     const hasMore = totalCount !== null && items.length < totalCount;
 

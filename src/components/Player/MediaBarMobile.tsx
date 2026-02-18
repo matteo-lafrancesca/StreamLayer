@@ -32,12 +32,10 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
 
     // Check if cover is loaded
     const coverUrl = useCover('album', playingTrack?.id_album, 's');
-    // Hide if track exists but cover not loaded
-    const isVisible = useImageReadyState(playingTrack != null && !coverUrl);
 
     return (
         <div
-            className={`${styles.mediaBarMobile} ${isVisible ? styles.visible : styles.hidden}`}
+            className={styles.mediaBarMobile}
             onClick={handleExpand}
         >
             {/* Left: Cover + Track Info */}

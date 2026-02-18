@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Playlist } from '@definitions/playlist';
 import type { Track } from '@definitions/track';
 import { AuthenticatedImage } from '@components/Player/AuthenticatedImage';
@@ -13,7 +14,7 @@ interface PlaylistHeaderProps {
     onShufflePlay: () => void;
 }
 
-export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: PlaylistHeaderProps) {
+function PlaylistHeaderComponent({ playlist, tracks, onPlayAll, onShufflePlay }: PlaylistHeaderProps) {
     // Track count: always from playlist.nb_items to avoid progressive update
     const trackCount = playlist.nb_items;
 
@@ -66,3 +67,5 @@ export function PlaylistHeader({ playlist, tracks, onPlayAll, onShufflePlay }: P
         </div>
     );
 }
+
+export const PlaylistHeader = memo(PlaylistHeaderComponent);

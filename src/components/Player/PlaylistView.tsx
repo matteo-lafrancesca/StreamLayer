@@ -68,8 +68,9 @@ export function PlaylistView() {
     // Handler for shuffle play
     const handleShufflePlay = useCallback(() => {
         if (tracks && tracks.length > 0) {
-            // Play first track with shuffle enabled
-            playTrackFromPlaylist(0, tracks, { shuffle: true });
+            // Pick a random track index to start with
+            const randomIndex = Math.floor(Math.random() * tracks.length);
+            playTrackFromPlaylist(randomIndex, tracks, { shuffle: true });
         }
     }, [tracks, playTrackFromPlaylist]);
 

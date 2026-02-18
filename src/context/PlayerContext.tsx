@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode, type RefObject } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 import { usePlaybackControls } from '@hooks/usePlaybackControls';
@@ -8,6 +8,8 @@ import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
 import { useTrackPreloader } from '@hooks/useTrackPreloader';
 import { useAuth } from './AuthContext';
 import { usePlayerUI } from './PlayerUIContext';
+import { useReporting } from '@hooks/useReporting';
+import type { ReportingStatus } from '../types/Reporting';
 
 interface PlaybackControls {
     isShuffled: boolean;
@@ -79,6 +81,71 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     // Session Preloader (Preload next 5 tracks)
     useTrackPreloader(queueManager.queue, queueManager.currentIndex, accessToken);
 
+    // Reporting
+    const { trackEvent } = useReporting();
+    const lastTrackRef = useRef<Track | null>(null);
+    const lastEventRef = useRef<{ id: string; status: ReportingStatus } | null>(null);
+
+    const handleReport = useCallback((track: Track, status: ReportingStatus, time: number) => {
+        // Dedup logic for stopped (avoid double send on end + skip)
+        if (status === 'stopped' && lastEventRef.current?.id === String(track.id) && lastEventRef.current?.status === 'stopped') {
+            return;
+        }
+
+        lastEventRef.current = { id: String(track.id), status };
+
+        lastEventRef.current = { id: String(track.id), status };
+
+        trackEvent({
+            id: track.id,
+            container_type: 'list', // Default to list for now
+            id_container: playingFromPlaylist?.id || 0, // 0 if no container
+            full: true,
+            creation_datetime: Math.floor(Date.now() / 1000), // Seconds
+            device_type: 'web',
+            online: navigator.onLine,
+            status,
+            time: Math.floor(time),
+            format: 'low',
+            current_position: Math.floor(audioPlayer.audioRef.current?.currentTime || 0),
+            play_mode: 'online',
+            territory_code: 'FR', // Defaulting to FR
+        });
+    }, [trackEvent]);
+
+    const handlePlay = useCallback(() => {
+        if (!playingTrack) return;
+        const currentTime = audioPlayer.audioRef.current?.currentTime || 0;
+        // Logic: if near 0, started, else resume.
+        // Tolerance 1s to account for minor seek or latency
+        const status: ReportingStatus = currentTime < 1 ? 'started' : 'resume';
+        // Spec says: if started, time = 0.
+        const time = status === 'started' ? 0 : currentTime;
+
+        handleReport(playingTrack, status, time);
+    }, [playingTrack, handleReport]); // audioPlayer ref is stable-ish
+
+    const handlePause = useCallback(() => {
+        if (!playingTrack) return;
+        const currentTime = audioPlayer.audioRef.current?.currentTime || 0;
+        handleReport(playingTrack, 'paused', currentTime);
+    }, [playingTrack, handleReport]);
+
+    const handleStop = useCallback((time: number) => {
+        // Determine which track stopped
+        // If we in rotation (render), playingTrack is NEW, lastTrackRef is OLD.
+        // If we in onEnded (event), playingTrack is CURRENT (same as lastTrackRef).
+
+        const trackToReport = (playingTrack?.id !== lastTrackRef.current?.id)
+            ? lastTrackRef.current
+            : playingTrack;
+
+        if (trackToReport) {
+            handleReport(trackToReport, 'stopped', time);
+        }
+    }, [playingTrack, handleReport]);
+
+
     // Audio player with HLS support
     const nextTrack = queueManager.queue[queueManager.currentIndex + 1];
     const prevTrack = queueManager.queue[queueManager.currentIndex - 1];
@@ -112,6 +179,9 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
                 queueManager.playNext();
             }
         },
+        onPlay: handlePlay,
+        onPause: handlePause,
+        onStop: handleStop,
     });
 
 
@@ -204,6 +274,11 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onNext: playbackControlsHook.handleNext,
         onRepeat: playbackControlsHook.handleRepeat,
     }), [playbackControlsHook]);
+
+    // Update lastTrackRef for reporting detection
+    useEffect(() => {
+        lastTrackRef.current = playingTrack;
+    }, [playingTrack]);
 
 
     const contextValue = useMemo(() => ({

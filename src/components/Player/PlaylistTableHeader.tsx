@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import styles from '@styles/PlaylistTableHeader.module.css';
 
-export function PlaylistTableHeader() {
+function PlaylistTableHeaderComponent() {
     return (
         <div className={styles.header}>
             <div className={styles.indexColumn}>#</div>
@@ -22,3 +23,5 @@ export function PlaylistTableHeader() {
         </div>
     );
 }
+
+export const PlaylistTableHeader = memo(PlaylistTableHeaderComponent);

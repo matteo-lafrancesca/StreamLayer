@@ -129,6 +129,17 @@ export class CacheManager<T> {
     }
 
     /**
+     * Check if a cache entry is stale (older than staleTime)
+     * @param key - Cache key
+     * @param staleTime - Time in ms before entry is considered stale
+     */
+    isStale(key: string, staleTime: number): boolean {
+        const entry = this.memoryCache.get(key);
+        if (!entry) return true;
+        return Date.now() - entry.timestamp > staleTime;
+    }
+
+    /**
      * Deduplicate in-flight requests
      * If a request is already in progress, return the same promise
      */

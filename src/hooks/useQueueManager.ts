@@ -1,5 +1,23 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useReducer, useCallback, useMemo } from 'react';
 import type { Track } from '@definitions/track';
+
+interface QueueState {
+    currentIndex: number;
+    isShuffled: boolean;
+    repeatMode: 'off' | 'all' | 'one';
+    originalTracks: Track[];
+    shuffledTracks: Track[];
+}
+
+type QueueAction =
+    | { type: 'SET_QUEUE'; tracks: Track[]; startIndex: number; shuffle?: boolean; keepState?: boolean }
+    | { type: 'PLAY_NEXT' }
+    | { type: 'PLAY_PREVIOUS' }
+    | { type: 'TOGGLE_SHUFFLE' }
+    | { type: 'TOGGLE_REPEAT' }
+    | { type: 'PLAY_INDEX'; index: number }
+    | { type: 'PLAY_ID'; trackId: number }
+    | { type: 'REORDER'; oldIndex: number; newIndex: number };
 
 interface UseQueueManagerProps {
     tracks: Track[] | null;
@@ -31,221 +49,194 @@ interface UseQueueManagerReturn {
  */
 function shuffleArray(array: Track[], currentTrack: Track | null): Track[] {
     const shuffled = [...array];
-
-    // Place current track at index 0
     if (currentTrack) {
         const currentIndex = shuffled.findIndex(t => t.id === currentTrack.id);
         if (currentIndex > 0) {
             [shuffled[0], shuffled[currentIndex]] = [shuffled[currentIndex], shuffled[0]];
         }
     }
-
-    // Shuffle from index 1 onwards
     for (let i = shuffled.length - 1; i > 1; i--) {
-        const j = Math.floor(Math.random() * i) + 1;
+        const j = Math.floor(Math.random() * (i)) + 1;
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-
     return shuffled;
 }
+
+function queueReducer(state: QueueState, action: QueueAction): QueueState {
+    const activeList = state.isShuffled ? state.shuffledTracks : state.originalTracks;
+    const currentTrack = activeList[state.currentIndex] || null;
+
+    switch (action.type) {
+        case 'SET_QUEUE': {
+            const { tracks, startIndex, shuffle, keepState } = action;
+
+            if (keepState) {
+                if (state.isShuffled) {
+                    const exists = tracks.find(t => t.id === currentTrack?.id);
+                    if (exists) {
+                        return {
+                            ...state,
+                            originalTracks: tracks,
+                            shuffledTracks: shuffleArray(tracks, exists),
+                            currentIndex: 0
+                        };
+                    }
+                } else {
+                    const newIndex = tracks.findIndex(t => t.id === currentTrack?.id);
+                    return {
+                        ...state,
+                        originalTracks: tracks,
+                        currentIndex: newIndex !== -1 ? newIndex : startIndex
+                    };
+                }
+            }
+
+            return {
+                ...state,
+                originalTracks: tracks,
+                shuffledTracks: shuffleArray(tracks, tracks[startIndex] || null),
+                currentIndex: startIndex,
+                isShuffled: shuffle ?? false
+            };
+        }
+
+        case 'PLAY_NEXT': {
+            let nextRepeatMode = state.repeatMode;
+            let nextIndex = state.currentIndex;
+            const total = activeList.length;
+
+            if (state.repeatMode === 'one') {
+                nextRepeatMode = 'all';
+            }
+
+            if (state.currentIndex < total - 1) {
+                nextIndex = state.currentIndex + 1;
+            } else if (nextRepeatMode === 'all') {
+                nextIndex = 0;
+            }
+
+            return { ...state, currentIndex: nextIndex, repeatMode: nextRepeatMode };
+        }
+
+        case 'PLAY_PREVIOUS': {
+            let nextIndex = state.currentIndex;
+            const total = activeList.length;
+
+            if (state.currentIndex > 0) {
+                nextIndex = state.currentIndex - 1;
+            } else if (state.repeatMode === 'all') {
+                nextIndex = total - 1;
+            }
+
+            return { ...state, currentIndex: nextIndex };
+        }
+
+        case 'TOGGLE_SHUFFLE': {
+            const willShuffle = !state.isShuffled;
+            if (willShuffle) {
+                const newShuffled = shuffleArray(state.originalTracks, currentTrack);
+                return { ...state, isShuffled: true, shuffledTracks: newShuffled, currentIndex: 0 };
+            } else {
+                const originalIndex = currentTrack
+                    ? state.originalTracks.findIndex(t => t.id === currentTrack.id)
+                    : 0;
+                return { ...state, isShuffled: false, currentIndex: Math.max(0, originalIndex) };
+            }
+        }
+
+        case 'TOGGLE_REPEAT': {
+            const modes: ('off' | 'all' | 'one')[] = ['off', 'all', 'one'];
+            const nextMode = modes[(modes.indexOf(state.repeatMode) + 1) % 3];
+            return { ...state, repeatMode: nextMode };
+        }
+
+        case 'PLAY_INDEX': {
+            if (action.index >= 0 && action.index < activeList.length) {
+                return { ...state, currentIndex: action.index };
+            }
+            return state;
+        }
+
+        case 'PLAY_ID': {
+            const index = activeList.findIndex(t => t.id === action.trackId);
+            if (index !== -1) {
+                return { ...state, currentIndex: index };
+            }
+            return state;
+        }
+
+        case 'REORDER': {
+            const { oldIndex, newIndex } = action;
+            if (oldIndex === newIndex) return state;
+
+            const listKey = state.isShuffled ? 'shuffledTracks' : 'originalTracks';
+            const newList = [...state[listKey]];
+            const [removed] = newList.splice(oldIndex, 1);
+            newList.splice(newIndex, 0, removed);
+
+            let nextIndex = state.currentIndex;
+            if (oldIndex === state.currentIndex) {
+                nextIndex = newIndex;
+            } else if (oldIndex < state.currentIndex && newIndex >= state.currentIndex) {
+                nextIndex = state.currentIndex - 1;
+            } else if (oldIndex > state.currentIndex && newIndex <= state.currentIndex) {
+                nextIndex = state.currentIndex + 1;
+            }
+
+            return { ...state, [listKey]: newList, currentIndex: nextIndex };
+        }
+
+        default:
+            return state;
+    }
+}
+
+const initialState: QueueState = {
+    currentIndex: 0,
+    isShuffled: false,
+    repeatMode: 'off',
+    originalTracks: [],
+    shuffledTracks: [],
+};
 
 /**
  * Hook to manage track queue and navigation
  * Handles shuffle, repeat modes, next/previous logic
  */
 export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerReturn {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isShuffled, setIsShuffled] = useState(false);
-    const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
-    const [originalTracks, setOriginalTracks] = useState<Track[]>([]);
-    const [shuffledTracks, setShuffledTracks] = useState<Track[]>([]);
-
-    // Use refs to avoid dependency issues in callbacks
-    const shuffledTracksRef = useRef<Track[]>([]);
-    const originalTracksRef = useRef<Track[]>([]);
-    const currentIndexRef = useRef<number>(0);
-
-    // Keep refs in sync with state (single useEffect to minimize hook count)
-    useEffect(() => {
-        shuffledTracksRef.current = shuffledTracks;
-        originalTracksRef.current = originalTracks;
-        currentIndexRef.current = currentIndex;
-    }, [shuffledTracks, originalTracks, currentIndex]);
+    const [state, dispatch] = useReducer(queueReducer, initialState);
 
     // Active track list (shuffled or original)
     const activeTrackList = useMemo(() => {
-        return isShuffled ? shuffledTracks : originalTracks;
-    }, [isShuffled, shuffledTracks, originalTracks]);
+        return state.isShuffled ? state.shuffledTracks : state.originalTracks;
+    }, [state.isShuffled, state.shuffledTracks, state.originalTracks]);
 
-    // Current track
-    const currentTrack = useMemo(() => {
-        return activeTrackList[currentIndex] || null;
-    }, [activeTrackList, currentIndex]);
-
-    // Total tracks
+    const currentTrack = activeTrackList[state.currentIndex] || null;
     const totalTracks = activeTrackList.length;
 
-    // Can play next/previous
-    const canPlayNext = repeatMode === 'all' || repeatMode === 'one' || currentIndex < totalTracks - 1;
-    const canPlayPrevious = repeatMode === 'all' || currentIndex > 0;
+    // Derived states
+    const canPlayNext = state.repeatMode === 'all' || state.repeatMode === 'one' || state.currentIndex < totalTracks - 1;
+    const canPlayPrevious = state.repeatMode === 'all' || state.currentIndex > 0;
 
-    // Set queue (called when playlist changes or loads)
+    // Callbacks
     const setQueue = useCallback((newTracks: Track[], startIndex: number = 0, options: { keepState?: boolean; shuffle?: boolean } = {}) => {
-        setOriginalTracks(newTracks);
-
-        if (options.keepState) {
-            // Update mode: preserve shuffle and current track/index if possible
-            if (isShuffled) {
-                const current = shuffledTracksRef.current[currentIndexRef.current];
-                const exists = newTracks.find(t => t.id === current?.id);
-
-                if (exists) {
-                    // Re-shuffle everything
-                    const newShuffled = shuffleArray(newTracks, exists);
-                    setShuffledTracks(newShuffled);
-                    setCurrentIndex(0);
-                } else {
-                    // Current track removed? Fallback to standard reset
-                    setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
-                    setCurrentIndex(startIndex);
-                }
-            } else {
-                // Not shuffled: Find where the current track is in the new list
-                const current = originalTracksRef.current[currentIndexRef.current];
-                const newIndex = newTracks.findIndex(t => t.id === current?.id);
-                setCurrentIndex(newIndex !== -1 ? newIndex : startIndex);
-            }
-        } else {
-            // Default reset
-            setOriginalTracks(newTracks);
-            setShuffledTracks(shuffleArray(newTracks, newTracks[startIndex] || null));
-            setCurrentIndex(startIndex);
-            setIsShuffled(options.shuffle ?? false);
-        }
-    }, [isShuffled]);
-
-    // Play next track
-    const playNext = useCallback(() => {
-        let effectiveRepeatMode = repeatMode;
-
-        if (repeatMode === 'one') {
-            // User requested skip while in 'repeat one': switch to 'repeat all' and skip
-            setRepeatMode('all');
-            effectiveRepeatMode = 'all';
-        }
-
-        if (currentIndex < totalTracks - 1) {
-            setCurrentIndex(prev => prev + 1);
-        } else if (effectiveRepeatMode === 'all') {
-            setCurrentIndex(0); // Loop to start
-        }
-        // If repeat is 'off' and we're at the end, don't change index
-    }, [currentIndex, totalTracks, repeatMode]);
-
-    // Play previous track (restart if > 3s into current track)
-    // Play previous track
-    const playPrevious = useCallback(() => {
-        if (currentIndex > 0) {
-            setCurrentIndex(prev => prev - 1);
-        } else if (repeatMode === 'all') {
-            setCurrentIndex(totalTracks - 1); // Loop to end
-        }
-        // If at the start and repeat is 'off', do nothing (PlayerContext handles seek to 0 if needed)
-    }, [currentIndex, totalTracks, repeatMode]);
-
-    // Toggle shuffle
-    const toggleShuffle = useCallback(() => {
-        setIsShuffled(prev => {
-            const newShuffled = !prev;
-
-            if (newShuffled) {
-                // Switching to shuffle
-                const newShuffledList = shuffleArray(originalTracks, currentTrack);
-                setShuffledTracks(newShuffledList);
-                setCurrentIndex(0); // Current track is now at index 0
-            } else {
-                // Switching back to original order
-                if (currentTrack) {
-                    const originalIndex = originalTracks.findIndex(t => t.id === currentTrack.id);
-                    setCurrentIndex(Math.max(0, originalIndex));
-                }
-            }
-
-            return newShuffled;
-        });
-    }, [originalTracks, currentTrack]);
-
-    // Reorder queue (for drag & drop)
-    const reorderQueue = useCallback((oldIndex: number, newIndex: number) => {
-        if (oldIndex === newIndex) return;
-
-        if (isShuffled) {
-            setShuffledTracks(prev => {
-                const newQueue = [...prev];
-                const [removed] = newQueue.splice(oldIndex, 1);
-                newQueue.splice(newIndex, 0, removed);
-
-                // Update current index if the current track moved
-                if (oldIndex === currentIndex) {
-                    setCurrentIndex(newIndex);
-                } else if (oldIndex < currentIndex && newIndex >= currentIndex) {
-                    setCurrentIndex(prevIndex => prevIndex - 1);
-                } else if (oldIndex > currentIndex && newIndex <= currentIndex) {
-                    setCurrentIndex(prevIndex => prevIndex + 1);
-                }
-
-                return newQueue;
-            });
-        } else {
-            setOriginalTracks(prev => {
-                const newQueue = [...prev];
-                const [removed] = newQueue.splice(oldIndex, 1);
-                newQueue.splice(newIndex, 0, removed);
-
-                // Update current index if the current track moved
-                if (oldIndex === currentIndex) {
-                    setCurrentIndex(newIndex);
-                } else if (oldIndex < currentIndex && newIndex >= currentIndex) {
-                    setCurrentIndex(prevIndex => prevIndex - 1);
-                } else if (oldIndex > currentIndex && newIndex <= currentIndex) {
-                    setCurrentIndex(prevIndex => prevIndex + 1);
-                }
-
-                return newQueue;
-            });
-        }
-    }, [isShuffled, currentIndex]);
-
-    // Toggle repeat mode
-    const toggleRepeat = useCallback(() => {
-        setRepeatMode(prev => {
-            if (prev === 'off') return 'all';
-            if (prev === 'all') return 'one';
-            return 'off';
-        });
+        dispatch({ type: 'SET_QUEUE', tracks: newTracks, startIndex, ...options });
     }, []);
 
-    // Play specific track by index
-    const playTrackAtIndex = useCallback((index: number) => {
-        if (index >= 0 && index < totalTracks) {
-            setCurrentIndex(index);
-        }
-    }, [totalTracks]);
-
-    // Play track by ID (for manual track selection from UI)
-    const playTrackById = useCallback((trackId: number) => {
-        const index = activeTrackList.findIndex(t => t.id === trackId);
-        if (index >= 0) {
-            setCurrentIndex(index);
-        }
-    }, [activeTrackList]);
+    const playNext = useCallback(() => dispatch({ type: 'PLAY_NEXT' }), []);
+    const playPrevious = useCallback(() => dispatch({ type: 'PLAY_PREVIOUS' }), []);
+    const toggleShuffle = useCallback(() => dispatch({ type: 'TOGGLE_SHUFFLE' }), []);
+    const toggleRepeat = useCallback(() => dispatch({ type: 'TOGGLE_REPEAT' }), []);
+    const playTrackAtIndex = useCallback((index: number) => dispatch({ type: 'PLAY_INDEX', index }), []);
+    const playTrackById = useCallback((trackId: number) => dispatch({ type: 'PLAY_ID', trackId }), []);
+    const reorderQueue = useCallback((oldIndex: number, newIndex: number) => dispatch({ type: 'REORDER', oldIndex, newIndex }), []);
 
     return useMemo(() => ({
         currentTrack,
-        currentIndex,
+        currentIndex: state.currentIndex,
         totalTracks,
-        isShuffled,
-        repeatMode,
+        isShuffled: state.isShuffled,
+        repeatMode: state.repeatMode,
         canPlayNext,
         canPlayPrevious,
         playNext,
@@ -259,10 +250,10 @@ export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerRetur
         queue: activeTrackList,
     }), [
         currentTrack,
-        currentIndex,
+        state.currentIndex,
         totalTracks,
-        isShuffled,
-        repeatMode,
+        state.isShuffled,
+        state.repeatMode,
         canPlayNext,
         canPlayPrevious,
         playNext,

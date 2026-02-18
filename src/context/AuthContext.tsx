@@ -17,7 +17,11 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ projectId, children }: AuthProviderProps) {
-    const { accessToken, refreshToken, setAccessToken, setRefreshToken } = useAuthTokens({ projectId });
+    const { accessToken, refreshToken, setAccessToken, setRefreshToken, isLoading } = useAuthTokens({ projectId });
+
+    if (isLoading) {
+        return null;
+    }
 
     return (
         <AuthContext.Provider

@@ -9,6 +9,7 @@ interface UseAuthTokensProps {
 interface UseAuthTokensReturn {
     accessToken: string | null;
     refreshToken: string | null;
+    isLoading: boolean;
     setAccessToken: (token: string | null) => void;
     setRefreshToken: (token: string | null) => void;
 }
@@ -21,6 +22,7 @@ interface UseAuthTokensReturn {
 export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensReturn {
     const [accessToken, setAccessToken] = useState<string | null>(tokenManager.getAccessToken());
     const [refreshToken, setRefreshToken] = useState<string | null>(tokenManager.getRefreshToken());
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Initialize projectId in manager
@@ -40,6 +42,9 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
             })
             .catch((error) => {
                 console.error('Error retrieving tokens:', error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
 
         return () => {
@@ -50,6 +55,7 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
     return {
         accessToken,
         refreshToken,
+        isLoading,
         // Manual setters update local state,
         // ideally we should go through the manager for any global change
         setAccessToken,

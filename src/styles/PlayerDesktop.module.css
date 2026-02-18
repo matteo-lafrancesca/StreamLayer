@@ -10,11 +10,7 @@
     /* No default transition on position properties to allow instant drag/drop updates */
 }
 
-@media (max-width: 750px) {
-    .playerContainer {
-        display: none !important;
-    }
-}
+
 
 .player {
     width: var(--player-width-desktop);
