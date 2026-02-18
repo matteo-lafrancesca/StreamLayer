@@ -3,6 +3,7 @@ import { PlayerProvider } from '@context/PlayerContext';
 import { AuthProvider } from '@context/AuthContext';
 import { PlayerUIProvider } from '@context/PlayerUIContext';
 import { Player } from '@components/Player/Player';
+import { useBackButton } from '@hooks/useBackButton';
 import type { ThemeConfig } from '../types/Theme';
 import { generateThemeVariables } from '../utils/theme';
 import { themes, defaultTheme } from '../config/themes';
@@ -22,6 +23,9 @@ export interface StreamLayerProps {
  * Wrap your app or content with this component.
  */
 export function StreamLayer({ projectId, children, theme }: StreamLayerProps) {
+    // Handle native back button navigation
+    useBackButton();
+
     const themeStyles = useMemo(() => {
         let themeConfig: ThemeConfig | undefined;
 

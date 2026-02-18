@@ -1,7 +1,5 @@
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
-import { useCover } from '@hooks/useCover';
-import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
 import { Play, Pause } from 'lucide-react';
@@ -17,7 +15,6 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     const {
         isPlaying,
         setIsPlaying,
-        playingTrack,
     } = usePlayer();
     const { setCurrentView, isExpanded, currentView } = usePlayerUI();
 
@@ -31,7 +28,7 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     };
 
     // Check if cover is loaded
-    const coverUrl = useCover('album', playingTrack?.id_album, 's');
+    // const coverUrl = useCover('album', playingTrack?.id_album, 's');
 
     return (
         <div

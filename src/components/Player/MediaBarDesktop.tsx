@@ -1,8 +1,6 @@
 import { usePlayer } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { useCompactMode } from '@hooks/useCompactMode';
-import { useCover } from '@hooks/useCover';
-import { useImageReadyState } from '@hooks/useImageReadyState';
 import { TrackDisplay } from './TrackDisplay';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
@@ -24,7 +22,6 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         volume,
         setVolume,
         playbackControls,
-        playingTrack,
     } = usePlayer();
 
     const {
@@ -37,7 +34,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
     const { enableCompactMode } = useCompactMode();
 
     // Check if cover is loaded
-    const coverUrl = useCover('album', playingTrack?.id_album, 's');
+    // const coverUrl = useCover('album', playingTrack?.id_album, 's');
 
     // Stop propagation for interactive elements to prevent expansion
     const handleInteractiveClick = (e: React.MouseEvent) => {
