@@ -6,14 +6,13 @@ interface UseTrackNavigationProps {
     minSwipeDistance?: number;
 }
 
-export function useTrackNavigation({ minSwipeDistance = 50 }: UseTrackNavigationProps = {}) {
+export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationProps = {}) {
     const { playingTrack, playbackControls, queue } = usePlayer();
 
     // Optimistic UI state
     const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | null>(null);
     const [optimisticTrack, setOptimisticTrack] = useState<Track | null>(null);
 
-    // Swipe refs
     // Swipe refs
     const touchStartX = useRef<number | null>(null);
     const touchStartY = useRef<number | null>(null);
@@ -45,13 +44,17 @@ export function useTrackNavigation({ minSwipeDistance = 50 }: UseTrackNavigation
         const dx = touchStartX.current - touchEndX.current; // + = Left Swipe, - = Right Swipe
         const dy = touchStartY.current - touchEndY.current;
 
-        // Strict vertical check: If the user moved vertically more than 30px (scrolling/dismissing), 
-        // we disable the track switch to prevent accidental skips.
-        // User request: "If the window folds, it's impossible to change track" -> No comparison, just strict veto.
-        if (Math.abs(dy) > 30) return;
+        console.log(`[SwipeDebug] dx: ${dx}, dy: ${dy}, min: ${minSwipeDistance}`);
 
-        // Also keep directional lock for smaller movements
-        if (Math.abs(dy) > Math.abs(dx)) return;
+        // Vertical vs Horizontal logic:
+        // We allow swipe only if horizontal movement is dominant and clearly intentional.
+        if (Math.abs(dx) < minSwipeDistance) return;
+
+        // Veto if vertical movement is too significant (relaxed to 2x horizontal)
+        if (Math.abs(dy) > Math.abs(dx) * 2) {
+            console.log('[SwipeDebug] Vetoed by vertical movement');
+            return;
+        }
 
         const isLeftSwipe = dx > minSwipeDistance;
         const isRightSwipe = dx < -minSwipeDistance;

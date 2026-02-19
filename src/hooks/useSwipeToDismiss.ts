@@ -101,15 +101,15 @@ export function useSwipeToDismiss({
                     sheet.style.transition = 'transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1)';
                     sheet.style.transform = 'translateY(100%)';
                 }
-                // Small delay to let animation complete
-                setTimeout(() => {
-                    onClose();
-                    // Reset styles after close
-                    if (sheet) {
-                        sheet.style.transform = '';
-                        sheet.style.transition = '';
-                    }
-                }, 300);
+
+                // Call onClose immediately to trigger state change (which should set isOpen=false)
+                onClose();
+
+                // CRITICAL: We DO NOT clean up the manual transform here.
+                // We leave the element at translateY(100%) manually.
+                // The useEffect at the top of this hook will clean it up when isOpen becomes true again.
+                // This prevents the "flash" or "rebound" effect where the manual style is removed
+                // before the CSS class has fully taken over or while the component is unmounting/remounting.
             } else {
                 // Snap back to open position
                 if (sheet) {

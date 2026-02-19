@@ -24,6 +24,7 @@
     justify-content: center;
     align-items: center;
     margin: var(--spacing-lg) 0 var(--spacing-xl) 0;
+    touch-action: none;
 }
 
 .coverLarge {

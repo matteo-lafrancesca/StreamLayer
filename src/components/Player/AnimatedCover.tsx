@@ -19,28 +19,32 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
     const [animating, setAnimating] = useState(false);
     const timeoutRef = useRef<number | null>(null);
 
-    // 1. Derived State: Detect change and update state immediately (during render)
-    if (track?.id !== displayTrack?.id) {
-        if (direction) {
-            setPrevTrack(displayTrack);
-            setDisplayTrack(track);
-            setAnimating(true);
-        } else {
-            setDisplayTrack(track);
-        }
-    }
-
-    // 2. Effect: Handle animation cleanup side-effect
+    // 1. Detect change and animate
     useEffect(() => {
-        if (animating) {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            timeoutRef.current = window.setTimeout(() => {
+        if (track?.id !== displayTrack?.id) {
+            if (direction) {
+                // If we have a direction, animate
+                setPrevTrack(displayTrack);
+                setDisplayTrack(track);
+                setAnimating(true);
+
+                // Clear previous timeout if exists
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+                // Set new timeout for cleanup
+                timeoutRef.current = window.setTimeout(() => {
+                    setAnimating(false);
+                    setPrevTrack(null);
+                    if (onAnimationEnd) onAnimationEnd();
+                }, 300);
+            } else {
+                // No direction (e.g. initial load or jump), just update immediately
+                setDisplayTrack(track);
                 setAnimating(false);
                 setPrevTrack(null);
-                if (onAnimationEnd) onAnimationEnd();
-            }, 300);
+            }
         }
-    }, [animating, onAnimationEnd]);
+    }, [track, direction, displayTrack, onAnimationEnd]);
 
     // Cleanup
     useEffect(() => {

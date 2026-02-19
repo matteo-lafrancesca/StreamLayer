@@ -258,10 +258,18 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager]);
 
     // Auto-play when track changes
+    const hasUserInteractedRef = useRef(false);
+
     useEffect(() => {
         if (playingTrack) {
-            // Reset logic is handled locally or by audio player
+            // On iOS/Web, autoplay is often blocked unless there's an interaction.
+            // We set isPlaying to true, but the actual play() call in useAudioPlayer 
+            // will handle the catch() if blocked.
+            
+            // If it's a cold start (no user interaction yet), we might want to be careful,
+            // but setting setIsPlaying(true) here is intended to start the flow.
             setIsPlaying(true);
+            hasUserInteractedRef.current = true;
         }
     }, [playingTrack?.id]);
 

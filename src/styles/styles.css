@@ -12,6 +12,7 @@
   box-sizing: border-box;
 
   /* Defend against host styles leaking in */
+  touch-action: manipulation;
   text-align: left;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
