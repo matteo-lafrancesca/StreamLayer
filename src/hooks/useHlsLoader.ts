@@ -68,8 +68,8 @@ export function useHlsLoader({
             return;
         }
 
-        // Don't pass accessToken here, let xhrSetup handle it to avoid double-auth params
-        const streamUrl = getTrackStreamUrl(trackId);
+        // Include token for native playback (iOS) which doesn't use xhrSetup
+        const streamUrl = getTrackStreamUrl(trackId, accessTokenRef.current || undefined);
         console.log('[HLS] Loading stream:', streamUrl);
 
         if (!streamUrl) {
