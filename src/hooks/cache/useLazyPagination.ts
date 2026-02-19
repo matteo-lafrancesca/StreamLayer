@@ -56,12 +56,15 @@ export function useLazyPagination<T>({
     useEffect(() => { fetcherRef.current = fetcher; }, [fetcher]);
 
     useEffect(() => {
+        // Reset on key change or disabled
+        setItems([]);
+        setTotalCount(null);
+        setLoading(false);
+        setLoadingMore(false);
+        setError(null);
+        currentOffsetRef.current = 0;
+
         if (!enabled || key === null) {
-            setItems([]);
-            setTotalCount(null);
-            setLoading(false);
-            setLoadingMore(false);
-            currentOffsetRef.current = 0;
             return;
         }
 

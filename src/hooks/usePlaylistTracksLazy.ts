@@ -58,6 +58,10 @@ export function usePlaylistTracksLazy(
             return;
         }
 
+        // Reset state when key changes
+        setCachedTracks(null);
+        setCacheChecked(false);
+
         const checkCache = async () => {
             // Try to get from cache first
             const cached = await playlistTracksCache.get(cacheKey);
