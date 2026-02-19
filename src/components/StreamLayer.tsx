@@ -23,9 +23,6 @@ export interface StreamLayerProps {
  * Wrap your app or content with this component.
  */
 export function StreamLayer({ projectId, children, theme }: StreamLayerProps) {
-    // Handle native back button navigation
-    useBackButton();
-
     const themeStyles = useMemo(() => {
         let themeConfig: ThemeConfig | undefined;
 
@@ -42,6 +39,7 @@ export function StreamLayer({ projectId, children, theme }: StreamLayerProps) {
         <div className="sl-root" style={themeStyles}>
             <AuthProvider projectId={projectId}>
                 <PlayerUIProvider>
+                    <BackButtonHandler />
                     <PlayerProvider>
                         {children}
                         <Player />
@@ -50,4 +48,9 @@ export function StreamLayer({ projectId, children, theme }: StreamLayerProps) {
             </AuthProvider>
         </div>
     );
+}
+
+function BackButtonHandler() {
+    useBackButton();
+    return null;
 }
