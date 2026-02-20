@@ -137,6 +137,15 @@
     container-name: playlist-container;
 }
 
+/* On mobile, we use the parent (data-scrollable) for scrolling to avoid double-scrolling issues 
+   and allow the BottomSheet swipe-to-dismiss to work correctly. */
+@media (max-width: 768px) {
+    .scrollContainer {
+        overflow-y: visible;
+        flex: none;
+    }
+}
+
 .contentList {
     display: flex;
     flex-direction: column;

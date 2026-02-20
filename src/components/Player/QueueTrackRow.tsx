@@ -35,14 +35,14 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: 1, // Keep full opacity even when dragging
-        touchAction: 'none',
+        touchAction: 'pan-y',
     };
 
     // Override style if it's an overlay (pure visual) - don't spread style to avoid inherited opacity
     const finalStyle = isOverlay ? {
         cursor: 'grabbing',
-        touchAction: 'none',
         opacity: 1,
+        touchAction: 'none',
     } : style;
 
     return (

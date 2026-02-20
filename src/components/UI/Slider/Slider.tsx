@@ -26,7 +26,7 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         onChange(newValue);
     }, [onChange]);
 
-    const { ref, handleMouseDown, isDragging } = useSlider(handleSliderChange, onDragStart, onDragEnd);
+    const { ref, handleMouseDown, handleTouchStart, isDragging } = useSlider(handleSliderChange, onDragStart, onDragEnd);
 
     // Sync local state with props, UNLESS user is dragging
     // Prevents global timer from jumping cursor during interaction
@@ -52,7 +52,12 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         .join(' ');
 
     return (
-        <div ref={ref} className={containerClasses} onMouseDown={handleMouseDown}>
+        <div
+            ref={ref}
+            className={containerClasses}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+        >
             <div className={trackClasses}>
                 <div className={fillClasses} style={{ width: `${localValue}%` }}>
                     {showThumb && <div className={thumbClasses} />}

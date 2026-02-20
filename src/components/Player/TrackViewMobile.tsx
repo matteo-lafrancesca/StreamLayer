@@ -7,7 +7,7 @@ import { ScrollingText } from './ScrollingText';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
 import { IconButton } from '@components/UI';
-import { ListMusic, ListVideo } from 'lucide-react';
+import { ListMusic, ChevronDown, ListVideo } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/TrackViewMobile.module.css';
 
@@ -31,6 +31,7 @@ export function TrackViewMobile() {
         setIsSeeking,
         setCurrentView,
         selectedPlaylist,
+        setIsExpanded,
     } = usePlayerUI();
 
     // Swipe & Navigation Logic
@@ -47,6 +48,23 @@ export function TrackViewMobile() {
 
     return (
         <div className={styles.trackViewMobile}>
+            {/* Header Section */}
+            <div className={styles.header}>
+                <IconButton
+                    icon={<ChevronDown size={PLAYER_SIZES.MOBILE.CHEVRON} />}
+                    onClick={() => setIsExpanded(false)}
+                    className={styles.dismissButton}
+                    title="Fermer"
+                />
+                <div className={styles.headerInfo}>
+                    <span className={styles.headerLabel}>LECTURE À PARTIR DE</span>
+                    <span className={styles.headerContext}>
+                        {selectedPlaylist?.metadata?.title || 'Projets'}
+                    </span>
+                </div>
+                <div style={{ width: PLAYER_SIZES.MOBILE.CHEVRON }} /> {/* Spacer to center the title section */}
+            </div>
+
             {/* Scrollable Content */}
             <div className={styles.trackContent} data-scrollable>
                 {/* Album Cover with Swipe & Animation */}
@@ -98,20 +116,23 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Navigation Buttons - Centered below controls */}
-                <div className={styles.navigationButtons}>
-                    <IconButton
-                        icon={<ListMusic size={PLAYER_SIZES.MOBILE.ICON_SMALL} />}
+                {/* Redesigned Navigation Footer */}
+                <div className={styles.navigationFooter}>
+                    <button
+                        className={styles.navButton}
                         onClick={() => setCurrentView(selectedPlaylist ? 'playlist' : 'project')}
-                        title="Playlist"
-                        enlargeHitbox
-                    />
-                    <IconButton
-                        icon={<ListVideo size={PLAYER_SIZES.MOBILE.ICON_SMALL} />}
+                    >
+                        <ListMusic size={20} />
+                        <span>Playlist</span>
+                    </button>
+
+                    <button
+                        className={styles.navButton}
                         onClick={() => setCurrentView('queue')}
-                        title="File d'attente"
-                        enlargeHitbox
-                    />
+                    >
+                        <ListVideo size={20} />
+                        <span>File d'attente</span>
+                    </button>
                 </div>
 
                 {/* Preloader for Adjacent Tracks - using visibility hidden instead of display none to force load */}

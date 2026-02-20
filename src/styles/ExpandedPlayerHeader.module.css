@@ -4,22 +4,13 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: calc(var(--safe-area-top) + var(--spacing-md)) var(--spacing-lg) var(--spacing-md);
     position: relative;
     height: var(--player-header-height);
     width: 100%;
     box-sizing: border-box;
 }
 
-.expandedPlayerHeader::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: var(--spacing-lg);
-    right: var(--spacing-lg);
-    height: 1px;
-    background: var(--color-gray-300);
-}
 
 /* Layout Sections */
 .leftSection {

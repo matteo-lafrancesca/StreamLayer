@@ -9,8 +9,8 @@
     cursor: pointer;
     transition: background var(--transition-base);
     /* For dnd-kit transform */
-    touch-action: none;
     background: var(--bg-secondary);
+    touch-action: pan-y;
 }
 
 .row:hover {
@@ -25,9 +25,7 @@
     color: var(--text-secondary);
     cursor: grab;
     padding: 4px;
-    color: var(--text-secondary);
-    cursor: grab;
-    padding: 4px;
+    touch-action: none;
 }
 
 .dragHandle:hover {

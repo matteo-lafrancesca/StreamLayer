@@ -3,11 +3,13 @@ import { useRef, useCallback, useState, useEffect } from 'react';
 interface UseSliderReturn {
     ref: (node: HTMLDivElement | null) => void;
     handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+    handleTouchStart: (e: React.TouchEvent<HTMLDivElement>) => void;
     isDragging: boolean;
 }
 
 /**
  * Hook for custom slider interaction.
+ * Supports both mouse and touch events for drag functionality.
  */
 export function useSlider(
     onChange: (value: number) => void,
@@ -32,13 +34,29 @@ export function useSlider(
         latestOnDragEnd.current = onDragEnd;
     }, [onChange, onDragStart, onDragEnd]);
 
-    const handleInteraction = useCallback((e: React.MouseEvent<HTMLDivElement> | MouseEvent, cachedRect?: DOMRect) => {
+    const handleInteraction = useCallback((e: React.MouseEvent<HTMLDivElement> | MouseEvent | React.TouchEvent<HTMLDivElement> | TouchEvent, cachedRect?: DOMRect) => {
         if (!internalRef.current) return;
 
         // Use cached rect if available (during drag), otherwise get fresh (initial click)
         const rect = cachedRect || internalRef.current.getBoundingClientRect();
 
-        const x = e.clientX - rect.left;
+        let clientX: number;
+        if ('touches' in e) {
+            // TouchEvent
+            if (e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+            } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+                // For touchend, use changedTouches
+                clientX = e.changedTouches[0].clientX;
+            } else {
+                return;
+            }
+        } else {
+            // MouseEvent
+            clientX = e.clientX;
+        }
+
+        const x = clientX - rect.left;
         const percentage = Math.round((x / rect.width) * 100);
         const clamped = Math.max(0, Math.min(100, percentage));
 
@@ -50,24 +68,18 @@ export function useSlider(
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         setIsDragging(true);
 
-        // Cache dimensions ONLY at the start of the interaction
-        // This prevents layout thrashing (re-calculating size on every pixel move)
-        // The bar doesn't move during the drag, so this is safe and much faster.
         const rect = internalRef.current?.getBoundingClientRect();
-
         const initialValue = handleInteraction(e, rect);
         if (initialValue !== undefined) {
             latestOnDragStart.current?.(initialValue);
         }
 
         const handleMouseMove = (moveEvent: MouseEvent) => {
-            // Pass the cached rect to avoid re-measuring DOM
             handleInteraction(moveEvent, rect);
         };
 
         const handleMouseUp = (upEvent: MouseEvent) => {
             setIsDragging(false);
-            // Get final value on mouse up, reusing cached rect
             if (internalRef.current && rect) {
                 const x = upEvent.clientX - rect.left;
                 const percentage = Math.round((x / rect.width) * 100);
@@ -83,9 +95,61 @@ export function useSlider(
         document.addEventListener('mouseup', handleMouseUp);
     }, [handleInteraction]);
 
+    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+        setIsDragging(true);
+        const startX = e.touches[0].clientX;
+        const startY = e.touches[0].clientY;
+        const lockRef = { direction: null as 'horizontal' | 'vertical' | null };
+
+        const rect = internalRef.current?.getBoundingClientRect();
+        const initialValue = handleInteraction(e, rect);
+        if (initialValue !== undefined) {
+            latestOnDragStart.current?.(initialValue);
+        }
+
+        const handleTouchMove = (moveEvent: TouchEvent) => {
+            const currentX = moveEvent.touches[0].clientX;
+            const currentY = moveEvent.touches[0].clientY;
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+
+            if (!lockRef.direction) {
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                    lockRef.direction = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+                }
+            }
+
+            if (lockRef.direction === 'horizontal') {
+                // Prevent scrolling while dragging horizontally
+                if (moveEvent.cancelable) moveEvent.preventDefault();
+                handleInteraction(moveEvent, rect);
+            }
+            // If vertical, we don't preventDefault, allowing the bottom sheet to catch it
+        };
+
+        const handleTouchEnd = (upEvent: TouchEvent) => {
+            setIsDragging(false);
+            if (internalRef.current && rect) {
+                const clientX = upEvent.changedTouches[0].clientX;
+                const x = clientX - rect.left;
+                const percentage = Math.round((x / rect.width) * 100);
+                const clamped = Math.max(0, Math.min(100, percentage));
+                latestOnDragEnd.current?.(clamped);
+            }
+
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+
+        // passive: false is required to use preventDefault()
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+    }, [handleInteraction]);
+
     return {
         ref,
         handleMouseDown,
+        handleTouchStart,
         isDragging,
     };
 }

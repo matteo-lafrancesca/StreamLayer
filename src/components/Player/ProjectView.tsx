@@ -42,8 +42,6 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
 
     return (
         <div className={styles.scrollContainer}>
-
-
             <div className={styles.contentGrid}>
                 {playlists?.map((playlist) => {
                     const displayInfo = getPlaylistDisplayInfo(playlist, 'm');

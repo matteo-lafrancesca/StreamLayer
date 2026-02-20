@@ -24,6 +24,17 @@
     /* Space for the floating bar */
 }
 
+.bottomFade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top, var(--bg-secondary) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 5;
+}
+
 .floatingMediaBar {
     position: sticky;
     bottom: 0;
@@ -33,7 +44,7 @@
     border-top: 1px solid var(--color-border);
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
     z-index: 10;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: var(--safe-area-bottom);
 }
 
 /* Handle extra small screens */

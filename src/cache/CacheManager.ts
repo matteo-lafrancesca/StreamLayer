@@ -27,6 +27,7 @@ export class CacheManager<T> {
     private inFlightRequests: Map<string, Promise<T>> = new Map();
     private readonly options: Required<CacheOptions>;
     private readonly storeName: StoreName;
+    private readonly keyPrefix: string;
 
     constructor(storeName: StoreName, options: CacheOptions = {}) {
         this.storeName = storeName;
@@ -35,38 +36,46 @@ export class CacheManager<T> {
             maxItems: options.maxItems ?? 100,
             persist: options.persist ?? true,
         };
+        // Add API URL as a prefix to isolate caches between different environments/projects
+        this.keyPrefix = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}:` : '';
+    }
+
+    private getInternalKey(key: string): string {
+        return `${this.keyPrefix}${key}`;
     }
 
     /**
      * Get value from cache (Memory → Disk)
      */
     async get(key: string): Promise<T | null> {
+        const internalKey = this.getInternalKey(key);
+
         // 1. Check Memory Cache
-        const memEntry = this.memoryCache.get(key);
+        const memEntry = this.memoryCache.get(internalKey);
         if (memEntry) {
             // Check TTL
             if (Date.now() - memEntry.timestamp < this.options.ttl) {
                 // Refresh LRU position
-                this.memoryCache.delete(key);
-                this.memoryCache.set(key, memEntry);
+                this.memoryCache.delete(internalKey);
+                this.memoryCache.set(internalKey, memEntry);
                 return memEntry.value;
             } else {
                 // Expired
-                this.memoryCache.delete(key);
+                this.memoryCache.delete(internalKey);
             }
         }
 
         // 2. Check Disk Cache (IndexedDB)
         if (this.options.persist) {
             try {
-                const diskValue = await persistentCache.get<T>(this.storeName, key);
+                const diskValue = await persistentCache.get<T>(this.storeName, internalKey);
                 if (diskValue) {
                     // Hydrate memory cache
                     this.set(key, diskValue, { skipPersist: true });
                     return diskValue;
                 }
             } catch (err) {
-                console.warn(`[CacheManager] Disk cache error for ${key}:`, err);
+                console.warn(`[CacheManager] Disk cache error for ${internalKey}:`, err);
             }
         }
 
@@ -77,6 +86,7 @@ export class CacheManager<T> {
      * Set value in cache (Memory + Disk)
      */
     async set(key: string, value: T, options?: { skipPersist?: boolean }): Promise<void> {
+        const internalKey = this.getInternalKey(key);
         const entry: CacheEntry<T> = {
             value,
             timestamp: Date.now(),
@@ -84,19 +94,19 @@ export class CacheManager<T> {
 
         // 1. Set in Memory
         // Evict oldest if at capacity
-        if (this.memoryCache.size >= this.options.maxItems && !this.memoryCache.has(key)) {
+        if (this.memoryCache.size >= this.options.maxItems && !this.memoryCache.has(internalKey)) {
             const oldestKey = this.memoryCache.keys().next().value;
             if (oldestKey) {
                 this.memoryCache.delete(oldestKey);
             }
         }
 
-        this.memoryCache.set(key, entry);
+        this.memoryCache.set(internalKey, entry);
 
         // 2. Persist to Disk (async, non-blocking)
         if (this.options.persist && !options?.skipPersist) {
-            persistentCache.set(this.storeName, key, value).catch((err) => {
-                console.warn(`[CacheManager] Failed to persist ${key}:`, err);
+            persistentCache.set(this.storeName, internalKey, value).catch((err) => {
+                console.warn(`[CacheManager] Failed to persist ${internalKey}:`, err);
             });
         }
     }
@@ -105,9 +115,10 @@ export class CacheManager<T> {
      * Delete from cache
      */
     async delete(key: string): Promise<void> {
-        this.memoryCache.delete(key);
+        const internalKey = this.getInternalKey(key);
+        this.memoryCache.delete(internalKey);
         if (this.options.persist) {
-            await persistentCache.delete(this.storeName, key);
+            await persistentCache.delete(this.storeName, internalKey);
         }
     }
 
@@ -125,7 +136,7 @@ export class CacheManager<T> {
      * Check if key exists in memory cache
      */
     has(key: string): boolean {
-        return this.memoryCache.has(key);
+        return this.memoryCache.has(this.getInternalKey(key));
     }
 
     /**
@@ -134,7 +145,7 @@ export class CacheManager<T> {
      * @param staleTime - Time in ms before entry is considered stale
      */
     isStale(key: string, staleTime: number): boolean {
-        const entry = this.memoryCache.get(key);
+        const entry = this.memoryCache.get(this.getInternalKey(key));
         if (!entry) return true;
         return Date.now() - entry.timestamp > staleTime;
     }

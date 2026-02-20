@@ -57,12 +57,14 @@
 
 .thinTrack {
     height: 2px;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-    background: var(--color-gray-300);
+    border-top-left-radius: var(--radius-sm);
+    border-top-right-radius: var(--radius-sm);
+    background: var(--color-gray-200);
 }
 
 .thin {
     height: 2px;
-    border-radius: 0 0 0 var(--radius-md);
+    border-top-left-radius: var(--radius-sm);
+    border-top-right-radius: var(--radius-sm);
     background: var(--color-black);
 }

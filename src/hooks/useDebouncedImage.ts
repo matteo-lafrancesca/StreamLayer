@@ -39,6 +39,8 @@ export function useDebouncedImage(
     });
 
     useEffect(() => {
+        let isSubscribed = true;
+
         if (!shouldLoad) {
             // Keep previous image if it was loaded? No, follow shouldLoad.
             // But usually we want to keep showing until new one replaces it?
@@ -60,6 +62,8 @@ export function useDebouncedImage(
                 // A. Check Persistent Cache (Disk)
                 const storedBlob = await persistentCache.get<Blob>('images', cacheKey);
 
+                if (!isSubscribed) return;
+
                 if (storedBlob) {
                     const url = URL.createObjectURL(storedBlob);
                     setCachedImage(cacheKey, url);
@@ -69,6 +73,8 @@ export function useDebouncedImage(
 
                 // B. Fetch from Network (if not in disk)
                 const url = await fetchFn();
+
+                if (!isSubscribed) return;
 
                 // C. Persist to Disk (Get Blob from URL and save)
                 // We fetch the blob back from the object URL to store it
@@ -80,10 +86,13 @@ export function useDebouncedImage(
                     console.warn(`[useDebouncedImage] Failed to persist ${cacheKey}:`, err);
                 }
 
+                if (!isSubscribed) return;
+
                 setCachedImage(cacheKey, url);
                 setBlobUrl(url);
 
             } catch (error) {
+                if (!isSubscribed) return;
                 console.error(`[useDebouncedImage] Load failed for ${cacheKey}:`, error);
                 setBlobUrl(null);
             }
@@ -91,6 +100,7 @@ export function useDebouncedImage(
 
         // 3. Cleanup on unmount or dependency change
         return () => {
+            isSubscribed = false;
             clearTimeout(timeoutId);
         };
     }, [shouldLoad, cacheKey, fetchFn, delay]);

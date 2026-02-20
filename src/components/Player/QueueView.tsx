@@ -22,6 +22,7 @@ import { compensateForTransforms, restrictToVerticalAxis, restrictToScrollContai
 export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
     const { selectedPlaylist, setIsDragging } = usePlayerUI();
+
     // Sensors for drag detection
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -82,7 +83,6 @@ export function QueueView() {
 
     return (
         <div className={styles.scrollContainer}>
-
             {/* Now Playing */}
             {currentTrack && (
                 <div className={styles.queueSection}>

@@ -4,7 +4,7 @@ function App() {
   // TODO: Get projectId from props or config
   const projectId = '34';
 
-  const theme = 'default';
+  const theme = 'dark';
 
   return (
     <StreamLayer projectId={projectId} theme={theme}>

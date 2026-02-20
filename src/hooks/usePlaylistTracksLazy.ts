@@ -4,7 +4,7 @@
  * Reduced from ~179 lines to ~80 lines by separating concerns
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getPlaylistTracks } from '@services/api/playlists';
 import type { Track } from '@definitions/track';
 import { useApi } from './useApi';
@@ -62,9 +62,13 @@ export function usePlaylistTracksLazy(
         setCachedTracks(null);
         setCacheChecked(false);
 
+        let isSubscribed = true;
+
         const checkCache = async () => {
             // Try to get from cache first
             const cached = await playlistTracksCache.get(cacheKey);
+
+            if (!isSubscribed) return;
             setCacheChecked(true);
 
             if (cached) {
@@ -88,7 +92,9 @@ export function usePlaylistTracksLazy(
 
                             if (response.items && response.items.length > 0) {
                                 console.log('[usePlaylistTracksLazy] Revalidation success, updating cache');
-                                setCachedTracks(response.items);
+                                if (isSubscribed) {
+                                    setCachedTracks(response.items);
+                                }
                                 return response.items;
                             }
                             return cached;
@@ -101,6 +107,10 @@ export function usePlaylistTracksLazy(
         };
 
         checkCache();
+
+        return () => {
+            isSubscribed = false;
+        };
     }, [cacheKey, accessToken]);
 
     // 2. Lazy Pagination (Only if NO cache)
@@ -125,9 +135,10 @@ export function usePlaylistTracksLazy(
     });
 
     // 3. Update Cache when Pagination Completes
-    useMemo(() => {
+    useEffect(() => {
         if (
             cacheKey &&
+            pagination.dataKey === playlistId &&
             pagination.items.length > 0 &&
             pagination.totalCount &&
             pagination.items.length >= pagination.totalCount &&
@@ -136,7 +147,7 @@ export function usePlaylistTracksLazy(
             console.log('[usePlaylistTracksLazy] Pagination complete, caching all tracks...');
             playlistTracksCache.set(cacheKey, pagination.items);
         }
-    }, [cacheKey, pagination.items, pagination.totalCount, pagination.hasMore]);
+    }, [cacheKey, pagination.items, pagination.totalCount, pagination.hasMore, pagination.dataKey, playlistId]);
 
     // Return Data
     if (cachedTracks) {

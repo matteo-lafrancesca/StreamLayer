@@ -35,6 +35,8 @@ export function usePreloadPlaylistImages(
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        let isSubscribed = true;
+
         if (!accessToken || !playlistId || albumIds.length === 0) {
             setLoading(albumIds.length === 0 || !playlistId);
             return;
@@ -106,12 +108,19 @@ export function usePreloadPlaylistImages(
         setError(null);
 
         Promise.all(priorityPromises)
-            .then(() => setLoading(false))
+            .then(() => {
+                if (isSubscribed) setLoading(false);
+            })
             .catch((err) => {
-                setError(err instanceof Error ? err : new Error('Loading error'));
-                setLoading(false);
+                if (isSubscribed) {
+                    setError(err instanceof Error ? err : new Error('Loading error'));
+                    setLoading(false);
+                }
             });
 
+        return () => {
+            isSubscribed = false;
+        };
     }, [playlistId, albumIds.join(','), playlistCoverSize, albumCoverSize, accessToken]);
 
     return { loading, error };

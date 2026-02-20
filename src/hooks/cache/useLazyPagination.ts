@@ -25,6 +25,7 @@ export interface UseLazyPaginationResult<T> {
     error: Error | null;
     totalCount: number | null;
     hasMore: boolean;
+    dataKey: string | number | null;
 }
 
 /**
@@ -50,6 +51,7 @@ export function useLazyPagination<T>({
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [totalCount, setTotalCount] = useState<number | null>(null);
+    const [dataKey, setDataKey] = useState<string | number | null>(key);
 
     const currentOffsetRef = useRef(0);
     const fetcherRef = useRef(fetcher);
@@ -62,6 +64,7 @@ export function useLazyPagination<T>({
         setLoading(false);
         setLoadingMore(false);
         setError(null);
+        setDataKey(key);
         currentOffsetRef.current = 0;
 
         if (!enabled || key === null) {
@@ -131,5 +134,6 @@ export function useLazyPagination<T>({
         error,
         totalCount,
         hasMore,
+        dataKey,
     };
 }

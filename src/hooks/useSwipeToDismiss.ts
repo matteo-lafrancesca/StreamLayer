@@ -12,6 +12,7 @@ interface SwipeState {
     startY: number;
     currentY: number;
     startX: number;
+    lockDirection: 'horizontal' | 'vertical' | null;
 }
 
 /**
@@ -29,7 +30,8 @@ export function useSwipeToDismiss({
         isDragging: false,
         startY: 0,
         currentY: 0,
-        startX: 0
+        startX: 0,
+        lockDirection: null
     });
 
     useEffect(() => {
@@ -59,7 +61,8 @@ export function useSwipeToDismiss({
                 isDragging: true,
                 startY: e.touches[0].clientY,
                 currentY: e.touches[0].clientY,
-                startX: e.touches[0].clientX
+                startX: e.touches[0].clientX,
+                lockDirection: null
             };
         };
 
@@ -71,12 +74,26 @@ export function useSwipeToDismiss({
             const deltaY = currentY - swipeState.current.startY;
             const deltaX = currentX - swipeState.current.startX;
 
+            // Determine lock direction after clear intent (e.g., 10px movement)
+            if (!swipeState.current.lockDirection) {
+                if (Math.abs(deltaY) > 10 || Math.abs(deltaX) > 10) {
+                    swipeState.current.lockDirection = Math.abs(deltaY) > Math.abs(deltaX) ? 'vertical' : 'horizontal';
+                } else {
+                    return; // Wait for more movement
+                }
+            }
+
+            // If locked to horizontal, don't handle vertical swipe
+            if (swipeState.current.lockDirection === 'horizontal') {
+                return;
+            }
+
             // Check if the sheet content is scrolled to top
             const scrollableContent = dragElement.querySelector('[data-scrollable]') as HTMLElement;
             const isAtTop = !scrollableContent || scrollableContent.scrollTop <= 0;
 
-            // Only allow downward swipes when at top and moving more vertically than horizontally
-            if (deltaY > 5 && Math.abs(deltaY) > Math.abs(deltaX) && isAtTop) {
+            // Only allow downward swipes when at top
+            if (deltaY > 0 && isAtTop) {
                 swipeState.current.currentY = currentY;
 
                 // Prevent default scroll behavior

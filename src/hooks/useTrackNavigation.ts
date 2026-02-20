@@ -18,6 +18,7 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
     const touchStartY = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
     const touchEndY = useRef<number | null>(null);
+    const lockDirection = useRef<'horizontal' | 'vertical' | null>(null);
 
     // Reset optimistic state when real track updates to match
     useEffect(() => {
@@ -27,15 +28,30 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
     }, [playingTrack, optimisticTrack]);
 
     const handleTouchStart = (e: React.TouchEvent) => {
-        touchEndX.current = null;
-        touchEndY.current = null;
         touchStartX.current = e.targetTouches[0].clientX;
         touchStartY.current = e.targetTouches[0].clientY;
+        touchEndX.current = null;
+        touchEndY.current = null;
+        lockDirection.current = null;
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
         touchEndX.current = e.targetTouches[0].clientX;
         touchEndY.current = e.targetTouches[0].clientY;
+
+        const dx = touchStartX.current! - touchEndX.current;
+        const dy = touchStartY.current! - touchEndY.current;
+
+        if (!lockDirection.current) {
+            if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                lockDirection.current = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+            }
+        }
+
+        if (lockDirection.current === 'horizontal') {
+            // Prevent scrolling/other gestures if we are navigating tracks
+            if (e.cancelable) e.preventDefault();
+        }
     };
 
     const handleTouchEnd = () => {
@@ -46,15 +62,8 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
 
         console.log(`[SwipeDebug] dx: ${dx}, dy: ${dy}, min: ${minSwipeDistance}`);
 
-        // Vertical vs Horizontal logic:
-        // We allow swipe only if horizontal movement is dominant and clearly intentional.
-        if (Math.abs(dx) < minSwipeDistance) return;
-
-        // Veto if vertical movement is too significant (relaxed to 2x horizontal)
-        if (Math.abs(dy) > Math.abs(dx) * 2) {
-            console.log('[SwipeDebug] Vetoed by vertical movement');
-            return;
-        }
+        // Check if movement is intentional and locked to horizontal
+        if (lockDirection.current !== 'horizontal' || Math.abs(dx) < minSwipeDistance) return;
 
         const isLeftSwipe = dx > minSwipeDistance;
         const isRightSwipe = dx < -minSwipeDistance;

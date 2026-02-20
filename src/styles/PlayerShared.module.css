@@ -76,12 +76,10 @@
 .progressSlider {
     position: absolute;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 6px;
+    right: 6px;
     pointer-events: none;
     z-index: 20;
-    overflow: hidden;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 /* Queue Panel - 40% width attached to right */

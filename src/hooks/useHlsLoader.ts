@@ -10,6 +10,7 @@ interface UseHlsLoaderProps {
     audioElement: HTMLAudioElement | null;
     onError: () => void;
     onStreamReady: () => void;
+    priority?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export function useHlsLoader({
     audioElement,
     onError,
     onStreamReady,
+    priority = false,
 }: UseHlsLoaderProps) {
     const hlsRef = useRef<Hls | null>(null);
     const retryCountRef = useRef<number>(0);
@@ -79,7 +81,8 @@ export function useHlsLoader({
         }
 
         // Debounce HLS initialization to prevent request flooding
-        const loadTimeout = setTimeout(() => {
+        // Skip debounce if priority is true (e.g., active track)
+        const initHls = () => {
             if (Hls.isSupported()) {
                 if (hlsRef.current) hlsRef.current.destroy();
 
@@ -165,10 +168,17 @@ export function useHlsLoader({
             } else {
                 console.error('HLS is not supported in this browser');
             }
-        }, 150);
+        };
+
+        let loadTimeout: number | undefined;
+        if (priority) {
+            initHls();
+        } else {
+            loadTimeout = window.setTimeout(initHls, 150);
+        }
 
         return () => {
-            clearTimeout(loadTimeout);
+            if (loadTimeout) clearTimeout(loadTimeout);
             retryTimeouts.forEach(clearTimeout);
             if (hlsRef.current) {
                 hlsRef.current.destroy();

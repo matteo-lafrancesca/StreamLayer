@@ -135,7 +135,16 @@ export function useAudioPlayer({
         accessToken,
         audioElement: audioElements.current![0],
         onError: () => activeIndex === 0 && onError?.(),
-        onStreamReady: () => activeIndex === 0 && setIsBuffering(false)
+        onStreamReady: () => {
+            if (activeIndex === 0) {
+                setIsBuffering(false);
+                // If we should be playing but were blocked by loading, try again
+                if (shouldPlay && audioElements.current![0].paused) {
+                    audioElements.current![0].play().catch(() => { });
+                }
+            }
+        },
+        priority: activeIndex === 0
     });
 
     useHlsLoader({
@@ -143,7 +152,15 @@ export function useAudioPlayer({
         accessToken,
         audioElement: audioElements.current![1],
         onError: () => activeIndex === 1 && onError?.(),
-        onStreamReady: () => activeIndex === 1 && setIsBuffering(false)
+        onStreamReady: () => {
+            if (activeIndex === 1) {
+                setIsBuffering(false);
+                if (shouldPlay && audioElements.current![1].paused) {
+                    audioElements.current![1].play().catch(() => { });
+                }
+            }
+        },
+        priority: activeIndex === 1
     });
 
     useHlsLoader({
@@ -151,7 +168,15 @@ export function useAudioPlayer({
         accessToken,
         audioElement: audioElements.current![2],
         onError: () => activeIndex === 2 && onError?.(),
-        onStreamReady: () => activeIndex === 2 && setIsBuffering(false)
+        onStreamReady: () => {
+            if (activeIndex === 2) {
+                setIsBuffering(false);
+                if (shouldPlay && audioElements.current![2].paused) {
+                    audioElements.current![2].play().catch(() => { });
+                }
+            }
+        },
+        priority: activeIndex === 2
     });
 
     // 6. Volume & Playback Controls
@@ -179,7 +204,7 @@ export function useAudioPlayer({
         } else if (!shouldPlay && !activePlayer.paused) {
             activePlayer.pause();
         }
-    }, [shouldPlay, trackId, activeIndex]);
+    }, [shouldPlay, trackId, activeIndex, isBuffering, duration]);
 
     // 7. Cleanup
     useEffect(() => {

@@ -1,6 +1,9 @@
 import { MediaBarMobile } from './MediaBarMobile';
 import { TrackViewMobile } from './TrackViewMobile';
-import { ViewRenderer } from './ViewRenderer';
+import { PlaylistView } from './PlaylistView';
+import { ProjectView } from './ProjectView';
+import { QueueView } from './QueueView';
+import { NavStack } from './NavStack';
 import { ExpandedPlayerHeaderMobile } from './ExpandedPlayerHeaderMobile';
 import { BottomSheet } from './BottomSheet';
 import { ProgressSlider } from './ProgressSlider';
@@ -20,6 +23,18 @@ export function PlayerMobile() {
 
     const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';
 
+    let layer1State: 'hidden' | 'active' | 'obscured' = 'hidden';
+    if (currentView === 'project' || currentView === 'queue') {
+        layer1State = 'active';
+    } else if (currentView === 'playlist') {
+        layer1State = 'obscured';
+    }
+
+    let layer2State: 'hidden' | 'active' | 'obscured' = 'hidden';
+    if (currentView === 'playlist') {
+        layer2State = 'active';
+    }
+
     return (
         <div className={styles.mobileWrapper}>
             {/* Fixed Player at Bottom */}
@@ -37,7 +52,7 @@ export function PlayerMobile() {
                         <MediaBarMobile onExpandToggle={onExpandToggle} />
                     </div>
 
-                    {/* Mobile progress slider */}
+                    {/* Mobile progress slider at the bottom */}
                     <ProgressSlider interactive={false} />
                 </div>
             </div>
@@ -49,28 +64,43 @@ export function PlayerMobile() {
                 showChevron={false}
                 disabled={isDragging}
             >
-                {currentView === 'track' ? (
+                {/* Layer 0: Track View (Always rendered as base) */}
+                <div style={{ position: 'absolute', inset: 0, overflow: 'auto', zIndex: 1 }}>
                     <TrackViewMobile />
-                ) : (
-                    <>
-                        {/* Header for non-track views (Mobile-specific) */}
-                        <ExpandedPlayerHeaderMobile
-                            currentView={currentView}
-                            setCurrentView={setCurrentView}
-                        />
+                </div>
 
-                        {/* Content Area - using ViewRenderer */}
-                        <div
-                            className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`}
-                            data-scrollable
-                        >
-                            <ViewRenderer
-                                currentView={currentView}
-                                setCurrentView={setCurrentView}
-                            />
-                        </div>
-                    </>
-                )}
+                {/* Layer 1: Project or Queue View */}
+                <NavStack
+                    state={layer1State}
+                    onBack={() => setCurrentView('track')}
+                    zIndex={2}
+                >
+                    <ExpandedPlayerHeaderMobile
+                        currentView={currentView === 'queue' ? 'queue' : 'project'}
+                        setCurrentView={setCurrentView}
+                    />
+                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? '80px' : 0 }}>
+                        {currentView === 'queue' ? <QueueView /> : <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />}
+                    </div>
+                </NavStack>
+
+                {/* Layer 2: Playlist View */}
+                <NavStack
+                    state={layer2State}
+                    onBack={() => setCurrentView('project')}
+                    zIndex={3}
+                >
+                    <ExpandedPlayerHeaderMobile
+                        currentView='playlist'
+                        setCurrentView={setCurrentView}
+                    />
+                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? '80px' : 0 }}>
+                        <PlaylistView />
+                    </div>
+                </NavStack>
+
+                {/* Background Fade Overlay for better separation from list content */}
+                {currentView !== 'track' && <div className={styles.bottomFade} style={{ zIndex: 1000 }} />}
             </BottomSheet>
         </div>
     );

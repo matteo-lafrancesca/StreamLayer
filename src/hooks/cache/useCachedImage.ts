@@ -47,6 +47,8 @@ export function useCachedImage({
     }, [fetcher]);
 
     useEffect(() => {
+        let isSubscribed = true;
+
         if (!enabled || !key) {
             setBlobUrl(null);
             return;
@@ -65,6 +67,8 @@ export function useCachedImage({
                 // A. Check Disk Cache (IndexedDB)
                 const storedBlob = await persistentCache.get<Blob>('images', key);
 
+                if (!isSubscribed) return;
+
                 if (storedBlob) {
                     // Found in disk, create blob URL
                     const url = URL.createObjectURL(storedBlob);
@@ -76,6 +80,8 @@ export function useCachedImage({
                 // B. Fetch from Network (use ref to get latest fetcher)
                 const url = await fetcherRef.current();
 
+                if (!isSubscribed) return;
+
                 // C. Persist to Disk
                 try {
                     const response = await fetch(url);
@@ -85,17 +91,21 @@ export function useCachedImage({
                     console.warn(`[useCachedImage] Failed to persist ${key}:`, err);
                 }
 
+                if (!isSubscribed) return;
+
                 // D. Cache in Memory
                 setCachedImage(key, url);
                 setBlobUrl(url);
 
             } catch (error) {
+                if (!isSubscribed) return;
                 console.error(`[useCachedImage] Load failed for ${key}:`, error);
                 setBlobUrl(null);
             }
         }, debounce);
 
         return () => {
+            isSubscribed = false;
             clearTimeout(timeoutId);
         };
     }, [enabled, key, debounce]); // Removed 'fetcher' from dependencies
