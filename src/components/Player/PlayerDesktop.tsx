@@ -82,14 +82,14 @@ function PlayerDesktopContent({
             // Apply horizontal
             baseStyle.left = `${customPosition.x}px`;
 
-            // Apply vertical
-            // We use 'top' for the animation phase (when customPosition.y matches the animation tick)
-            // But when settled (loop finished), we might want to switch to 'bottom' property for responsiveness.
-            // HOWEVER, since we're updating 'top' every frame during animation, switching to 'bottom' abruptly might glitch if window resizes.
-            // For now, let's stick to using 'top' pixels as calculated by the physics engine.
-            // The 'targetY' for bottom was calculated as (Height - playerHeight - 20), which equals the top offset.
-
-            baseStyle.top = `${customPosition.y}px`;
+            // Apply vertical securely
+            if (customPosition.dockSide === 'bottom') {
+                // Use calc(100vh - y - height) to securely position from the bottom.
+                // This preserves responsiveness if the window is resized while docked or even during animation.
+                baseStyle.bottom = `calc(100vh - ${customPosition.y + PLAYER_SIZES.DESKTOP.COLLAPSED_HEIGHT}px)`;
+            } else {
+                baseStyle.top = `${customPosition.y}px`;
+            }
         }
 
         return baseStyle;

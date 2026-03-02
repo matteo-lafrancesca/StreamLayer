@@ -4,6 +4,7 @@ import { sendStats } from '@services/api/reporting';
 
 const FLUSH_INTERVAL = 30000; // 30 seconds
 const MAX_BATCH_SIZE = 50;
+const MAX_FAILED_BATCH_SIZE = 200;
 
 export function useReporting() {
     // Use a ref for the queue to access it in intervals/effects without dependency issues
@@ -16,16 +17,16 @@ export function useReporting() {
         if (items.length === 0) return;
 
         // Clear queue immediately (optimistic)
-        // If send fails, we could re-queue them, but keeping it simple for now as per plan
         queueRef.current = [];
 
         try {
             console.log(`[Reporting] Flushing ${items.length} items`, items);
             await sendStats(items);
         } catch (error) {
-            console.error('[Reporting] Flush failed, items lost', error);
-            // Re-queue items? For now we accept loss on error until offline mode is properly specified
-            // queueRef.current = [...items, ...queueRef.current]; 
+            console.error('[Reporting] Flush failed, re-queuing items', error);
+            // Re-queue items with a cap to prevent infinite memory growth if offline forever
+            const combined = [...items, ...queueRef.current];
+            queueRef.current = combined.slice(0, MAX_FAILED_BATCH_SIZE);
         }
     }, []);
 

@@ -24,7 +24,14 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
         }
 
         const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-        return await fetch(url, { ...customOptions, headers });
+        const response = await fetch(url, { ...customOptions, headers });
+
+        // Explicitly throw on 401/403 so callWithAuth can catch and trigger token refresh
+        if (response.status === 401 || response.status === 403) {
+            throw new ApiError(`Auth Error: ${response.statusText}`, response.status);
+        }
+
+        return response;
     };
 
     // If explicit token provided or available in manager, use callWithAuth for auto-refresh

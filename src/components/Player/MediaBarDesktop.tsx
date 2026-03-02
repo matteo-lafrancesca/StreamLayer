@@ -43,6 +43,8 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
 
     // Helper for smooth view transitions: Close -> Wait -> Switch -> Open
     const switchViewWithAnimation = (targetView: 'playlist' | 'project' | 'queue') => {
+        const ASYNC_TRANSITION_MS = 300; // Expected matching CSS duration
+
         if (isExpanded && currentView !== targetView) {
             // 1. Collapse
             onExpandToggle();
@@ -53,7 +55,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                 setCurrentView(targetView);
                 // 4. Expand
                 onExpandToggle();
-            }, 300);
+            }, ASYNC_TRANSITION_MS);
         } else {
             // Immediate switch if not expanded
             setCurrentView(targetView);

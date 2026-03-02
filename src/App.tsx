@@ -1,11 +1,11 @@
 import { StreamLayer } from '@components/StreamLayer';
 
-function App() {
-  // TODO: Get projectId from props or config
-  const projectId = '34';
+export interface AppProps {
+  projectId?: string;
+  theme?: string;
+}
 
-  const theme = 'dark';
-
+function App({ projectId = '34', theme = 'dark' }: AppProps) {
   return (
     <StreamLayer projectId={projectId} theme={theme}>
       {/* Votre contenu d'application ici */}

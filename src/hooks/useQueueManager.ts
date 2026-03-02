@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useMemo } from 'react';
+import { useReducer, useCallback, useMemo, useEffect } from 'react';
 import type { Track } from '@definitions/track';
 import { queueReducer, initialState } from './queue/queueReducer';
 
@@ -30,8 +30,20 @@ interface UseQueueManagerReturn {
  * Hook to manage track queue and navigation
  * Handles shuffle, repeat modes, next/previous logic
  */
-export function useQueueManager({ }: UseQueueManagerProps): UseQueueManagerReturn {
+export function useQueueManager({ tracks, initialTrack }: UseQueueManagerProps): UseQueueManagerReturn {
     const [state, dispatch] = useReducer(queueReducer, initialState);
+
+    // Bootstrap queue from props on initial mount
+    useEffect(() => {
+        if (tracks && tracks.length > 0) {
+            let startIndex = 0;
+            if (initialTrack) {
+                const idx = tracks.findIndex(t => t.id === initialTrack.id);
+                if (idx !== -1) startIndex = idx;
+            }
+            dispatch({ type: 'SET_QUEUE', tracks, startIndex });
+        }
+    }, []);
 
     // Active track list (shuffled or original)
     const activeTrackList = useMemo(() => {

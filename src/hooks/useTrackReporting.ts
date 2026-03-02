@@ -1,4 +1,5 @@
 import { useCallback, useRef, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 import { useReporting } from '@hooks/useReporting';
@@ -36,20 +37,33 @@ export function useTrackReporting({
 
         lastEventRef.current = { id: String(track.id), status };
 
+        // Determine device type via Capacitor
+        let deviceType: 'web' | 'mobile' = 'web';
+        try {
+            const platform = Capacitor.getPlatform();
+            if (platform === 'ios' || platform === 'android') {
+                deviceType = 'mobile';
+            }
+        } catch (e) {
+            // Capacitor might not be available in standard web environments, default to web.
+        }
+
+        const isOnline = navigator.onLine;
+
         trackEvent({
             id: track.id,
             container_type: 'list', // Default to list for now
             id_container: playingFromPlaylist?.id || 0, // 0 if no container
             full: true,
             creation_datetime: Math.floor(Date.now() / 1000), // Seconds
-            device_type: 'web',
-            online: navigator.onLine, // Note: consider using a more robust online check if available
+            device_type: deviceType,
+            online: isOnline,
             status,
             time: Math.floor(time),
-            format: 'low',
             current_position: Math.floor(audioRef.current?.currentTime || 0),
-            play_mode: 'online',
-            territory_code: 'FR', // Defaulting to FR
+            play_mode: isOnline ? 'online' : 'offline',
+            // territory_code and format are deliberately omitted to reduce payload size 
+            // and let the backend session state infer them securely.
         });
     }, [trackEvent, playingFromPlaylist, audioRef]);
 

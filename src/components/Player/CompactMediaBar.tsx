@@ -5,11 +5,18 @@ import { IconButton } from '@components/UI';
 import { Play, Pause, GripVertical } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/CompactMediaBar.module.css';
+import type { DraggableAttributes } from '@dnd-kit/core';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+
+interface CompactMediaBarProps {
+    dragAttributes?: DraggableAttributes;
+    dragListeners?: SyntheticListenerMap;
+}
 
 /**
  * Minimal player with cover, controls, and expand button.
  */
-export function CompactMediaBar({ dragAttributes, dragListeners }: { dragAttributes?: any, dragListeners?: any }) {
+export function CompactMediaBar({ dragAttributes, dragListeners }: CompactMediaBarProps) {
     const {
         playingTrack,
         isPlaying,

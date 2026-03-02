@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { Track } from '@definitions/track';
 import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import styles from '@styles/TrackViewMobile.module.css';
@@ -17,9 +17,8 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
     const [displayTrack, setDisplayTrack] = useState<Track | null>(track);
     const [prevTrack, setPrevTrack] = useState<Track | null>(null);
     const [animating, setAnimating] = useState(false);
-    const timeoutRef = useRef<number | null>(null);
 
-    // 1. Detect change and animate
+    // 1. Detect change and start animation
     useEffect(() => {
         if (track?.id !== displayTrack?.id) {
             if (direction) {
@@ -27,16 +26,6 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
                 setPrevTrack(displayTrack);
                 setDisplayTrack(track);
                 setAnimating(true);
-
-                // Clear previous timeout if exists
-                if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-                // Set new timeout for cleanup
-                timeoutRef.current = window.setTimeout(() => {
-                    setAnimating(false);
-                    setPrevTrack(null);
-                    if (onAnimationEnd) onAnimationEnd();
-                }, 300);
             } else {
                 // No direction (e.g. initial load or jump), just update immediately
                 setDisplayTrack(track);
@@ -44,14 +33,15 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
                 setPrevTrack(null);
             }
         }
-    }, [track, direction, displayTrack, onAnimationEnd]);
+    }, [track, direction, displayTrack]);
 
-    // Cleanup
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        };
-    }, []);
+    const handleAnimationEnd = () => {
+        if (animating) {
+            setAnimating(false);
+            setPrevTrack(null);
+            if (onAnimationEnd) onAnimationEnd();
+        }
+    };
 
     const getAnimationClass = (isIncoming: boolean) => {
         if (!animating || !direction) return '';
@@ -78,7 +68,10 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
             )}
 
             {/* Current Track - Entering or Static */}
-            <div className={`${styles.coverWrapper} ${animating ? getAnimationClass(true) : ''}`}>
+            <div
+                className={`${styles.coverWrapper} ${animating ? getAnimationClass(true) : ''}`}
+                onAnimationEnd={handleAnimationEnd}
+            >
                 <AlbumCoverOrPlaceholder
                     track={displayTrack}
                     size="l"
