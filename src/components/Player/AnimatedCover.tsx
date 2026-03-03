@@ -18,16 +18,13 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
     const [prevTrack, setPrevTrack] = useState<Track | null>(null);
     const [animating, setAnimating] = useState(false);
 
-    // 1. Detect change and start animation
     useEffect(() => {
         if (track?.id !== displayTrack?.id) {
             if (direction) {
-                // If we have a direction, animate
                 setPrevTrack(displayTrack);
                 setDisplayTrack(track);
                 setAnimating(true);
             } else {
-                // No direction (e.g. initial load or jump), just update immediately
                 setDisplayTrack(track);
                 setAnimating(false);
                 setPrevTrack(null);
@@ -45,18 +42,15 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
 
     const getAnimationClass = (isIncoming: boolean) => {
         if (!animating || !direction) return '';
-        if (direction === 'next') { // Swipe Left -> Next
-            // Old (Prev) slides out Left. New (Incoming) slides in from Right.
+        if (direction === 'next') {
             return isIncoming ? styles.slideInRight : styles.slideOutLeft;
-        } else { // Swipe Right -> Prev
-            // Old (Prev) slides out Right. New (Incoming) slides in from Left.
+        } else {
             return isIncoming ? styles.slideInLeft : styles.slideOutRight;
         }
     };
 
     return (
         <div className={styles.animatingContainer}>
-            {/* Previous Track - Exiting */}
             {prevTrack && animating && (
                 <div className={`${styles.coverWrapper} ${getAnimationClass(false)}`}>
                     <AlbumCoverOrPlaceholder
@@ -67,7 +61,6 @@ export function AnimatedCover({ track, direction, onAnimationEnd }: AnimatedCove
                 </div>
             )}
 
-            {/* Current Track - Entering or Static */}
             <div
                 className={`${styles.coverWrapper} ${animating ? getAnimationClass(true) : ''}`}
                 onAnimationEnd={handleAnimationEnd}

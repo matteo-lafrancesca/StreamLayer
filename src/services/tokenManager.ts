@@ -1,4 +1,5 @@
 import { refreshTokens } from './api/auth';
+import { Logger } from '../utils/logger';
 
 type TokenListener = (accessToken: string | null) => void;
 
@@ -27,8 +28,6 @@ class TokenManager {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
 
-        // Debug logic removed
-
         this.notifyListeners();
     }
 
@@ -56,7 +55,6 @@ class TokenManager {
             throw new Error('Missing refresh token or project ID');
         }
 
-        // If refresh already in progress, return same promise
         if (this.refreshPromise) {
             return this.refreshPromise;
         }
@@ -69,7 +67,7 @@ class TokenManager {
                 this.notifyListeners();
                 return response.access_token;
             } catch (error) {
-                console.error('Failed to refresh token:', error);
+                Logger.error('[TokenManager] Failed to refresh token:', error);
                 this.accessToken = null;
                 this.refreshToken = null;
                 this.notifyListeners();
@@ -92,19 +90,17 @@ class TokenManager {
         }
 
         try {
-            // Try 1: Call with current token
             return await apiCall(this.accessToken);
         } catch (error: any) {
-            // Check for 401/403 (standard for this API)
             const isAuthError =
                 (error?.status === 401 || error?.status === 403) ||
                 (error instanceof Error && (error.message.includes('401') || error.message.includes('403')));
 
             if (isAuthError && this.refreshToken) {
                 try {
-                    console.log('[TokenManager] Token issue detected, attempting refresh...');
+                    Logger.info('[TokenManager] Token issue detected, attempting refresh...');
                     const newToken = await this.refreshAccessToken();
-                    console.log('[TokenManager] Refresh successful, retrying call...');
+                    Logger.info('[TokenManager] Refresh successful, retrying call...');
                     return await apiCall(newToken);
                 } catch (refreshError) {
                     throw refreshError;

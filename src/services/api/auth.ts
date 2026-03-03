@@ -1,7 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const API_KEY_ID = import.meta.env.VITE_API_KEY_ID;
-const USER_API = import.meta.env.VITE_USER_API;
-const PASSWORD_API = import.meta.env.VITE_PASSWORD_API;
+import { ConfigManager } from '../../config/ConfigManager';
 
 interface TokenResponse {
     access_token: string;
@@ -14,7 +11,8 @@ interface TokenResponse {
  * @returns Access and refresh tokens.
  */
 export async function getInitialTokens(projectId: string): Promise<TokenResponse> {
-    const url = `${API_BASE_URL}/projects/${projectId}/token?apikey_id=${API_KEY_ID}`;
+    const config = ConfigManager.getConfig();
+    const url = `${config.apiBaseUrl}/projects/${projectId}/token?apikey_id=${config.apiKeyId}`;
 
     const response = await fetch(url, {
         method: 'POST',
@@ -22,8 +20,8 @@ export async function getInitialTokens(projectId: string): Promise<TokenResponse
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            login: USER_API,
-            password: PASSWORD_API,
+            login: config.userApi,
+            password: config.passwordApi,
         }),
     });
 
@@ -41,7 +39,8 @@ export async function getInitialTokens(projectId: string): Promise<TokenResponse
  * @returns New access and refresh tokens.
  */
 export async function refreshTokens(projectId: string, refreshToken: string): Promise<TokenResponse> {
-    const url = `${API_BASE_URL}/projects/${projectId}/token`;
+    const config = ConfigManager.getConfig();
+    const url = `${config.apiBaseUrl}/projects/${projectId}/token`;
 
     const response = await fetch(url, {
         method: 'GET',

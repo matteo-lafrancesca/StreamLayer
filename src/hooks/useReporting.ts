@@ -1,37 +1,58 @@
 import { useRef, useEffect, useCallback } from 'react';
 import type { StatItem } from '@definitions/../types/Reporting';
 import { sendStats } from '@services/api/reporting';
+import { Logger } from '@utils/logger';
+import { persistentCache } from '@cache/PersistentCache';
+import { ConfigManager } from '../config/ConfigManager';
 
 const FLUSH_INTERVAL = 30000; // 30 seconds
 const MAX_BATCH_SIZE = 50;
 const MAX_FAILED_BATCH_SIZE = 200;
 
+const OFFLINE_QUEUE_KEY = () => `reporting-queue-${ConfigManager.getConfig().apiBaseUrl}`;
+
 export function useReporting() {
-    // Use a ref for the queue to access it in intervals/effects without dependency issues
     const queueRef = useRef<StatItem[]>([]);
 
-    // We might want to persist failed items, but for now we keep it simple in-memory
+    useEffect(() => {
+        async function loadOffline() {
+            if (!ConfigManager.isInitialized()) return;
+            try {
+                const saved = await persistentCache.get<StatItem[]>('data', OFFLINE_QUEUE_KEY());
+                if (saved && saved.length > 0) {
+                    queueRef.current = [...queueRef.current, ...saved];
+                }
+            } catch (err) {
+                Logger.error('[Reporting] Failed to load offline queue', err);
+            }
+        }
+        loadOffline();
+    }, []);
 
     const flush = useCallback(async () => {
         const items = [...queueRef.current];
         if (items.length === 0) return;
 
-        // Clear queue immediately (optimistic)
         queueRef.current = [];
 
         try {
-            console.log(`[Reporting] Flushing ${items.length} items`, items);
+            Logger.info(`[Reporting] Flushing ${items.length} items`, items);
             await sendStats(items);
+            if (ConfigManager.isInitialized()) {
+                await persistentCache.delete('data', OFFLINE_QUEUE_KEY());
+            }
         } catch (error) {
-            console.error('[Reporting] Flush failed, re-queuing items', error);
-            // Re-queue items with a cap to prevent infinite memory growth if offline forever
+            Logger.error('[Reporting] Flush failed, re-queuing items', error);
             const combined = [...items, ...queueRef.current];
             queueRef.current = combined.slice(0, MAX_FAILED_BATCH_SIZE);
+            if (ConfigManager.isInitialized()) {
+                persistentCache.set('data', OFFLINE_QUEUE_KEY(), queueRef.current);
+            }
         }
     }, []);
 
     const trackEvent = useCallback((item: StatItem) => {
-        console.log('[Reporting] Track event:', item);
+        Logger.info('[Reporting] Track event:', item);
         queueRef.current.push(item);
 
         if (queueRef.current.length >= MAX_BATCH_SIZE) {
@@ -39,17 +60,14 @@ export function useReporting() {
         }
     }, [flush]);
 
-    // Flush periodically
     useEffect(() => {
         const interval = setInterval(flush, FLUSH_INTERVAL);
         return () => {
             clearInterval(interval);
-            // Flush on unmount
             flush();
         };
     }, [flush]);
 
-    // Flush on visibility change (e.g. user leaves tab/app)
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'hidden') {

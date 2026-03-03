@@ -9,18 +9,15 @@ interface UseTrackNavigationProps {
 export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationProps = {}) {
     const { playingTrack, playbackControls, queue } = usePlayer();
 
-    // Optimistic UI state
     const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | null>(null);
     const [optimisticTrack, setOptimisticTrack] = useState<Track | null>(null);
 
-    // Swipe refs
     const touchStartX = useRef<number | null>(null);
     const touchStartY = useRef<number | null>(null);
     const touchEndX = useRef<number | null>(null);
     const touchEndY = useRef<number | null>(null);
     const lockDirection = useRef<'horizontal' | 'vertical' | null>(null);
 
-    // Reset optimistic state when real track updates to match
     useEffect(() => {
         if (optimisticTrack && playingTrack?.id === optimisticTrack.id) {
             setOptimisticTrack(null);
@@ -49,7 +46,6 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
         }
 
         if (lockDirection.current === 'horizontal') {
-            // Prevent scrolling/other gestures if we are navigating tracks
             if (e.cancelable) e.preventDefault();
         }
     };
@@ -57,12 +53,8 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
     const handleTouchEnd = () => {
         if (touchStartX.current === null || touchEndX.current === null || touchStartY.current === null || touchEndY.current === null) return;
 
-        const dx = touchStartX.current - touchEndX.current; // + = Left Swipe, - = Right Swipe
-        const dy = touchStartY.current - touchEndY.current;
+        const dx = touchStartX.current - touchEndX.current;
 
-        console.log(`[SwipeDebug] dx: ${dx}, dy: ${dy}, min: ${minSwipeDistance}`);
-
-        // Check if movement is intentional and locked to horizontal
         if (lockDirection.current !== 'horizontal' || Math.abs(dx) < minSwipeDistance) return;
 
         const isLeftSwipe = dx > minSwipeDistance;
@@ -71,7 +63,6 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
         const currentIndex = queue.findIndex(t => t.id === playingTrack?.id);
 
         if (isLeftSwipe) {
-            // Next Track Optimistic
             const nextIndex = (currentIndex + 1) % queue.length;
             if (queue[nextIndex]) {
                 setOptimisticTrack(queue[nextIndex]);
@@ -79,7 +70,6 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
                 playbackControls.onNext();
             }
         } else if (isRightSwipe) {
-            // Prev Track Optimistic
             let prevIndex = currentIndex - 1;
             if (prevIndex < 0) prevIndex = queue.length - 1;
 

@@ -46,7 +46,6 @@ export function getTrackDisplayInfo(track: Track, coverSize: CoverSize = 'm') {
         durationSeconds: track.duration,
         coverUrl: getTrackCoverUrl(track, coverSize),
         albumId: track.id_album,
-        // albumName: track.album?.name || 'Unknown Album', // To add when available
     };
 }
 

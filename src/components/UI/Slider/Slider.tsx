@@ -17,10 +17,8 @@ export interface SliderProps {
  * Implements optimistic UI to avoid lag during drag.
  */
 export function Slider({ value, onChange, variant = 'default', showThumb = true, className = '', onDragStart, onDragEnd }: SliderProps) {
-    // Local state for immediate display
     const [localValue, setLocalValue] = useState(value);
 
-    // Wrapper to update local state immediately AND notify parent
     const handleSliderChange = useCallback((newValue: number) => {
         setLocalValue(newValue);
         onChange(newValue);
@@ -28,9 +26,6 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
 
     const { ref, handleMouseDown, handleTouchStart, isDragging } = useSlider(handleSliderChange, onDragStart, onDragEnd);
 
-    // Sync local state with props, UNLESS user is dragging
-    // Prevents global timer from jumping cursor during interaction
-    // "Update State During Render" pattern to avoid double-render
     if (!isDragging && localValue !== value) {
         setLocalValue(value);
     }

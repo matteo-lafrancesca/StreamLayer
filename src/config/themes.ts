@@ -100,37 +100,37 @@ export const darkTheme: ThemeConfig = {
         gray900: '#ffffff',
     },
     elements: {
-        slider: '#6366f1', // Primary blue
+        slider: '#6366f1',
     }
 };
 
 export const ikeaTheme: ThemeConfig = {
     ...defaultTheme,
     colors: {
-        primary: '#ffda1a', // IKEA Yellow
+        primary: '#ffda1a',
         primaryLight: '#ffe04d',
         primaryDark: '#ccaa00',
-        secondary: '#0051ba', // IKEA Blue
+        secondary: '#0051ba',
         accent: '#ffda1a',
     },
     backgrounds: {
-        primary: '#0051ba', // IKEA Blue background
+        primary: '#0051ba',
         secondary: '#004195',
         dark: '#003170',
         card: '#0046a1',
     },
     text: {
         primary: '#ffffff',
-        secondary: '#ffda1a', // Yellow text
+        secondary: '#ffda1a',
         tertiary: '#cbd5e1',
         light: '#94a3b8',
         white: '#ffffff',
     },
     gradients: {
         ...defaultTheme.gradients,
-        primary: 'linear-gradient(135deg, #ffda1a 0%, #e6c417 100%)', // Yellow gradient
-        primaryVibrant: 'linear-gradient(135deg, #0051ba 0%, #ffda1a 100%)', // Blue to Yellow
-        dark: 'linear-gradient(135deg, #0051ba 0%, #003e8f 100%)', // Blue gradient
+        primary: 'linear-gradient(135deg, #ffda1a 0%, #e6c417 100%)',
+        primaryVibrant: 'linear-gradient(135deg, #0051ba 0%, #ffda1a 100%)',
+        dark: 'linear-gradient(135deg, #0051ba 0%, #003e8f 100%)',
     },
     neutrals: {
         ...defaultTheme.neutrals,
@@ -139,7 +139,7 @@ export const ikeaTheme: ThemeConfig = {
         gray200: '#0051ba',
         gray300: '#3373c8',
         gray400: '#6696d6',
-        gray500: '#cbd5e1', // Light gray text
+        gray500: '#cbd5e1',
         gray600: '#e2e8f0',
         gray700: '#f1f5f9',
         gray800: '#f8fafc',

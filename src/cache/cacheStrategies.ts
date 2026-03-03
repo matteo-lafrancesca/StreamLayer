@@ -21,13 +21,11 @@ export async function cacheFirst<T>({
     key,
     fetcher,
 }: FetchOptions<T>): Promise<T> {
-    // 1. Try cache (Memory → Disk)
     const cached = await cacheManager.get(key);
     if (cached !== null) {
         return cached;
     }
 
-    // 2. Fetch from network (with deduplication)
     return cacheManager.fetchWithDeduplication(key, fetcher);
 }
 
@@ -42,19 +40,15 @@ export async function networkFirst<T>({
     fetcher,
 }: FetchOptions<T>): Promise<T> {
     try {
-        // 1. Try network first
         const result = await fetcher();
-        // Cache the result
         await cacheManager.set(key, result);
         return result;
     } catch (error) {
-        // 2. Fallback to cache
         const cached = await cacheManager.get(key);
         if (cached !== null) {
             console.warn(`[networkFirst] Using stale cache for ${key} due to network error`);
             return cached;
         }
-        // No cache available, rethrow error
         throw error;
     }
 }
@@ -72,14 +66,11 @@ export async function staleWhileRevalidate<T>({
 }: FetchOptions<T> & {
     onRevalidate?: (freshData: T) => void;
 }): Promise<T> {
-    // 1. Get cached data (if available)
     const cached = await cacheManager.get(key);
 
-    // 2. Start background revalidation (don't await)
     if (onRevalidate) {
         cacheManager.fetchWithDeduplication(key, fetcher)
             .then((freshData) => {
-                // Only notify if data actually changed
                 if (cached === null || JSON.stringify(cached) !== JSON.stringify(freshData)) {
                     onRevalidate(freshData);
                 }
@@ -93,12 +84,10 @@ export async function staleWhileRevalidate<T>({
         });
     }
 
-    // 3. Return cached data immediately (or wait for network if no cache)
     if (cached !== null) {
         return cached;
     }
 
-    // No cache, must wait for network
     return cacheManager.fetchWithDeduplication(key, fetcher);
 }
 

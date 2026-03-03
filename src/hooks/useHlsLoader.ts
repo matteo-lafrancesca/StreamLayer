@@ -3,6 +3,7 @@ import Hls from 'hls.js';
 import { getTrackStreamUrl } from '@services/api/tracks';
 import { tokenManager } from '@services/tokenManager';
 import { appendAuthToUrl } from '@utils/hls';
+import { Logger } from '@utils/logger';
 
 interface UseHlsLoaderProps {
     trackId: number | null;
@@ -33,7 +34,7 @@ export function useHlsLoader({
     const retryCountRef = useRef<number>(0);
     const authRetryCountRef = useRef<number>(0);
 
-    // Stable error callback ref to avoid effect re-runs
+    // Stable error callback ref
     const onErrorRef = useRef(onError);
     useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
@@ -41,7 +42,7 @@ export function useHlsLoader({
     const onStreamReadyRef = useRef(onStreamReady);
     useEffect(() => { onStreamReadyRef.current = onStreamReady; }, [onStreamReady]);
 
-    // Stable Token Ref to avoid HLS destruction on refresh
+    // Stable Token Ref
     const accessTokenRef = useRef(accessToken);
     useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
 
@@ -57,7 +58,6 @@ export function useHlsLoader({
         authRetryCountRef.current = 0;
 
         if (!audio || !trackId) {
-            // Clean up if no track
             if (hlsRef.current) {
                 hlsRef.current.destroy();
                 hlsRef.current = null;
@@ -70,18 +70,17 @@ export function useHlsLoader({
             return;
         }
 
-        // Include token for native playback (iOS) which doesn't use xhrSetup
+        // Include token for native playback
         const streamUrl = getTrackStreamUrl(trackId, accessTokenRef.current || undefined);
-        console.log('[HLS] Loading stream:', streamUrl);
+        Logger.info('[HLS] Loading stream:', streamUrl);
 
         if (!streamUrl) {
-            console.error('[HLS] Invalid stream URL');
+            Logger.error('[HLS] Invalid stream URL');
             onErrorRef.current?.();
             return;
         }
 
-        // Debounce HLS initialization to prevent request flooding
-        // Skip debounce if priority is true (e.g., active track)
+        // Debounce HLS initialization
         const initHls = () => {
             if (Hls.isSupported()) {
                 if (hlsRef.current) hlsRef.current.destroy();
@@ -113,25 +112,25 @@ export function useHlsLoader({
                     // Check for 401/403 on Network Error (Token expired)
                     if (data.type === Hls.ErrorTypes.NETWORK_ERROR && (data.response?.code === 401 || data.response?.code === 403)) {
                         if (authRetryCountRef.current < MAX_AUTH_RETRIES) {
-                            console.log(`[HLS] Token 401 detected, refreshing... (Attempt ${authRetryCountRef.current + 1}/${MAX_AUTH_RETRIES})`);
+                            Logger.info(`[HLS] Token 401 detected, refreshing... (Attempt ${authRetryCountRef.current + 1}/${MAX_AUTH_RETRIES})`);
                             authRetryCountRef.current++;
 
                             tokenManager.refreshAccessToken().catch((e: unknown) => {
-                                console.error('[HLS] Token refresh failed:', e);
+                                Logger.error('[HLS] Token refresh failed:', e);
                                 onErrorRef.current?.();
                             });
                         } else {
-                            console.error('[HLS] Max auth retries reached, aborting.');
+                            Logger.error('[HLS] Max auth retries reached, aborting.');
                             onErrorRef.current?.();
                         }
                         return;
                     }
 
                     if (data.fatal) {
-                        console.error(`[HLS Error] Type: ${data.type}, Details:`, data.details, `(Retry ${retryCountRef.current}/${MAX_RETRIES})`);
+                        Logger.error(`[HLS Error] Type: ${data.type}, Details:`, data.details, `(Retry ${retryCountRef.current}/${MAX_RETRIES})`);
 
                         if (retryCountRef.current >= MAX_RETRIES) {
-                            console.error('[HLS] Max retries reached, skipping to next track');
+                            Logger.error('[HLS] Max retries reached, skipping to next track');
                             hls.destroy();
                             retryCountRef.current = 0;
                             onErrorRef.current?.();
@@ -145,11 +144,11 @@ export function useHlsLoader({
 
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
-                                    console.log(`[HLS] Retry #${retryCountRef.current}: Network error, reloading...`);
+                                    Logger.info(`[HLS] Retry #${retryCountRef.current}: Network error, reloading...`);
                                     hls.loadSource(streamUrl);
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.log(`[HLS] Retry #${retryCountRef.current}: Media error, recovering...`);
+                                    Logger.info(`[HLS] Retry #${retryCountRef.current}: Media error, recovering...`);
                                     hls.recoverMediaError();
                                     break;
                                 default:
@@ -166,7 +165,7 @@ export function useHlsLoader({
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = streamUrl;
             } else {
-                console.error('HLS is not supported in this browser');
+                Logger.error('HLS is not supported in this browser');
             }
         };
 
@@ -185,5 +184,5 @@ export function useHlsLoader({
                 hlsRef.current = null;
             }
         };
-    }, [trackId, audioElement]); // removed accessToken from dependencies
+    }, [trackId, audioElement]);
 }

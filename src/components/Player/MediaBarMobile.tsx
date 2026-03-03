@@ -22,23 +22,18 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
         if (isExpanded && currentView !== 'track') {
             setCurrentView('track');
         } else {
-            setCurrentView('track'); // Set to track view before expanding
+            setCurrentView('track');
             onExpandToggle();
         }
     };
-
-    // Check if cover is loaded
-    // const coverUrl = useCover('album', playingTrack?.id_album, 's');
 
     return (
         <div
             className={styles.mediaBarMobile}
             onClick={handleExpand}
         >
-            {/* Left: Cover + Track Info */}
             <TrackDisplay />
 
-            {/* Right: Play/Pause */}
             <div className={styles.mediaBarRight}>
                 <IconButton
                     icon={isPlaying
@@ -46,7 +41,7 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
                         : <Play size={PLAYER_SIZES.MOBILE.ICON_SMALL} strokeWidth={2.5} />
                     }
                     onClick={(e) => {
-                        e.stopPropagation(); // Prevent expand trigger
+                        e.stopPropagation();
                         setIsPlaying(!isPlaying);
                     }}
                     className={styles.playPauseButtonMobile}

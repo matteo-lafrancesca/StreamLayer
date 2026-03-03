@@ -33,7 +33,7 @@ interface UseQueueManagerReturn {
 export function useQueueManager({ tracks, initialTrack }: UseQueueManagerProps): UseQueueManagerReturn {
     const [state, dispatch] = useReducer(queueReducer, initialState);
 
-    // Bootstrap queue from props on initial mount
+    // Bootstrap queue
     useEffect(() => {
         if (tracks && tracks.length > 0) {
             let startIndex = 0;
@@ -45,7 +45,7 @@ export function useQueueManager({ tracks, initialTrack }: UseQueueManagerProps):
         }
     }, []);
 
-    // Active track list (shuffled or original)
+    // Active track list
     const activeTrackList = useMemo(() => {
         return state.isShuffled ? state.shuffledTracks : state.originalTracks;
     }, [state.isShuffled, state.shuffledTracks, state.originalTracks]);
@@ -53,11 +53,9 @@ export function useQueueManager({ tracks, initialTrack }: UseQueueManagerProps):
     const currentTrack = activeTrackList[state.currentIndex] || null;
     const totalTracks = activeTrackList.length;
 
-    // Derived states
     const canPlayNext = state.repeatMode === 'all' || state.repeatMode === 'one' || state.currentIndex < totalTracks - 1;
     const canPlayPrevious = state.repeatMode === 'all' || state.currentIndex > 0;
 
-    // Callbacks
     const setQueue = useCallback((newTracks: Track[], startIndex: number = 0, options: { keepState?: boolean; shuffle?: boolean } = {}) => {
         dispatch({ type: 'SET_QUEUE', tracks: newTracks, startIndex, ...options });
     }, []);

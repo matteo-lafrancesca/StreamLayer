@@ -19,6 +19,5 @@ export function ViewRenderer({ currentView, setCurrentView }: ViewRendererProps)
         return <QueueView />;
     }
 
-    // Default to project view
     return <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />;
 }

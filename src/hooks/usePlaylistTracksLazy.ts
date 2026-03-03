@@ -1,7 +1,5 @@
 /**
  * Hook to lazily fetch playlist tracks
- * REFACTORED to use new cache architecture
- * Reduced from ~179 lines to ~80 lines by separating concerns
  */
 
 import { useState, useEffect } from 'react';
@@ -10,11 +8,11 @@ import type { Track } from '@definitions/track';
 import { useApi } from './useApi';
 import { useLazyPagination } from './cache/useLazyPagination';
 import { createCacheManager } from '@cache/CacheManager';
+import { Logger } from '@utils/logger';
 
-// Shared cache manager for playlist tracks
 const playlistTracksCache = createCacheManager<Track[]>('data', {
-    ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
-    maxItems: 50, // Cache up to 50 playlists
+    ttl: 7 * 24 * 60 * 60 * 1000,
+    maxItems: 50,
 });
 
 interface UsePlaylistTracksLazyResult {
@@ -28,15 +26,6 @@ interface UsePlaylistTracksLazyResult {
 /**
  * Hook to lazily fetch playlist tracks.
  * Loads tracks in batches of 10 for fast initial render.
- * 
- * Strategy:
- * 1. Check cache for full playlist (instant load if cached)
- * 2. If not cached, use lazy pagination to load in batches
- * 3. Once all tracks loaded, cache the full playlist
- * 
- * @param playlistId - Playlist ID
- * @param accessToken - Access Token
- * @param expectedTotal - Expected total count (from playlist.nb_items)
  */
 export function usePlaylistTracksLazy(
     playlistId: number | null | undefined,
@@ -50,7 +39,6 @@ export function usePlaylistTracksLazy(
     const [cachedTracks, setCachedTracks] = useState<Track[] | null>(null);
     const [cacheChecked, setCacheChecked] = useState(false);
 
-    // 1. Initial Cache Check & Background Revalidation
     useEffect(() => {
         if (!cacheKey) {
             setCachedTracks(null);
@@ -72,7 +60,7 @@ export function usePlaylistTracksLazy(
             setCacheChecked(true);
 
             if (cached) {
-                console.log('[usePlaylistTracksLazy] Cache hit:', cached.length);
+                Logger.info('[usePlaylistTracksLazy] Cache hit:', cached.length);
                 setCachedTracks(cached);
 
                 // Background Revalidation (update cache with fresh data)
@@ -82,7 +70,7 @@ export function usePlaylistTracksLazy(
                 if (accessToken && isStale) {
                     playlistTracksCache.fetchWithDeduplication(cacheKey, () =>
                         authenticatedCall(async (token) => {
-                            console.log('[usePlaylistTracksLazy] Revalidating in background...');
+                            Logger.info('[usePlaylistTracksLazy] Revalidating in background...');
                             const response = await getPlaylistTracks({
                                 playlistId: playlistId!,
                                 limit: expectedTotal ?? 1000,
@@ -91,7 +79,7 @@ export function usePlaylistTracksLazy(
                             });
 
                             if (response.items && response.items.length > 0) {
-                                console.log('[usePlaylistTracksLazy] Revalidation success, updating cache');
+                                Logger.info('[usePlaylistTracksLazy] Revalidation success, updating cache');
                                 if (isSubscribed) {
                                     setCachedTracks(response.items);
                                 }
@@ -100,7 +88,7 @@ export function usePlaylistTracksLazy(
                             return cached;
                         })
                     ).catch((err) => {
-                        console.error('[usePlaylistTracksLazy] Revalidation failed:', err);
+                        Logger.error('[usePlaylistTracksLazy] Revalidation failed:', err);
                     });
                 }
             }
@@ -113,7 +101,6 @@ export function usePlaylistTracksLazy(
         };
     }, [cacheKey, accessToken]);
 
-    // 2. Lazy Pagination (Only if NO cache)
     const pagination = useLazyPagination<Track>({
         key: playlistId ?? null,
         fetcher: async (offset, limit) => {
@@ -134,7 +121,6 @@ export function usePlaylistTracksLazy(
         enabled: !!playlistId && !!accessToken && cacheChecked && !cachedTracks,
     });
 
-    // 3. Update Cache when Pagination Completes
     useEffect(() => {
         if (
             cacheKey &&
@@ -144,7 +130,7 @@ export function usePlaylistTracksLazy(
             pagination.items.length >= pagination.totalCount &&
             !pagination.hasMore
         ) {
-            console.log('[usePlaylistTracksLazy] Pagination complete, caching all tracks...');
+            Logger.info('[usePlaylistTracksLazy] Pagination complete, caching all tracks...');
             playlistTracksCache.set(cacheKey, pagination.items);
         }
     }, [cacheKey, pagination.items, pagination.totalCount, pagination.hasMore, pagination.dataKey, playlistId]);

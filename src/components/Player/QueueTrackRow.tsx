@@ -11,8 +11,9 @@ interface QueueTrackRowProps {
     track: Track;
     onClick: () => void;
     isPlaying?: boolean;
+    isPlaying?: boolean;
     isPlayingState?: boolean;
-    id?: string; // ID for dnd-kit
+    id?: string;
     isOverlay?: boolean;
 }
 
@@ -34,11 +35,10 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: 1, // Keep full opacity even when dragging
+        opacity: 1,
         touchAction: 'pan-y',
     };
 
-    // Override style if it's an overlay (pure visual) - don't spread style to avoid inherited opacity
     const finalStyle = isOverlay ? {
         cursor: 'grabbing',
         opacity: 1,
@@ -51,24 +51,17 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
             style={finalStyle}
             className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''} ${!isOverlay && isDragging ? styles.isDragging : ''} ${isOverlay ? styles.overlay : ''}`}
         >
-            {/* Drag Handle - Only show if not playing current track (which isn't sortable usually, or is separate) */}
             {!isPlaying && (
                 <div
                     className={styles.dragHandle}
                     {...attributes}
                     {...listeners}
-                    onClick={(e) => e.stopPropagation()} // Prevent click from triggering row click
+                    onClick={(e) => e.stopPropagation()}
                     data-no-swipe="true"
                 >
                     <GripVertical size={16} />
                 </div>
             )}
-
-            {/* Play/Pause Control - Needs stopPropagation to not trigger row click if handled separately, 
-                but here row click handles play, so maybe we want that. 
-                Original didn't have specific click handler on icon, just row.
-            */}
-
 
             <AuthenticatedImage
                 type="album"

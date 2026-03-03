@@ -20,7 +20,6 @@ interface UsePlaybackControlsReturn {
 
 /**
  * Controlled hook for playback controls.
- * Delegates all logic to parent (PlayerContext via queueManager).
  */
 export function usePlaybackControls({
     isShuffled,

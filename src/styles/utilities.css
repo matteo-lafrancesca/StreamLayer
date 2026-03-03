@@ -1,7 +1,6 @@
 /**
  * Utility Classes - StreamLayer
  * Classes CSS réutilisables pour éviter la duplication
- * IMPORTANT: Toutes les classes sont préfixées avec 'sl-' pour éviter les conflits
  */
 
 /* ========== BUTTONS ========== */
@@ -98,7 +97,6 @@
     font-size: var(--font-size-2xl);
 }
 
-/* Hitbox élargie sans décalage visuel */
 .sl-icon-btn-hitbox {
     padding: var(--hitbox-padding);
     margin: calc(-1 * var(--hitbox-padding));

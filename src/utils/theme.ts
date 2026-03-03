@@ -10,14 +10,12 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
 
     const variables: Record<string, string> = {};
 
-    // Helper to add variable if value exists
     const addVar = (name: string, value?: string) => {
         if (value) {
             variables[name] = value;
         }
     };
 
-    // Colors
     if (theme.colors) {
         addVar('--color-primary', theme.colors.primary);
         addVar('--color-primary-light', theme.colors.primaryLight);
@@ -26,7 +24,6 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--color-accent', theme.colors.accent);
     }
 
-    // Gradients
     if (theme.gradients) {
         addVar('--gradient-primary', theme.gradients.primary);
         addVar('--gradient-primary-vibrant', theme.gradients.primaryVibrant);
@@ -38,7 +35,6 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--gradient-red', theme.gradients.red);
     }
 
-    // Neutrals
     if (theme.neutrals) {
         addVar('--color-white', theme.neutrals.white);
         addVar('--color-black', theme.neutrals.black);
@@ -54,7 +50,6 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--color-gray-900', theme.neutrals.gray900);
     }
 
-    // Backgrounds
     if (theme.backgrounds) {
         addVar('--bg-primary', theme.backgrounds.primary);
         addVar('--bg-secondary', theme.backgrounds.secondary);
@@ -62,7 +57,6 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--bg-card', theme.backgrounds.card);
     }
 
-    // Text
     if (theme.text) {
         addVar('--text-primary', theme.text.primary);
         addVar('--text-secondary', theme.text.secondary);
@@ -71,7 +65,6 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--text-white', theme.text.white);
     }
 
-    // State
     if (theme.state) {
         addVar('--color-success', theme.state.success);
         addVar('--color-warning', theme.state.warning);
@@ -79,13 +72,11 @@ export function generateThemeVariables(theme?: ThemeConfig): CSSProperties {
         addVar('--color-info', theme.state.info);
     }
 
-    // Spotify
     if (theme.spotify) {
         addVar('--color-spotify-green', theme.spotify.green);
         addVar('--color-spotify-green-hover', theme.spotify.greenHover);
     }
 
-    // Radius
     if (theme.radius) {
         addVar('--radius-none', theme.radius.none);
         addVar('--radius-sm', theme.radius.sm);

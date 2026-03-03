@@ -37,7 +37,6 @@ export function CompactMediaBar({ dragAttributes, dragListeners }: CompactMediaB
             role="button"
             tabIndex={0}
         >
-            {/* Album Cover */}
             <div className={styles.coverContainer}>
                 <AlbumCoverOrPlaceholder
                     track={playingTrack}
@@ -46,7 +45,6 @@ export function CompactMediaBar({ dragAttributes, dragListeners }: CompactMediaB
                 />
             </div>
 
-            {/* Play/Pause Button */}
             <IconButton
                 icon={isPlaying ? <Pause size={PLAYER_SIZES.DESKTOP.ICON_LARGE} /> : <Play size={PLAYER_SIZES.DESKTOP.ICON_LARGE} />}
                 onClick={handlePlayPause}
@@ -55,7 +53,6 @@ export function CompactMediaBar({ dragAttributes, dragListeners }: CompactMediaB
                 title={isPlaying ? "Pause" : "Lecture"}
             />
 
-            {/* Drag Handle */}
             <div
                 className={styles.dragHandle}
                 {...dragAttributes}

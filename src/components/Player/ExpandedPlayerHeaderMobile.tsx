@@ -1,4 +1,3 @@
-// import { IconButton } from '@components/UI'; // Unused
 import { ArrowLeft } from 'lucide-react';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 
@@ -7,8 +6,6 @@ import styles from '@styles/ExpandedPlayerHeader.module.css';
 export interface ExpandedPlayerHeaderMobileProps {
     currentView: 'playlist' | 'project' | 'queue' | 'track';
     setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
-    // selectedPlaylist: Playlist | null; // Unused
-    // onExpandToggle: () => void; // Unused
 }
 
 /**
@@ -20,12 +17,10 @@ export function ExpandedPlayerHeaderMobile({
     currentView,
     setCurrentView,
 }: ExpandedPlayerHeaderMobileProps) {
-    // Track view doesn't have a header (handled by BottomSheet chevron)
     if (currentView === 'track') {
         return null;
     }
 
-    // Render header content based on view
     const renderHeaderContent = () => {
         switch (currentView) {
             case 'playlist':

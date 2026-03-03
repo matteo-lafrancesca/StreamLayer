@@ -16,8 +16,6 @@ interface UseAuthTokensReturn {
 
 /**
  * Hook to manage authentication and tokens.
- * @param projectId - Project ID.
- * @returns Tokens and setters.
  */
 export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensReturn {
     const [accessToken, setAccessToken] = useState<string | null>(tokenManager.getAccessToken());
@@ -25,19 +23,15 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Initialize projectId in manager
         tokenManager.setProjectId(projectId);
 
-        // Subscribe to token changes
         const unsubscribe = tokenManager.subscribe((newAccessToken) => {
             setAccessToken(newAccessToken);
             setRefreshToken(tokenManager.getRefreshToken());
         });
 
-        // Retrieve initial tokens
         getInitialTokens(projectId)
             .then((tokens) => {
-                // Via the manager, this triggers notification and state update
                 tokenManager.setTokens(tokens.access_token, tokens.refresh_token);
             })
             .catch((error) => {
@@ -56,8 +50,6 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
         accessToken,
         refreshToken,
         isLoading,
-        // Manual setters update local state,
-        // ideally we should go through the manager for any global change
         setAccessToken,
         setRefreshToken,
     };

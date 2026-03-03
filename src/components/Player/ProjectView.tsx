@@ -52,7 +52,6 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
                             onClick={() => handlePlaylistClick(playlist)}
                             className={styles.playlistCard}
                         >
-                            {/* Cover */}
                             <AuthenticatedImage
                                 type="playlist"
                                 id={playlist.id}
@@ -61,7 +60,6 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
                                 className={styles.coverPlaylist}
                             />
 
-                            {/* Playlist Info */}
                             <div className={styles.playlistInfo}>
                                 <div className={styles.playlistTitle}>
                                     {displayInfo.title}

@@ -53,9 +53,7 @@ export interface ScrollingTextProps {
     speed?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PlaylistViewProps {
-    // Reserved for future props
 }
 
 export interface ProjectViewProps {
@@ -64,5 +62,4 @@ export interface ProjectViewProps {
 
 import { type CoverSize } from '@services/api/covers';
 
-// Type alias for image sizes (maps directly to CoverSize)
 export type ImageSize = CoverSize;

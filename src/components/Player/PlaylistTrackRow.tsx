@@ -21,9 +21,7 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
 
     return (
         <div className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} onClick={onClick}>
-            {/* Index with Play/Pause on hover */}
             <div className={styles.index}>
-                {/* Default state (no hover) */}
                 <div className={styles.indexContent}>
                     {isPlaying && isPlayingState ? (
                         <PlayingIndicator />
@@ -32,7 +30,6 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
                     )}
                 </div>
 
-                {/* Hover state */}
                 {isPlaying && isPlayingState ? (
                     <Pause className={styles.playIcon} fill="currentColor" />
                 ) : (
@@ -40,7 +37,6 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
                 )}
             </div>
 
-            {/* Track Content */}
             <div className={styles.trackContent}>
                 <AuthenticatedImage
                     type="album"
@@ -59,11 +55,9 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
                 {album?.title || 'Chargement...'}
             </div>
 
-            {/* Duration */}
             <div className={styles.duration}>{displayInfo.duration}</div>
         </div>
     );
 }
 
-// Memoize component to optimize renders
 export const PlaylistTrackRow = memo(PlaylistTrackRowComponent);

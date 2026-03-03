@@ -23,7 +23,6 @@ export function useSlider(
     }, []);
     const [isDragging, setIsDragging] = useState(false);
 
-    // Keep track of the latest callbacks to avoid stale closures in event listeners
     const latestOnChange = useRef(onChange);
     const latestOnDragStart = useRef(onDragStart);
     const latestOnDragEnd = useRef(onDragEnd);
@@ -37,22 +36,18 @@ export function useSlider(
     const handleInteraction = useCallback((e: React.MouseEvent<HTMLDivElement> | MouseEvent | React.TouchEvent<HTMLDivElement> | TouchEvent, cachedRect?: DOMRect) => {
         if (!internalRef.current) return;
 
-        // Use cached rect if available (during drag), otherwise get fresh (initial click)
         const rect = cachedRect || internalRef.current.getBoundingClientRect();
 
         let clientX: number;
         if ('touches' in e) {
-            // TouchEvent
             if (e.touches.length > 0) {
                 clientX = e.touches[0].clientX;
             } else if ('changedTouches' in e && e.changedTouches.length > 0) {
-                // For touchend, use changedTouches
                 clientX = e.changedTouches[0].clientX;
             } else {
                 return;
             }
         } else {
-            // MouseEvent
             clientX = e.clientX;
         }
 
@@ -60,7 +55,6 @@ export function useSlider(
         const percentage = Math.round((x / rect.width) * 100);
         const clamped = Math.max(0, Math.min(100, percentage));
 
-        // Always call the latest callback
         latestOnChange.current(clamped);
         return clamped;
     }, []);
@@ -120,11 +114,9 @@ export function useSlider(
             }
 
             if (lockRef.direction === 'horizontal') {
-                // Prevent scrolling while dragging horizontally
                 if (moveEvent.cancelable) moveEvent.preventDefault();
                 handleInteraction(moveEvent, rect);
             }
-            // If vertical, we don't preventDefault, allowing the bottom sheet to catch it
         };
 
         const handleTouchEnd = (upEvent: TouchEvent) => {
@@ -141,7 +133,6 @@ export function useSlider(
             document.removeEventListener('touchend', handleTouchEnd);
         };
 
-        // passive: false is required to use preventDefault()
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd);
     }, [handleInteraction]);

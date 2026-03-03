@@ -23,11 +23,10 @@ export function QueueView() {
     const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
     const { selectedPlaylist, setIsDragging } = usePlayerUI();
 
-    // Sensors for drag detection
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8, // Start dragging after moving 8px to prevent accidental drags on clicks
+                distance: 8,
             },
         }),
         useSensor(KeyboardSensor, {
@@ -35,7 +34,6 @@ export function QueueView() {
         })
     );
 
-    // Separate current track from upcoming tracks
     const { currentTrack, upcomingTracks } = useMemo(() => {
         if (!queue || queue.length === 0 || !playingTrack) {
             return { currentTrack: null, upcomingTracks: [], startIndex: 0 };
@@ -43,7 +41,6 @@ export function QueueView() {
 
         const currentIndex = queue.findIndex(track => track.id === playingTrack.id);
         if (currentIndex === -1) {
-            // Should not happen theoretically if playingTrack is in queue
             return { currentTrack: null, upcomingTracks: queue, startIndex: 0 };
         }
 
@@ -58,12 +55,6 @@ export function QueueView() {
         const { active, over } = event;
 
         if (active.id !== over?.id) {
-            // Find indexes in likely the whole queue or just the upcoming part?
-            // We need to map back to the MAIN queue indexes.
-
-            // "active.id" is the track ID as string (see QueueTrackRow)
-            // But we need the index in the FULL queue.
-
             const oldIndex = queue.findIndex((item) => item.id.toString() === active.id);
             const newIndex = queue.findIndex((item) => item.id.toString() === over?.id);
 
@@ -83,14 +74,12 @@ export function QueueView() {
 
     return (
         <div className={styles.scrollContainer}>
-            {/* Now Playing */}
             {currentTrack && (
                 <div className={styles.queueSection}>
                     <h3 className={styles.sectionTitle}>Titre en cours de lecture</h3>
                     <QueueTrackRow
                         track={currentTrack}
                         onClick={() => {
-                            // Toggle play/pause
                             setIsPlaying(!isPlaying);
                         }}
                         isPlaying={true}

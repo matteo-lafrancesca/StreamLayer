@@ -15,13 +15,10 @@ export function useVolumeControl(
 
     const toggleMute = useCallback(() => {
         if (isMuted) {
-            // Unmute: restore previous volume
             const volumeToRestore = previousVolumeRef.current > 0 ? previousVolumeRef.current : 100;
             onVolumeChange(volumeToRestore);
             setIsMuted(false);
         } else {
-            // Mute: save current volume before muting
-            // Note: Use props-provided initialVolume
             if (initialVolume > 0) {
                 previousVolumeRef.current = initialVolume;
             }
@@ -31,7 +28,6 @@ export function useVolumeControl(
     }, [isMuted, initialVolume, onVolumeChange]);
 
     const setVolume = useCallback((volume: number) => {
-        // Update the previous volume when user changes it manually
         if (volume > 0) {
             previousVolumeRef.current = volume;
             setIsMuted(false);

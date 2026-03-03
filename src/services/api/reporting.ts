@@ -19,8 +19,6 @@ export async function sendStats(items: StatItem[]): Promise<void> {
         });
     } catch (error) {
         console.error('[Reporting] Failed to send stats:', error);
-        // In a real implementation, we might want to throw here to let the caller handle retry/offline storage
-        // For now, we just log it as per initial plan which deferred offline handling
         throw error;
     }
 }

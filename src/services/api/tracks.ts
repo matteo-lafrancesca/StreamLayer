@@ -1,8 +1,7 @@
 import type { Track } from '@definitions/track';
 
 import { fetchJson } from './client';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { ConfigManager } from '../../config/ConfigManager';
 
 /**
  * Generates HLS streaming URL for a track.
@@ -11,7 +10,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
  * @returns HLS manifest URL (.m3u8).
  */
 export function getTrackStreamUrl(trackId: number, accessToken?: string): string {
-    const baseUrl = `${API_BASE_URL}/tracks/${trackId}/hls`;
+    const config = ConfigManager.getConfig();
+    const baseUrl = `${config.apiBaseUrl}/tracks/${trackId}/hls`;
     if (accessToken) {
         return `${baseUrl}?authorization=${encodeURIComponent(accessToken)}`;
     }

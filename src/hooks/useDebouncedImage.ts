@@ -1,18 +1,5 @@
 /**
  * @deprecated This hook is deprecated. Use `useCachedImage` from `@hooks/cache/useCachedImage` instead.
- * 
- * Migration example:
- * ```ts
- * // Old:
- * const imageUrl = useDebouncedImage(shouldLoad, cacheKey, fetchFn, 200);
- * 
- * // New:
- * const imageUrl = useCachedImage({
- *   key: shouldLoad ? cacheKey : null,
- *   fetcher: fetchFn,
- *   debounce: 200,
- * });
- * ```
  */
 
 import { useState, useEffect } from 'react';
@@ -32,7 +19,6 @@ export function useDebouncedImage(
     fetchFn: () => Promise<string>,
     delay: number = 200
 ): string | null {
-    // Initialize from cache if possible for immediate render
     const [blobUrl, setBlobUrl] = useState<string | null>(() => {
         if (!shouldLoad) return null;
         return getCachedImage(cacheKey);
@@ -42,24 +28,18 @@ export function useDebouncedImage(
         let isSubscribed = true;
 
         if (!shouldLoad) {
-            // Keep previous image if it was loaded? No, follow shouldLoad.
-            // But usually we want to keep showing until new one replaces it?
-            // Existing logic cleared it. adhering to existing logic.
             setBlobUrl(null);
             return;
         }
 
-        // 1. Check Memory Cache immediately (synchronous)
         const cached = getCachedImage(cacheKey);
         if (cached) {
             setBlobUrl(cached);
             return;
         }
 
-        // 2. Schedule Async checks (Disk -> Network)
         const timeoutId = setTimeout(async () => {
             try {
-                // A. Check Persistent Cache (Disk)
                 const storedBlob = await persistentCache.get<Blob>('images', cacheKey);
 
                 if (!isSubscribed) return;
@@ -71,13 +51,10 @@ export function useDebouncedImage(
                     return;
                 }
 
-                // B. Fetch from Network (if not in disk)
                 const url = await fetchFn();
 
                 if (!isSubscribed) return;
 
-                // C. Persist to Disk (Get Blob from URL and save)
-                // We fetch the blob back from the object URL to store it
                 try {
                     const response = await fetch(url);
                     const blob = await response.blob();
@@ -98,7 +75,6 @@ export function useDebouncedImage(
             }
         }, delay);
 
-        // 3. Cleanup on unmount or dependency change
         return () => {
             isSubscribed = false;
             clearTimeout(timeoutId);

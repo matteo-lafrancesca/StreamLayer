@@ -37,7 +37,6 @@ export function PlayerMobile() {
 
     return (
         <div className={styles.mobileWrapper}>
-            {/* Fixed Player at Bottom */}
             <div
                 className={styles.playerContainer}
                 style={{
@@ -47,29 +46,24 @@ export function PlayerMobile() {
                 }}
             >
                 <div className={styles.player} style={MOBILE_PLAYER_STYLES.player}>
-                    {/* MediaBar */}
                     <div className={sharedStyles.mediaBarSection}>
                         <MediaBarMobile onExpandToggle={onExpandToggle} />
                     </div>
 
-                    {/* Mobile progress slider at the bottom */}
                     <ProgressSlider interactive={false} />
                 </div>
             </div>
 
-            {/* Bottom Sheet for ALL Expanded Views */}
             <BottomSheet
                 isOpen={isExpanded}
                 onClose={onExpandToggle}
                 showChevron={false}
                 disabled={isDragging}
             >
-                {/* Layer 0: Track View (Always rendered as base) */}
                 <div style={{ position: 'absolute', inset: 0, overflow: 'auto', zIndex: 1 }}>
                     <TrackViewMobile />
                 </div>
 
-                {/* Layer 1: Project or Queue View */}
                 <NavStack
                     state={layer1State}
                     onBack={() => setCurrentView('track')}
@@ -84,7 +78,6 @@ export function PlayerMobile() {
                     </div>
                 </NavStack>
 
-                {/* Layer 2: Playlist View */}
                 <NavStack
                     state={layer2State}
                     onBack={() => setCurrentView('project')}
@@ -99,7 +92,6 @@ export function PlayerMobile() {
                     </div>
                 </NavStack>
 
-                {/* Background Fade Overlay for better separation from list content */}
                 {currentView !== 'track' && <div className={styles.bottomFade} style={{ zIndex: 1000 }} />}
             </BottomSheet>
         </div>

@@ -1,7 +1,7 @@
 import { tokenManager } from '@services/tokenManager';
 import { ApiError } from '@definitions/../types/ApiError';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { ConfigManager } from '../../config/ConfigManager';
 
 interface FetchOptions extends RequestInit {
     accessToken?: string;
@@ -23,10 +23,10 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+        const config = ConfigManager.getConfig();
+        const url = endpoint.startsWith('http') ? endpoint : `${config.apiBaseUrl}${endpoint}`;
         const response = await fetch(url, { ...customOptions, headers });
 
-        // Explicitly throw on 401/403 so callWithAuth can catch and trigger token refresh
         if (response.status === 401 || response.status === 403) {
             throw new ApiError(`Auth Error: ${response.statusText}`, response.status);
         }
@@ -34,7 +34,6 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
         return response;
     };
 
-    // If explicit token provided or available in manager, use callWithAuth for auto-refresh
     if (accessToken || tokenManager.getAccessToken()) {
         return await tokenManager.callWithAuth((token) => performFetch(token));
     }

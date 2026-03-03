@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { ConfigManager } from '../../config/ConfigManager';
 
 export type CoverSize = 's' | 'm' | 'l';
 
@@ -17,7 +17,8 @@ const COVER_DIMENSIONS: Record<CoverSize, { width: number; height: number }> = {
  */
 export function getAlbumCoverUrl(albumId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
-    return `${API_BASE_URL}/albums/${albumId}/cover.jpg?height=${height}&width=${width}`;
+    const config = ConfigManager.getConfig();
+    return `${config.apiBaseUrl}/albums/${albumId}/cover.jpg?height=${height}&width=${width}`;
 }
 
 /**
@@ -28,17 +29,10 @@ export function getAlbumCoverUrl(albumId: number, size: CoverSize = 'm'): string
  */
 export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
-    return `${API_BASE_URL}/lists/${playlistId}/cover.jpg?height=${height}&width=${width}`;
+    const config = ConfigManager.getConfig();
+    return `${config.apiBaseUrl}/lists/${playlistId}/cover.jpg?height=${height}&width=${width}`;
 }
 
-/**
- * Récupère la cover d'un album avec authentification
- * @param albumId - L'ID de l'album
- * @param size - Taille de la cover
- * @param accessToken - Token d'accès
- * @returns Blob de l'image
- */
-// Map to store in-flight requests for deduplication
 const inFlightRequests = new Map<string, Promise<string>>();
 
 /**
@@ -50,25 +44,21 @@ async function fetchCoverWithDeduplication(
     url: string,
     accessToken: string
 ): Promise<string> {
-    // If request already in progress, return it
     if (inFlightRequests.has(key)) {
         return inFlightRequests.get(key)!;
     }
 
     const promise = apiFetch(url, {
         accessToken,
-        // Important: fetch in 'cors' mode if needed (default usually fine)
     })
         .then(async (response) => {
             if (!response.ok) {
                 throw new Error(`Error loading cover: ${response.status}`);
             }
             const blob = await response.blob();
-            // Create unique URL here, shared by all callers
             return URL.createObjectURL(blob);
         })
         .finally(() => {
-            // Clean map once request finishes (success or error)
             inFlightRequests.delete(key);
         });
 

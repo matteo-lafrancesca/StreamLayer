@@ -21,18 +21,15 @@ export function BottomSheet({ isOpen, onClose, children, showChevron = true, dis
 
     return (
         <>
-            {/* Backdrop */}
             <div
                 className={`${styles.backdrop} ${isOpen ? styles.backdropOpen : ''}`}
                 onClick={onClose}
             />
 
-            {/* Bottom Sheet */}
             <div
                 className={`${styles.bottomSheet} ${isOpen ? styles.bottomSheetOpen : ''}`}
                 data-bottom-sheet
             >
-                {/* Header - Chevron or drag handle */}
                 <div
                     className={styles.dragHandle}
                     onClick={showChevron ? onClose : undefined}
@@ -45,7 +42,6 @@ export function BottomSheet({ isOpen, onClose, children, showChevron = true, dis
                     )}
                 </div>
 
-                {/* Swipeable Content Area */}
                 <div ref={dragRef} className={styles.swipeableContent}>
                     {children}
                 </div>

@@ -6,8 +6,7 @@ interface MobilePlayerStyles {
 }
 
 /**
- * Mobile player styles (no animation - player stays fixed).
- * The player is always in collapsed state at the bottom.
+ * Mobile player styles
  */
 export function useMobilePlayerStyles(): MobilePlayerStyles {
     const containerStyles: React.CSSProperties = useMemo(() => ({

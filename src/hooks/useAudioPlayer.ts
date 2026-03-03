@@ -40,7 +40,7 @@ export function useAudioPlayer({
     onPause,
     onStop,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
-    // 1. Stable Audio Elements
+    // Stable Audio Elements
     const audioElements = useRef<[HTMLAudioElement, HTMLAudioElement, HTMLAudioElement] | null>(null);
     if (!audioElements.current) {
         audioElements.current = [new Audio(), new Audio(), new Audio()];
@@ -49,13 +49,13 @@ export function useAudioPlayer({
         });
     }
 
-    // 2. State & Refs
+    // State & Refs
     const [activeIndex, setActiveIndex] = useState<0 | 1 | 2>(0);
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
 
-    // Rotation Logic (Synchronous to avoid gapless breaking intermediate render)
+    // Rotation Logic
     const [lastTrackId, setLastTrackId] = useState<number | null>(trackId);
     const historyRef = useRef({ next: nextTrackId, prev: prevTrackId });
 
@@ -90,7 +90,7 @@ export function useAudioPlayer({
     const exposedRef = useRef<HTMLAudioElement | null>(activeAudio);
     exposedRef.current = activeAudio;
 
-    // 4. Centralized Event Listeners
+    // Centralized Event Listeners
     useEffect(() => {
         const audios = audioElements.current!;
 
@@ -118,8 +118,7 @@ export function useAudioPlayer({
         };
     }, [activeIndex, onEnded, onError, onPlay, onPause]);
 
-    // 5. HLS Loading (Circular Assignment)
-    // We call useHlsLoader 3 times explicitly to respect hook rules
+    // HLS Loading
     const nextIndex = ((activeIndex + 1) % 3) as 0 | 1 | 2;
     const prevIndex = ((activeIndex + 2) % 3) as 0 | 1 | 2;
 
@@ -179,7 +178,7 @@ export function useAudioPlayer({
         priority: activeIndex === 2
     });
 
-    // 6. Volume & Playback Controls
+    // Volume & Playback Controls
     useEffect(() => {
         audioElements.current!.forEach(audio => {
             audio.volume = volume / 100;
@@ -206,7 +205,7 @@ export function useAudioPlayer({
         }
     }, [shouldPlay, trackId, activeIndex, isBuffering, duration]);
 
-    // 7. Cleanup
+    // Cleanup
     useEffect(() => {
         return () => {
             audioElements.current?.forEach(audio => {

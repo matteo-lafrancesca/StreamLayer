@@ -33,31 +33,21 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
 
     const { enableCompactMode } = useCompactMode();
 
-    // Check if cover is loaded
-    // const coverUrl = useCover('album', playingTrack?.id_album, 's');
-
-    // Stop propagation for interactive elements to prevent expansion
     const handleInteractiveClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
 
-    // Helper for smooth view transitions: Close -> Wait -> Switch -> Open
     const switchViewWithAnimation = (targetView: 'playlist' | 'project' | 'queue') => {
-        const ASYNC_TRANSITION_MS = 300; // Expected matching CSS duration
+        const ASYNC_TRANSITION_MS = 300;
 
         if (isExpanded && currentView !== targetView) {
-            // 1. Collapse
             onExpandToggle();
 
-            // 2. Wait for animation (matched with CSS transition)
             setTimeout(() => {
-                // 3. Switch View
                 setCurrentView(targetView);
-                // 4. Expand
                 onExpandToggle();
             }, ASYNC_TRANSITION_MS);
         } else {
-            // Immediate switch if not expanded
             setCurrentView(targetView);
             if (!isExpanded) {
                 onExpandToggle();
@@ -65,9 +55,6 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
         }
     };
 
-    // Handle main bar click:
-    // - If in Queue mode: Animate switch to Project/Playlist
-    // - If in Project mode: Toggle expand/collapse
     const handleMainClick = () => {
         if (currentView === 'queue') {
             const target = selectedPlaylist ? 'playlist' : 'project';
@@ -83,10 +70,8 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
             onClick={handleMainClick}
             title={isExpanded && currentView !== 'queue' ? "Réduire" : "Ouvrir le lecteur"}
         >
-            {/* Left: Cover + Track Info */}
             <TrackDisplay />
 
-            {/* Center: Progress + Controls */}
             <div className={styles.mediaBarCenter}>
                 <div onClick={handleInteractiveClick} style={{ width: '100%' }}>
                     <ProgressBar
@@ -107,17 +92,14 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                 </div>
             </div>
 
-            {/* Right: Volume + View Toggles */}
             <div className={styles.mediaBarRight}>
                 <div onClick={handleInteractiveClick}>
                     <IconButton
                         icon={<ListMusic size={PLAYER_SIZES.DESKTOP.ICON_MEDIUM} />}
                         onClick={() => {
                             if (currentView === 'queue') {
-                                // If already in queue, just minimize
                                 onExpandToggle();
                             } else {
-                                // Switch to queue with animation
                                 switchViewWithAnimation('queue');
                             }
                         }}

@@ -23,7 +23,6 @@ interface UseSeekableProgressReturn {
 export function useSeekableProgress(interactive: boolean = true): UseSeekableProgressReturn {
     const { progress, currentTime, duration, formattedCurrentTime, formattedRemainingTime, seek } = useTrackProgress();
 
-    // Local state to track drag
     const [isDragging, setIsDragging] = useState(false);
     const [dragProgress, setDragProgress] = useState(0);
 
@@ -34,8 +33,6 @@ export function useSeekableProgress(interactive: boolean = true): UseSeekablePro
 
     const handleSeekChange = useCallback((val: number) => {
         if (interactive) {
-            // Always update the drag progress for visual feedback
-            // Do NOT seek immediately to prevent audio cuts during click/drag
             setDragProgress(val);
         }
     }, [interactive]);
@@ -43,12 +40,10 @@ export function useSeekableProgress(interactive: boolean = true): UseSeekablePro
     const handleSeekEnd = useCallback((val: number) => {
         setIsDragging(false);
         if (interactive) {
-            // Only seek when the user releases the interaction (click or drag end)
             seek(val);
         }
     }, [interactive, seek]);
 
-    // Calculate display values based on state
     const displayTime = useMemo(() => {
         if (isDragging) {
             const dragTime = (dragProgress / 100) * duration;

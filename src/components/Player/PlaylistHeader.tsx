@@ -15,16 +15,13 @@ interface PlaylistHeaderProps {
 }
 
 function PlaylistHeaderComponent({ playlist, tracks, onPlayAll, onShufflePlay }: PlaylistHeaderProps) {
-    // Track count: always from playlist.nb_items to avoid progressive update
     const trackCount = playlist.nb_items;
 
-    // Duration: only if all tracks loaded
     const allTracksLoaded = tracks.length >= playlist.nb_items;
     const duration = allTracksLoaded ? formatPlaylistDuration(tracks) : 'Calcul...';
 
     return (
         <div className={styles.header}>
-            {/* Cover */}
             <div className={styles.coverContainer}>
                 <AuthenticatedImage
                     type="playlist"
@@ -35,7 +32,6 @@ function PlaylistHeaderComponent({ playlist, tracks, onPlayAll, onShufflePlay }:
                 />
             </div>
 
-            {/* Info & Controls */}
             <div className={styles.info}>
                 <h1 className={styles.title}>{playlist.metadata.title}</h1>
 

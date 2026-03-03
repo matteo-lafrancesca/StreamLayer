@@ -34,7 +34,6 @@ export function TrackViewMobile() {
         setIsExpanded,
     } = usePlayerUI();
 
-    // Swipe & Navigation Logic
     const {
         slideDirection,
         optimisticTrack,
@@ -48,7 +47,6 @@ export function TrackViewMobile() {
 
     return (
         <div className={styles.trackViewMobile}>
-            {/* Header Section */}
             <div className={styles.header}>
                 <IconButton
                     icon={<ChevronDown size={PLAYER_SIZES.MOBILE.CHEVRON} />}
@@ -62,12 +60,10 @@ export function TrackViewMobile() {
                         {selectedPlaylist?.metadata?.title || 'Projets'}
                     </span>
                 </div>
-                <div style={{ width: PLAYER_SIZES.MOBILE.CHEVRON }} /> {/* Spacer to center the title section */}
+                <div style={{ width: PLAYER_SIZES.MOBILE.CHEVRON }} />
             </div>
 
-            {/* Scrollable Content */}
             <div className={styles.trackContent} data-scrollable>
-                {/* Album Cover with Swipe & Animation */}
                 <div
                     className={styles.coverContainer}
                     onTouchStart={handleTouchStart}
@@ -81,7 +77,6 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Track Info */}
                 <div className={styles.trackInfo}>
                     <ScrollingText
                         text={playingTrack?.title || ''}
@@ -95,7 +90,6 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Progress Bar */}
                 <div className={styles.progressSection}>
                     <ProgressBar
                         onSeekStart={() => setIsSeeking(true)}
@@ -103,7 +97,6 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Playback Controls */}
                 <div className={styles.controlsSection}>
                     <PlaybackControls
                         isPlaying={isPlaying}
@@ -116,7 +109,6 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                {/* Redesigned Navigation Footer */}
                 <div className={styles.navigationFooter}>
                     <button
                         className={styles.navButton}
@@ -135,7 +127,6 @@ export function TrackViewMobile() {
                     </button>
                 </div>
 
-                {/* Preloader for Adjacent Tracks - using visibility hidden instead of display none to force load */}
                 <div style={{ width: 0, height: 0, opacity: 0, overflow: 'hidden', position: 'absolute' }}>
                     {(() => {
                         const currentIndex = queue.findIndex(t => t.id === playingTrack?.id);

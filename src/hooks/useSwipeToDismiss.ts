@@ -40,7 +40,6 @@ export function useSwipeToDismiss({
 
         const sheet = dragElement.closest('[data-bottom-sheet]') as HTMLElement;
 
-        // Reset transform when opening/closing to prevent stuck state
         if (sheet) {
             if (isOpen) {
                 sheet.style.transform = '';
@@ -51,7 +50,6 @@ export function useSwipeToDismiss({
         if (!isOpen || disabled) return;
 
         const handleTouchStart = (e: TouchEvent) => {
-            // Check if touch started on a no-swipe element (like drag handles)
             const target = e.target as HTMLElement;
             if (target.closest('[data-no-swipe="true"]')) {
                 return;
@@ -74,32 +72,26 @@ export function useSwipeToDismiss({
             const deltaY = currentY - swipeState.current.startY;
             const deltaX = currentX - swipeState.current.startX;
 
-            // Determine lock direction after clear intent (e.g., 10px movement)
             if (!swipeState.current.lockDirection) {
                 if (Math.abs(deltaY) > 10 || Math.abs(deltaX) > 10) {
                     swipeState.current.lockDirection = Math.abs(deltaY) > Math.abs(deltaX) ? 'vertical' : 'horizontal';
                 } else {
-                    return; // Wait for more movement
+                    return;
                 }
             }
 
-            // If locked to horizontal, don't handle vertical swipe
             if (swipeState.current.lockDirection === 'horizontal') {
                 return;
             }
 
-            // Check if the sheet content is scrolled to top
             const scrollableContent = dragElement.querySelector('[data-scrollable]') as HTMLElement;
             const isAtTop = !scrollableContent || scrollableContent.scrollTop <= 0;
 
-            // Only allow downward swipes when at top
             if (deltaY > 0 && isAtTop) {
                 swipeState.current.currentY = currentY;
 
-                // Prevent default scroll behavior
                 e.preventDefault();
 
-                // Apply transform to bottom sheet
                 if (sheet) {
                     sheet.style.transform = `translateY(${deltaY}px)`;
                     sheet.style.transition = 'none';
@@ -113,22 +105,13 @@ export function useSwipeToDismiss({
             const deltaY = swipeState.current.currentY - swipeState.current.startY;
 
             if (deltaY > threshold) {
-                // Dismiss the sheet
                 if (sheet) {
                     sheet.style.transition = 'transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1)';
                     sheet.style.transform = 'translateY(100%)';
                 }
 
-                // Call onClose immediately to trigger state change (which should set isOpen=false)
                 onClose();
-
-                // CRITICAL: We DO NOT clean up the manual transform here.
-                // We leave the element at translateY(100%) manually.
-                // The useEffect at the top of this hook will clean it up when isOpen becomes true again.
-                // This prevents the "flash" or "rebound" effect where the manual style is removed
-                // before the CSS class has fully taken over or while the component is unmounting/remounting.
             } else {
-                // Snap back to open position
                 if (sheet) {
                     sheet.style.transition = 'transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1)';
                     sheet.style.transform = '';
@@ -139,7 +122,7 @@ export function useSwipeToDismiss({
         };
 
         dragElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-        dragElement.addEventListener('touchmove', handleTouchMove, { passive: false }); // passive: false to allow preventDefault
+        dragElement.addEventListener('touchmove', handleTouchMove, { passive: false });
         dragElement.addEventListener('touchend', handleTouchEnd);
 
         return () => {

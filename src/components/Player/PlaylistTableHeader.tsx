@@ -8,7 +8,6 @@ function PlaylistTableHeaderComponent() {
             <div className={styles.titleColumn}>Titre</div>
             <div className={styles.albumColumn}>Album</div>
             <div className={styles.durationColumn}>
-                {/* Clock Icon */}
                 <svg
                     className={styles.clockIcon}
                     viewBox="0 0 16 16"

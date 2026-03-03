@@ -1,6 +1,5 @@
 /**
  * Hook to preload playlist and album covers
- * Uses direct cache access instead of hooks to avoid Rules of Hooks violations
  */
 
 import { useState, useEffect } from 'react';
@@ -19,13 +18,11 @@ export function usePreloadPlaylistImages(
 ): { loading: boolean; error: Error | null } {
     const { accessToken } = useAuth();
 
-    // Calculate initial state: only block if playlist or first 8 albums missing from MEMORY
     const [loading, setLoading] = useState(() => {
         if (!accessToken || !playlistId || albumIds.length === 0) return true;
 
         const playlistCached = hasCachedImage(`playlist-${playlistId}-${playlistCoverSize}`);
 
-        // Check cache only for priority IDs to determine initial loading
         const priorityIds = albumIds.slice(0, PRIORITY_LIMIT);
         const priorityAlbumsMissing = priorityIds.some(id => !hasCachedImage(`album-${id}-${albumCoverSize}`));
 
@@ -44,21 +41,17 @@ export function usePreloadPlaylistImages(
 
         const playlistCacheKey = `playlist-${playlistId}-${playlistCoverSize}`;
 
-        // Helper to ensure image is in memory (Disk -> Network -> Memory)
         const ensureImageLoaded = async (key: string, fetcher: () => Promise<string>) => {
             if (hasCachedImage(key)) return;
 
-            // 1. Check Disk
             const storedBlob = await persistentCache.get<Blob>('images', key);
             if (storedBlob) {
                 setCachedImage(key, URL.createObjectURL(storedBlob));
                 return;
             }
 
-            // 2. Fetch Network
             const url = await fetcher();
 
-            // 3. Persist
             try {
                 const response = await fetch(url);
                 const blob = await response.blob();
@@ -72,15 +65,11 @@ export function usePreloadPlaylistImages(
 
         const priorityPromises: Promise<void>[] = [];
 
-        // 1. PRIORITY HANDLING (Playlist + first 8 albums)
-
-        // Load playlist cover if needed
         priorityPromises.push(
             ensureImageLoaded(playlistCacheKey, () => fetchPlaylistCover(playlistId, playlistCoverSize, accessToken))
                 .catch((err) => console.error(`Playlist load error:`, err))
         );
 
-        // Identify priority albums
         const priorityIds = albumIds.slice(0, PRIORITY_LIMIT);
         priorityIds.forEach((albumId) => {
             const key = `album-${albumId}-${albumCoverSize}`;
@@ -90,10 +79,8 @@ export function usePreloadPlaylistImages(
             );
         });
 
-        // 2. REMAINING ITEMS (Background loading)
         const remainingIds = albumIds.slice(PRIORITY_LIMIT);
 
-        // Process remaining in chunks or just fire and forget (with small delay to prioritize UI)
         setTimeout(() => {
             remainingIds.forEach((albumId) => {
                 const key = `album-${albumId}-${albumCoverSize}`;
@@ -102,8 +89,6 @@ export function usePreloadPlaylistImages(
             });
         }, 500);
 
-        // 3. UNBLOCK INTERFACE
-        // We set loading=true initially, now wait for priority
         setLoading(true);
         setError(null);
 

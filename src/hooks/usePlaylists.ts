@@ -1,6 +1,5 @@
 /**
  * Hook to fetch playlists for a project
- * REFACTORED to use useCachedData
  */
 
 import { getPlaylists } from '@services/api/playlists';
@@ -9,10 +8,9 @@ import { useCachedData } from './cache/useCachedData';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createCacheManager } from '@cache/CacheManager';
 
-// Shared cache manager for playlists
 const playlistsCache = createCacheManager<Playlist[]>('data', {
-    ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
-    maxItems: 20, // Cache up to 20 projects
+    ttl: 7 * 24 * 60 * 60 * 1000,
+    maxItems: 20,
 });
 
 interface UsePlaylistsResult {
@@ -32,7 +30,6 @@ export function usePlaylists(
     projectIdOrOptions: string | UsePlaylistsOptions,
     autoRefresh = false
 ): UsePlaylistsResult {
-    // Support both signatures: usePlaylists(projectId) or usePlaylists({ projectId, ... })
     const options = typeof projectIdOrOptions === 'string'
         ? { projectId: projectIdOrOptions, autoRefresh, refreshTrigger: undefined }
         : projectIdOrOptions;
@@ -52,20 +49,17 @@ export function usePlaylists(
         strategy: 'stale-while-revalidate',
     });
 
-    // Function to force refresh
     const refreshPlaylists = useCallback(() => {
         // Increment to force new fetch with new cache key
         setRefreshKey((prev: number) => prev + 1);
     }, []);
 
-    // Auto-refresh on mount if requested
     useEffect(() => {
         if (autoRefresh || autoRefreshOption) {
             refreshPlaylists();
         }
     }, [autoRefresh, autoRefreshOption, refreshPlaylists]);
 
-    // Refresh when trigger toggles true
     useEffect(() => {
         if (refreshTrigger && !previousRefreshTrigger.current) {
             refreshPlaylists();

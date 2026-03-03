@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { StreamLayer } from '@components/StreamLayer';
+import { ErrorBoundary } from '@components/ErrorBoundary';
 
 import '@styles/styles.css';
 import '@styles/design-tokens.css';
@@ -11,17 +12,20 @@ import type { ThemeConfig } from './types/Theme';
 export interface StreamLayerConfig {
     projectId: string;
     containerId?: string;
+    apiBaseUrl: string;
+    apiKeyId: string;
+    userApi: string;
+    passwordApi: string;
+    debug?: boolean;
     apiUrl?: string;
     theme?: string | ThemeConfig;
     onReady?: () => void;
     onError?: (error: Error) => void;
 }
 
-// Export direct du composant pour usage React
 export { StreamLayer };
-export { StreamLayer as StreamLayerWidget }; // Garder pour rétrocompatibilité
+export { StreamLayer as StreamLayerWidget };
 
-// Map pour tracker les instances
 const instances = new Map<string, ReactDOM.Root>();
 
 /**
@@ -33,7 +37,12 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
     const {
         projectId,
         containerId = 'stream-layer-widget',
-        apiUrl: _apiUrl, // Reserved for future API configuration
+        apiBaseUrl,
+        apiKeyId,
+        userApi,
+        passwordApi,
+        debug,
+        apiUrl: _apiUrl,
         theme,
         onReady,
         onError
@@ -55,10 +64,17 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
 
         root.render(
             <React.StrictMode>
-                <StreamLayer
-                    projectId={projectId}
-                    theme={theme}
-                />
+                <ErrorBoundary onError={onError}>
+                    <StreamLayer
+                        projectId={projectId}
+                        theme={theme}
+                        apiBaseUrl={apiBaseUrl}
+                        apiKeyId={apiKeyId}
+                        userApi={userApi}
+                        passwordApi={passwordApi}
+                        debug={debug}
+                    />
+                </ErrorBoundary>
             </React.StrictMode>
         );
 
@@ -88,7 +104,6 @@ export function destroyStreamLayer(containerId: string = 'stream-layer-widget'):
     }
 }
 
-// Default export pour compatibilité UMD
 export default {
     initStreamLayer,
     destroyStreamLayer,
@@ -98,18 +113,11 @@ export default {
 
 if (typeof document !== 'undefined') {
     try {
-        // Mode Script/CDN uniquement : On cherche la configuration dans le script tag actuelle
         const currentScript = document.currentScript as HTMLScriptElement;
-
-        // On ne tente l'auto-init que si data-project-id est trouvé, 
-        // sinon on suppose que c'est un usage en librairie (import)
-
         let scriptWithConfig: HTMLScriptElement | null = currentScript;
 
         if (!scriptWithConfig) {
-            // Fallback pour certains cas de chargement async, mais on reste prudent
             const found = document.querySelector('script[data-project-id]') as HTMLScriptElement;
-            // Vérifier si ce script semble bien être stream-layer pour éviter les faux positifs
             if (found && (found.src.includes('stream-layer') || found.id === 'stream-layer-script')) {
                 scriptWithConfig = found;
             }
@@ -119,7 +127,12 @@ if (typeof document !== 'undefined') {
             console.log('[StreamLayer] Auto-initializing from script tag...');
             const projectId = scriptWithConfig.dataset.projectId;
 
-            const containerId = currentScript.dataset.containerId || 'stream-layer-widget';
+            const containerId = scriptWithConfig.dataset.containerId || 'stream-layer-widget';
+            const apiBaseUrl = scriptWithConfig.dataset.apiBaseUrl || '';
+            const apiKeyId = scriptWithConfig.dataset.apiKeyId || '';
+            const userApi = scriptWithConfig.dataset.userApi || '';
+            const passwordApi = scriptWithConfig.dataset.passwordApi || '';
+            const debug = scriptWithConfig.dataset.debug === 'true';
 
             console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);
 
@@ -130,12 +143,22 @@ if (typeof document !== 'undefined') {
                     console.log(`[StreamLayer] Container #${containerId} not found, creating it automatically.`);
                     container = document.createElement('div');
                     container.id = containerId;
-                    document.body.appendChild(container);
+
+                    if (scriptWithConfig && scriptWithConfig.parentNode) {
+                        scriptWithConfig.parentNode.insertBefore(container, scriptWithConfig.nextSibling);
+                    } else {
+                        document.body.appendChild(container);
+                    }
                 }
 
                 initStreamLayer({
                     projectId,
                     containerId,
+                    apiBaseUrl,
+                    apiKeyId,
+                    userApi,
+                    passwordApi,
+                    debug,
                     onReady: () => console.log(`[StreamLayer] Widget auto-initialized (Project: ${projectId})`)
                 });
             };

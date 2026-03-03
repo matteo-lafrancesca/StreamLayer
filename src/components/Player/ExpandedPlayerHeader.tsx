@@ -23,7 +23,6 @@ export function ExpandedPlayerHeader({
 
     return (
         <div className={styles.expandedPlayerHeader}>
-            {/* Left: Back Button (only in Playlist view) */}
             <div className={styles.leftSection}>
                 {currentView === 'playlist' && (
                     <button
@@ -36,9 +35,7 @@ export function ExpandedPlayerHeader({
                 )}
             </div>
 
-            {/* Center: Segmented Control */}
             <div className={styles.centerSection}>
-                {/* Segmented Control Removed - Views are now distinct windows */}
             </div>
 
             {/* Right: Close Button */}

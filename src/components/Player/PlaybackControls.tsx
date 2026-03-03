@@ -16,7 +16,6 @@ export function PlaybackControls({
 }: PlaybackControlsProps) {
     const { playbackControls } = usePlayer();
 
-    // Variant-based icon sizes
     const sizes = variant === 'mobile'
         ? {
             shuffle: PLAYER_SIZES.MOBILE.ICON_SMALL,
@@ -25,10 +24,10 @@ export function PlaybackControls({
             repeat: PLAYER_SIZES.MOBILE.ICON_SMALL
         }
         : {
-            shuffle: 18, // Standard small (was 20)
-            skip: 20,    // Subtle increase (was 22)
-            play: 24,    // Distinct but not huge (was 26)
-            repeat: 18   // Standard small (was 20)
+            shuffle: 18,
+            skip: 20,
+            play: 24,
+            repeat: 18
         };
 
     return (

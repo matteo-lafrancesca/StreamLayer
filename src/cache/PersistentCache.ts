@@ -1,5 +1,6 @@
 const DB_NAME = 'StreamLayerCache';
 const DB_VERSION = 1;
+import { Logger } from '../utils/logger';
 
 export type StoreName = 'images' | 'data';
 
@@ -18,11 +19,10 @@ class PersistentCache {
     private dbPromise: Promise<IDBDatabase> | null = null;
     private static instance: PersistentCache;
 
-    // Configuration
-    private readonly MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+    private readonly MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
     private readonly MAX_ITEMS = {
-        images: 500, // Max 500 cached images
-        data: 100    // Max 100 cached API responses
+        images: 500,
+        data: 100
     };
 
     private constructor() { }
@@ -44,7 +44,7 @@ class PersistentCache {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
 
             request.onerror = () => {
-                console.error('[PersistentCache] Failed to open DB', request.error);
+                Logger.error('[PersistentCache] Failed to open DB', request.error);
                 reject(request.error);
             };
 
@@ -55,13 +55,11 @@ class PersistentCache {
             request.onupgradeneeded = (event) => {
                 const db = (event.target as IDBOpenDBRequest).result;
 
-                // Store for Images (Blobs)
                 if (!db.objectStoreNames.contains('images')) {
                     const store = db.createObjectStore('images', { keyPath: 'key' });
                     store.createIndex('timestamp', 'timestamp', { unique: false });
                 }
 
-                // Store for Data (JSON)
                 if (!db.objectStoreNames.contains('data')) {
                     const store = db.createObjectStore('data', { keyPath: 'key' });
                     store.createIndex('timestamp', 'timestamp', { unique: false });
@@ -79,7 +77,6 @@ class PersistentCache {
         try {
             const db = await this.getDB();
 
-            // Calculate size - simple heuristic
             let size = 0;
             if (value instanceof Blob) {
                 size = value.size;
@@ -102,13 +99,12 @@ class PersistentCache {
                 request.onsuccess = () => resolve();
                 request.onerror = () => reject(request.error);
 
-                // Trigger non-blocking cleanup check
                 transaction.oncomplete = () => {
                     this.enforceLimits(storeName);
                 };
             });
         } catch (error) {
-            console.error(`[PersistentCache] Error setting key ${key} in ${storeName}:`, error);
+            Logger.error(`[PersistentCache] Error setting key ${key} in ${storeName}:`, error);
         }
     }
 
@@ -126,15 +122,12 @@ class PersistentCache {
                 request.onsuccess = () => {
                     const entry = request.result as CacheEntry<T>;
                     if (entry) {
-                        // Check Expiration (TTL)
                         if (Date.now() - entry.timestamp > this.MAX_AGE_MS) {
-                            console.log(`[PersistentCache] Item ${key} expired, deleting.`);
-                            this.delete(storeName, key); // Lazy delete
+                            Logger.info(`[PersistentCache] Item ${key} expired, deleting.`);
+                            this.delete(storeName, key);
                             resolve(null);
                         } else {
                             resolve(entry.value);
-                            // Optional: Update timestamp on access (LRU style update)?
-                            // For now, we only trust creation time for simpler TTL.
                         }
                     } else {
                         resolve(null);
@@ -143,7 +136,7 @@ class PersistentCache {
                 request.onerror = () => reject(request.error);
             });
         } catch (error) {
-            console.error(`[PersistentCache] Error getting key ${key} from ${storeName}:`, error);
+            Logger.error(`[PersistentCache] Error getting key ${key} from ${storeName}:`, error);
             return null;
         }
     }
@@ -178,18 +171,16 @@ class PersistentCache {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(storeName, 'readwrite');
             const store = transaction.objectStore(storeName);
-            const index = store.index('timestamp'); // Ordered by timestamp (Oldest first)
+            const index = store.index('timestamp');
 
             const countRequest = store.count();
 
             countRequest.onsuccess = () => {
                 const count = countRequest.result;
                 if (count > limit) {
-                    // Need to delete (count - limit) items
                     const itemsToDelete = count - limit;
                     let deleted = 0;
 
-                    // Open a cursor on the index (Oldest items first by default)
                     const cursorRequest = index.openCursor();
 
                     cursorRequest.onsuccess = (e) => {

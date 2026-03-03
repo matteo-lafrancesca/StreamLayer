@@ -1,6 +1,5 @@
 /**
  * Unified hook for loading and caching covers (albums + playlists)
- * Replaces useAlbumCover + usePlaylistCover
  */
 
 import { useAuth } from '@context/AuthContext';

@@ -57,11 +57,9 @@ function PlayerDesktopContent({
         disabled: !isCompact,
     });
 
-    // Helper to get conditional styles based on snap position
     const getPositionStyles = () => {
-        if (!isCompact) return {}; // Normal mode uses default CSS
+        if (!isCompact) return {};
 
-        // Base transform for drag preview
         const transformStyle = transform
             ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
             : undefined;
@@ -69,7 +67,6 @@ function PlayerDesktopContent({
         const baseStyle: React.CSSProperties = { transform: transformStyle };
 
         if (customPosition) {
-            // Reset base positioning
             baseStyle.left = 'auto';
             baseStyle.right = 'auto';
             baseStyle.top = 'auto';
@@ -79,13 +76,9 @@ function PlayerDesktopContent({
             baseStyle.marginTop = 0;
             baseStyle.marginBottom = 0;
 
-            // Apply horizontal
             baseStyle.left = `${customPosition.x}px`;
 
-            // Apply vertical securely
             if (customPosition.dockSide === 'bottom') {
-                // Use calc(100vh - y - height) to securely position from the bottom.
-                // This preserves responsiveness if the window is resized while docked or even during animation.
                 baseStyle.bottom = `calc(100vh - ${customPosition.y + PLAYER_SIZES.DESKTOP.COLLAPSED_HEIGHT}px)`;
             } else {
                 baseStyle.top = `${customPosition.y}px`;
@@ -116,7 +109,6 @@ function PlayerDesktopContent({
                 }}
             >
                 {isCompact ? (
-                    // Compact Mode
                     <>
                         <div className={sharedStyles.mediaBarSection}>
                             <CompactMediaBar
@@ -127,9 +119,7 @@ function PlayerDesktopContent({
                         <ProgressSlider />
                     </>
                 ) : (
-                    // Normal Mode
                     <>
-                        {/* Expandable Content Area */}
                         <div
                             className={currentView === 'queue'
                                 ? sharedStyles.queuePanel
@@ -139,7 +129,6 @@ function PlayerDesktopContent({
                                 `
                             }
                         >
-                            {/* Queue Panel Header */}
                             {currentView === 'queue' && (
                                 <div className={sharedStyles.queueHeader}>
                                     <span className={sharedStyles.queueTitle}>File d'attente</span>
@@ -152,7 +141,6 @@ function PlayerDesktopContent({
                                 </div>
                             )}
 
-                            {/* Header - Hidden in Queue Mode */}
                             {currentView !== 'queue' && (
                                 <ExpandedPlayerHeader
                                     currentView={currentView}
@@ -162,7 +150,6 @@ function PlayerDesktopContent({
                                 />
                             )}
 
-                            {/* Content Area - using ViewRenderer */}
                             <div className={sharedStyles.expandableContentScroll}>
                                 <ViewRenderer
                                     currentView={currentView}
@@ -171,7 +158,6 @@ function PlayerDesktopContent({
                             </div>
                         </div>
 
-                        {/* MediaBar */}
                         <div className={`
                             ${sharedStyles.mediaBarSection} 
                             ${isExpanded ? styles.borderTop : ''}

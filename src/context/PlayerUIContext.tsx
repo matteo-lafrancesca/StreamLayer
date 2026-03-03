@@ -3,28 +3,23 @@ import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
 
 interface PlayerUIContextType {
-    // UI state
     selectedPlaylist: Playlist | null;
     setSelectedPlaylist: (playlist: Playlist | null) => void;
 
     selectedTrack: Track | null;
     setSelectedTrack: (track: Track | null) => void;
 
-    // Player expansion state
     isExpanded: boolean;
     setIsExpanded: (isExpanded: boolean) => void;
     currentView: 'playlist' | 'project' | 'queue' | 'track';
     setCurrentView: (view: 'playlist' | 'project' | 'queue' | 'track') => void;
 
-    // Player compact mode state
     isCompact: boolean;
     setIsCompact: (isCompact: boolean) => void;
 
-    // Seek state
     isSeeking: boolean;
     setIsSeeking: (isSeeking: boolean) => void;
 
-    // Drag state
     isDragging: boolean;
     setIsDragging: (isDragging: boolean) => void;
 }
@@ -36,15 +31,12 @@ interface PlayerUIProviderProps {
 }
 
 export function PlayerUIProvider({ children }: PlayerUIProviderProps) {
-    // UI state
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
     const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [currentView, setCurrentView] = useState<'playlist' | 'project' | 'queue' | 'track'>('project');
     const [isSeeking, setIsSeeking] = useState(false);
     const [isCompact, setIsCompact] = useState(false);
-
-    // Drag state
     const [isDragging, setIsDragging] = useState(false);
 
     const contextValue = useMemo(() => ({

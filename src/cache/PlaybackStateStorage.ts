@@ -25,7 +25,7 @@ export interface PlaybackState {
 }
 
 const PLAYBACK_STATE_KEY = 'playback-state';
-const STATE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+const STATE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Save playback state to IndexedDB
@@ -57,7 +57,6 @@ export async function loadPlaybackState(): Promise<PlaybackState | null> {
             return null;
         }
 
-        // Check if state is too old
         const age = Date.now() - state.timestamp;
         if (age > STATE_TTL) {
             console.log('[PlaybackStateStorage] State too old, clearing');

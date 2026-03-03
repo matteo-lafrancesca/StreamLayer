@@ -23,14 +23,12 @@ export function AuthenticatedImage({
 }: AuthenticatedImageProps) {
     const blobUrl = useCover(type, id, size);
 
-    // Common style to hide alt text
     const imgStyle: React.CSSProperties = {
         ...style,
-        color: 'transparent' // Hides alt text in some browsers
+        color: 'transparent'
     };
 
     if (!blobUrl) {
-        // Placeholder waiting for cache/fetch
         return (
             <img
                 src={placeholderImg}

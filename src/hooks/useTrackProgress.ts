@@ -4,20 +4,16 @@ import { formatDuration } from '@utils/time';
 
 /**
  * Hook for local track progress without global re-renders.
- * Connects directly to the audio element requestAnimationFrame loop.
  */
 export function useTrackProgress() {
     const { audioRef, isPlaying } = usePlayer();
 
-    // Local state for UI updates
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [progress, setProgress] = useState(0);
 
-    // Animation frame reference
     const rafRef = useRef<number | null>(null);
 
-    // Update progress from audio element
     const updateProgress = useCallback(() => {
         if (audioRef?.current) {
             const current = audioRef.current.currentTime;
@@ -34,7 +30,6 @@ export function useTrackProgress() {
         }
     }, [audioRef]);
 
-    // Playback sync loop
     useEffect(() => {
         if (isPlaying) {
             const loop = () => {
@@ -42,7 +37,6 @@ export function useTrackProgress() {
                 rafRef.current = requestAnimationFrame(loop);
             };
 
-            // Start loop
             rafRef.current = requestAnimationFrame(loop);
 
             return () => {
@@ -51,12 +45,10 @@ export function useTrackProgress() {
                 }
             };
         } else {
-            // When paused, update once to ensure sync
             updateProgress();
         }
     }, [isPlaying, updateProgress]);
 
-    // Handle manual seeking
     const seek = useCallback((positionPercent: number) => {
         if (audioRef?.current) {
             const total = audioRef.current.duration || 0;
@@ -64,14 +56,12 @@ export function useTrackProgress() {
                 const newTime = (positionPercent / 100) * total;
                 audioRef.current.currentTime = newTime;
 
-                // Optimistic update
                 setCurrentTime(newTime);
                 setProgress(positionPercent);
             }
         }
     }, [audioRef]);
 
-    // Format times for display
     const formattedCurrentTime = formatDuration(currentTime);
     const formattedRemainingTime = `-${formatDuration(Math.max(0, duration - currentTime))}`;
 

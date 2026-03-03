@@ -8,48 +8,36 @@
    1. ISOLATION ROOT
    ========================================================================== */
 .sl-root {
-  /* Reset box-sizing for the widget */
   box-sizing: border-box;
 
-  /* Defend against host styles leaking in */
   touch-action: manipulation;
   text-align: left;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Force base typography (wins over host body styles) */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 16px;
   color: var(--text-primary);
   font-weight: 400;
 
-  /* Reset minimal layout props */
   margin: 0;
   padding: 0;
   border: 0;
 }
 
 /* ==========================================================================
-   2. AGGRESSIVE RESET (Scoped)
-   Reset all standard elements to avoid inheriting host styles
-   ========================================================================== */
-
-/* Box sizing reset for EVERYTHING inside */
-/* ==========================================================================
    2. TARGETED NORMALIZATION (Scoped)
-   Reset only what's necessary to ensure consistency without breaking internal layout
    ========================================================================== */
 
-/* 2.1 Box Sizing (CRITICAL) */
+/* 2.1 Box Sizing */
 .sl-root *,
 .sl-root *::before,
 .sl-root *::after {
   box-sizing: border-box;
 }
 
-/* 2.2 Layout & Block elements 
-   Don't reset everything blindly. Just ensure standard behavior. */
+/* 2.2 Layout & Block elements */
 .sl-root body,
 .sl-root h1,
 .sl-root h2,
@@ -93,17 +81,12 @@
   max-width: 100%;
 }
 
-/* SVGs are special: they are often icons. 
-   Don't force display: block which increases specificity 
-   and breaks 'display: none' in components. */
 .sl-root svg {
   vertical-align: middle;
   max-width: 100%;
 }
 
-/* 2.6 Buttons (CRITICAL ISOLATION)
-   Buttons are the most common source of host css leakage.
-   We reset them to look unstyled so our components can style them. */
+/* 2.6 Buttons */
 .sl-root button {
   background: none;
   border: none;
@@ -129,5 +112,3 @@
   text-decoration: none;
   color: inherit;
 }
-
-/* DEV HELPERS section moved to dev.css */

@@ -13,7 +13,6 @@ interface UseTrackReportingProps {
 
 /**
  * Hook to manage track playback reporting/analytics.
- * Extracted from PlayerContext to separate concerns.
  */
 export function useTrackReporting({
     playingTrack,
@@ -23,21 +22,21 @@ export function useTrackReporting({
     const { trackEvent } = useReporting();
     const lastTrackRef = useRef<Track | null>(null);
     const lastEventRef = useRef<{ id: string; status: ReportingStatus } | null>(null);
+    const hasStartedRef = useRef<Record<string, boolean>>({});
 
-    // Keep lastTrackRef updated
     useEffect(() => {
         lastTrackRef.current = playingTrack;
     }, [playingTrack]);
 
     const handleReport = useCallback((track: Track, status: ReportingStatus, time: number) => {
-        // Dedup logic for stopped (avoid double send on end + skip)
+        // Dedup logic
         if (status === 'stopped' && lastEventRef.current?.id === String(track.id) && lastEventRef.current?.status === 'stopped') {
             return;
         }
 
         lastEventRef.current = { id: String(track.id), status };
 
-        // Determine device type via Capacitor
+        // Determine device type
         let deviceType: 'web' | 'mobile' = 'web';
         try {
             const platform = Capacitor.getPlatform();
@@ -45,35 +44,39 @@ export function useTrackReporting({
                 deviceType = 'mobile';
             }
         } catch (e) {
-            // Capacitor might not be available in standard web environments, default to web.
         }
 
         const isOnline = navigator.onLine;
 
         trackEvent({
             id: track.id,
-            container_type: 'list', // Default to list for now
-            id_container: playingFromPlaylist?.id || 0, // 0 if no container
+            container_type: 'list',
+            id_container: playingFromPlaylist?.id || 0,
             full: true,
-            creation_datetime: Math.floor(Date.now() / 1000), // Seconds
+            creation_datetime: Math.floor(Date.now() / 1000),
             device_type: deviceType,
             online: isOnline,
             status,
             time: Math.floor(time),
             current_position: Math.floor(audioRef.current?.currentTime || 0),
             play_mode: isOnline ? 'online' : 'offline',
-            // territory_code and format are deliberately omitted to reduce payload size 
-            // and let the backend session state infer them securely.
+            format: 'low',
+            territory_code: 'FR'
         });
     }, [trackEvent, playingFromPlaylist, audioRef]);
 
     const handlePlay = useCallback(() => {
         if (!playingTrack) return;
         const currentTime = audioRef.current?.currentTime || 0;
-        // Logic: if near 0, started, else resume.
-        // Tolerance 1s to account for minor seek or latency
-        const status: ReportingStatus = currentTime < 1 ? 'started' : 'resume';
-        // Spec says: if started, time = 0.
+
+        let status: ReportingStatus;
+        if (!hasStartedRef.current[String(playingTrack.id)]) {
+            status = 'started';
+            hasStartedRef.current[String(playingTrack.id)] = true;
+        } else {
+            status = 'resume';
+        }
+
         const time = status === 'started' ? 0 : currentTime;
 
         handleReport(playingTrack, status, time);
@@ -87,8 +90,6 @@ export function useTrackReporting({
 
     const handleStop = useCallback((time: number) => {
         // Determine which track stopped
-        // If we in rotation (render), playingTrack is NEW, lastTrackRef is OLD.
-        // If we in onEnded (event), playingTrack is CURRENT (same as lastTrackRef).
 
         const trackToReport = (playingTrack?.id !== lastTrackRef.current?.id)
             ? lastTrackRef.current

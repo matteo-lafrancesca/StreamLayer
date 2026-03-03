@@ -20,8 +20,6 @@ interface PlaybackControls {
 }
 
 interface PlayerContextType {
-    // Playback state
-    // Audio Ref for direct access
     audioRef: RefObject<HTMLAudioElement | null>;
 
     // Playback state
@@ -33,11 +31,10 @@ interface PlayerContextType {
     volume: number;
     setVolume: (volume: number) => void;
 
-    // Total duration (rarely changes, kept in context)
     duration: number;
     isBuffering: boolean;
 
-    // Playlist logic (queue generation source)
+    // Playlist logic
     playingFromPlaylist: Playlist | null;
 
     // Queue state
@@ -55,11 +52,9 @@ interface PlayerProviderProps {
 }
 
 export function PlayerProvider({ children }: PlayerProviderProps) {
-    // Consume other contexts
     const { accessToken } = useAuth();
     const { selectedPlaylist, selectedTrack } = usePlayerUI();
 
-    // Load playlist tracks (pass accessToken to avoid circular dependency)
     const { tracks: playlistTracks } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
 
     // Queue manager
@@ -69,7 +64,6 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     });
 
     // Playback state
-    // Derived directly from QueueManager to avoid state duplication and sync loops
     const playingTrack = queueManager.currentTrack;
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(100);
@@ -77,10 +71,10 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     // Queue generation state
     const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);
 
-    // Session Preloader (Preload next 5 tracks)
+    // Session Preloader
     useTrackPreloader(queueManager.queue, queueManager.currentIndex, accessToken);
 
-    // Audio Elements Reference (will be bound inside useAudioPlayer, but we need it for reporting)
+    // Audio Elements Reference
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // Reporting
@@ -101,9 +95,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         volume,
         shouldPlay: isPlaying,
         onEnded: () => {
-            // Auto-play next track based on queue and repeat mode
             if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
-                // If repeat one, reset to 0 and play
                 audioPlayer.audioRef.current.currentTime = 0;
                 audioPlayer.audioRef.current.play().catch(console.error);
                 if (!isPlaying) setIsPlaying(true);
@@ -114,9 +106,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             }
         },
         onError: () => {
-            // If loading fails after retries, skip to next
             console.log('[PlayerContext] Track loading failed, skipping to next');
-            // Force stop playback to avoid inconsistent UI state
             setIsPlaying(false);
 
             if (queueManager.canPlayNext) {
@@ -128,12 +118,11 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onStop: handleStop,
     });
 
-    // Share actual audioRef instance with reporting
     useEffect(() => {
         audioRef.current = audioPlayer.audioRef.current;
     }, [audioPlayer.audioRef]);
 
-    // Playback controls (connected to queue manager)
+    // Playback controls
     const playbackControlsHook = usePlaybackControls({
         isShuffled: queueManager.isShuffled,
         repeatMode: queueManager.repeatMode,
@@ -141,40 +130,36 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onPrevious: () => {
             const currentTime = audioPlayer.audioRef.current?.currentTime || 0;
             if (currentTime > 5) {
-                // If more than 5s, restart current track
                 audioPlayer.seek(0);
                 if (!isPlaying && playingTrack) setIsPlaying(true);
             } else {
                 if (queueManager.canPlayPrevious) {
                     queueManager.playPrevious();
+                    if (!isPlaying) setIsPlaying(true);
                 } else {
-                    // If can't go back (first track) and below 5s, restart anyway
                     audioPlayer.seek(0);
                     if (!isPlaying && playingTrack) setIsPlaying(true);
                 }
             }
         },
-        onNext: queueManager.playNext,
+        onNext: () => {
+            queueManager.playNext();
+            if (!isPlaying) setIsPlaying(true);
+        },
         onRepeat: queueManager.toggleRepeat,
     });
 
-    // Play a track from playlist (creates new queue)
     const playTrackFromPlaylist = useCallback((trackIndex: number, tracks?: Track[], options?: { shuffle?: boolean }) => {
         const tracksToPlay = tracks || playlistTracks;
         if (tracksToPlay && tracksToPlay.length > 0) {
-            // Create new queue starting from the clicked track
             queueManager.setQueue(tracksToPlay, trackIndex, { shuffle: options?.shuffle });
-            // Set the playlist we're playing from
             setPlayingFromPlaylist(selectedPlaylist);
+            setIsPlaying(true);
         }
-    }, [playlistTracks, queueManager, selectedPlaylist]);
+    }, [playlistTracks, queueManager.setQueue, selectedPlaylist]);
 
     // Auto-update queue when all playlist tracks are loaded
     useEffect(() => {
-        // Only update if:
-        // 1. We're currently playing from a playlist
-        // 2. We have loaded tracks
-        // 3. The playlist indicates it has more tracks than what we have loaded
         if (
             playingFromPlaylist &&
             playlistTracks &&
@@ -182,11 +167,9 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             selectedPlaylist?.nb_items &&
             playlistTracks.length < selectedPlaylist.nb_items
         ) {
-            // Queue is incomplete, will be updated when playlistTracks grows
             return;
         }
 
-        // If we have all tracks and are playing from this playlist, update the queue
         if (
             playingFromPlaylist &&
             playlistTracks &&
@@ -196,31 +179,15 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             queueManager.totalTracks < selectedPlaylist.nb_items
         ) {
             console.log('[PlayerContext] All tracks loaded, updating queue with full playlist');
-            // Find current track index in full list
             const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
             if (currentTrackIndex >= 0) {
                 queueManager.setQueue(playlistTracks, currentTrackIndex, { keepState: true });
             }
         }
-    }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager]);
+    }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager.totalTracks, queueManager.currentTrack?.id, queueManager.setQueue]);
 
-    // Auto-play when track changes
-    const hasUserInteractedRef = useRef(false);
 
-    useEffect(() => {
-        if (playingTrack) {
-            // On iOS/Web, autoplay is often blocked unless there's an interaction.
-            // We set isPlaying to true, but the actual play() call in useAudioPlayer 
-            // will handle the catch() if blocked.
 
-            // If it's a cold start (no user interaction yet), we might want to be careful,
-            // but setting setIsPlaying(true) here is intended to start the flow.
-            setIsPlaying(true);
-            hasUserInteractedRef.current = true;
-        }
-    }, [playingTrack?.id]);
-
-    // Playback controls object
     const playbackControls: PlaybackControls = useMemo(() => ({
         isShuffled: playbackControlsHook.isShuffled,
         repeatMode: playbackControlsHook.repeatMode,

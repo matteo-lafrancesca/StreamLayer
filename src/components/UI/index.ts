@@ -1,4 +1,3 @@
-// UI Components - Barrel exports
 export { Button } from './Button';
 export { IconButton } from './IconButton';
 export { Card } from './Card';

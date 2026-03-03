@@ -7,7 +7,14 @@ export interface AppProps {
 
 function App({ projectId = '34', theme = 'dark' }: AppProps) {
   return (
-    <StreamLayer projectId={projectId} theme={theme}>
+    <StreamLayer
+      projectId={projectId}
+      theme={theme}
+      apiBaseUrl={import.meta.env.VITE_API_BASE_URL}
+      apiKeyId={import.meta.env.VITE_API_KEY_ID}
+      userApi={import.meta.env.VITE_USER_API}
+      passwordApi={import.meta.env.VITE_PASSWORD_API}
+    >
       {/* Votre contenu d'application ici */}
     </StreamLayer>
   );

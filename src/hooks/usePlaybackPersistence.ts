@@ -1,6 +1,5 @@
 /**
  * Hook to manage playback state persistence
- * Automatically saves state to IndexedDB with debouncing
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -29,30 +28,6 @@ interface UsePlaybackPersistenceReturn {
 
 /**
  * Hook to persist playback state to IndexedDB
- * 
- * Features:
- * - Debounced auto-save (default 2s)
- * - Manual restore on mount
- * - Manual save trigger
- * 
- * @example
- * const { restoreState } = usePlaybackPersistence({
- *   playlistId: currentPlaylist?.id,
- *   trackId: currentTrack?.id,
- *   currentIndex,
- *   isShuffled,
- *   repeatMode,
- *   currentTime,
- *   volume,
- * });
- * 
- * // On mount, restore state
- * useEffect(() => {
- *   const restored = await restoreState();
- *   if (restored) {
- *     // Apply restored state
- *   }
- * }, []);
  */
 export function usePlaybackPersistence({
     playlistId,
@@ -67,7 +42,6 @@ export function usePlaybackPersistence({
 }: UsePlaybackPersistenceOptions): UsePlaybackPersistenceReturn {
     const saveTimeoutRef = useRef<number | undefined>(undefined);
 
-    // Store state in ref to avoid stale closures
     const stateRef = useRef({
         playlistId,
         trackId,
@@ -78,7 +52,6 @@ export function usePlaybackPersistence({
         volume,
     });
 
-    // Update ref when state changes
     useEffect(() => {
         stateRef.current = {
             playlistId,
@@ -91,16 +64,12 @@ export function usePlaybackPersistence({
         };
     }, [playlistId, trackId, currentIndex, isShuffled, repeatMode, currentTime, volume]);
 
-    // Debounced auto-save
     useEffect(() => {
         if (!enabled) return;
-
-        // Clear existing timeout
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
 
-        // Schedule save
         saveTimeoutRef.current = setTimeout(() => {
             savePlaybackState(stateRef.current);
         }, debounceMs);
@@ -112,12 +81,10 @@ export function usePlaybackPersistence({
         };
     }, [playlistId, trackId, currentIndex, isShuffled, repeatMode, currentTime, volume, enabled, debounceMs]);
 
-    // Manual restore
     const restoreState = useCallback(async (): Promise<PlaybackState | null> => {
         return await loadPlaybackState();
     }, []);
 
-    // Manual save
     const saveNow = useCallback(async (): Promise<void> => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
