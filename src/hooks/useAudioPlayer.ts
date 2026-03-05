@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useHlsLoader } from './useHlsLoader';
+import { Logger } from '@utils/logger';
 
 interface UseAudioPlayerProps {
     trackId: number | null;
@@ -40,7 +41,6 @@ export function useAudioPlayer({
     onPause,
     onStop,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
-    // Stable Audio Elements
     const audioElements = useRef<[HTMLAudioElement, HTMLAudioElement, HTMLAudioElement] | null>(null);
     if (!audioElements.current) {
         audioElements.current = [new Audio(), new Audio(), new Audio()];
@@ -49,13 +49,11 @@ export function useAudioPlayer({
         });
     }
 
-    // State & Refs
     const [activeIndex, setActiveIndex] = useState<0 | 1 | 2>(0);
     const [duration, setDuration] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
 
-    // Rotation Logic
     const [lastTrackId, setLastTrackId] = useState<number | null>(trackId);
     const historyRef = useRef({ next: nextTrackId, prev: prevTrackId });
 
@@ -80,17 +78,14 @@ export function useAudioPlayer({
         setIsPlaying(false);
     }
 
-    // Update history ref for next rotation
     useEffect(() => {
         historyRef.current = { next: nextTrackId, prev: prevTrackId };
     }, [nextTrackId, prevTrackId]);
 
-    // Exposed ref pointing to current active element
     const activeAudio = audioElements.current[activeIndex];
     const exposedRef = useRef<HTMLAudioElement | null>(activeAudio);
     exposedRef.current = activeAudio;
 
-    // Centralized Event Listeners
     useEffect(() => {
         const audios = audioElements.current!;
 
@@ -104,7 +99,7 @@ export function useAudioPlayer({
                 waiting: () => isForActive && setIsBuffering(true),
                 playing: () => isForActive && setIsBuffering(false),
                 ended: () => isForActive && (setIsPlaying(false), onEnded?.(), onStop?.(audio.duration || 0)),
-                error: (e: Event) => isForActive && (console.error('[Audio] Player Error:', e), onError?.()),
+                error: (e: Event) => isForActive && (Logger.error('[Audio] Player Error:', e), onError?.()),
             };
 
             Object.entries(events).forEach(([name, fn]) => audio.addEventListener(name, fn));
@@ -118,7 +113,6 @@ export function useAudioPlayer({
         };
     }, [activeIndex, onEnded, onError, onPlay, onPause]);
 
-    // HLS Loading
     const nextIndex = ((activeIndex + 1) % 3) as 0 | 1 | 2;
     const prevIndex = ((activeIndex + 2) % 3) as 0 | 1 | 2;
 
@@ -137,7 +131,6 @@ export function useAudioPlayer({
         onStreamReady: () => {
             if (activeIndex === 0) {
                 setIsBuffering(false);
-                // If we should be playing but were blocked by loading, try again
                 if (shouldPlay && audioElements.current![0].paused) {
                     audioElements.current![0].play().catch(() => { });
                 }
@@ -178,7 +171,6 @@ export function useAudioPlayer({
         priority: activeIndex === 2
     });
 
-    // Volume & Playback Controls
     useEffect(() => {
         audioElements.current!.forEach(audio => {
             audio.volume = volume / 100;
@@ -198,14 +190,13 @@ export function useAudioPlayer({
 
         if (shouldPlay && activePlayer.paused) {
             activePlayer.play().catch(err => {
-                if (err.name !== 'AbortError') console.error('[Audio] Play failed:', err);
+                if (err.name !== 'AbortError') Logger.error('[Audio] Play failed:', err);
             });
         } else if (!shouldPlay && !activePlayer.paused) {
             activePlayer.pause();
         }
     }, [shouldPlay, trackId, activeIndex, isBuffering, duration]);
 
-    // Cleanup
     useEffect(() => {
         return () => {
             audioElements.current?.forEach(audio => {

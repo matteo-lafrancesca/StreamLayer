@@ -5,7 +5,7 @@
 export const MOBILE_PLAYER_STYLES = {
     container: {
         position: 'fixed' as const,
-        bottom: '20px',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)',
         left: 0,
         right: 0,
         zIndex: 1000,
@@ -17,8 +17,8 @@ export const MOBILE_PLAYER_STYLES = {
         width: '90%',
         height: '72px',
         borderRadius: '12px',
-        background: '#FFFFFF',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        background: 'var(--bg-secondary)',
+        boxShadow: 'var(--shadow-lg)',
         position: 'relative' as const,
         overflow: 'hidden' as const,
         userSelect: 'none' as const,

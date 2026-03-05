@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MediaBarMobile } from './MediaBarMobile';
 import { TrackViewMobile } from './TrackViewMobile';
 import { PlaylistView } from './PlaylistView';
@@ -21,7 +22,12 @@ export function PlayerMobile() {
     const { currentView, setCurrentView, isDragging } = usePlayerUI();
     const { isExpanded, onExpandToggle } = usePlayerExpansion();
 
-    const showMiniPlayerOverSheet = isExpanded && currentView !== 'track';
+    const [isLayer1Swiping, setIsLayer1Swiping] = useState(false);
+    const [isLayer2Swiping, setIsLayer2Swiping] = useState(false);
+
+    const isSwipingBack = isLayer1Swiping || isLayer2Swiping;
+
+    const showMiniPlayerOverSheet = isExpanded && currentView !== 'track' && !isSwipingBack;
 
     let layer1State: 'hidden' | 'active' | 'obscured' = 'hidden';
     if (currentView === 'project' || currentView === 'queue') {
@@ -68,12 +74,13 @@ export function PlayerMobile() {
                     state={layer1State}
                     onBack={() => setCurrentView('track')}
                     zIndex={2}
+                    onSwipeProgress={setIsLayer1Swiping}
                 >
                     <ExpandedPlayerHeaderMobile
                         currentView={currentView === 'queue' ? 'queue' : 'project'}
                         setCurrentView={setCurrentView}
                     />
-                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? '80px' : 0 }}>
+                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? 'calc(env(safe-area-inset-bottom, 0px) + 112px)' : 0 }}>
                         {currentView === 'queue' ? <QueueView /> : <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />}
                     </div>
                 </NavStack>
@@ -82,12 +89,13 @@ export function PlayerMobile() {
                     state={layer2State}
                     onBack={() => setCurrentView('project')}
                     zIndex={3}
+                    onSwipeProgress={setIsLayer2Swiping}
                 >
                     <ExpandedPlayerHeaderMobile
                         currentView='playlist'
                         setCurrentView={setCurrentView}
                     />
-                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? '80px' : 0 }}>
+                    <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? 'calc(env(safe-area-inset-bottom, 0px) + 112px)' : 0 }}>
                         <PlaylistView />
                     </div>
                 </NavStack>

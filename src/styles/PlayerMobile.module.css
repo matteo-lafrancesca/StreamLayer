@@ -20,7 +20,7 @@
 .expandableContentScrollMobile {
     flex: 1;
     overflow: auto;
-    padding-bottom: 80px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 112px);
     /* Space for the floating bar */
 }
 
@@ -29,7 +29,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 120px;
+    height: calc(env(safe-area-inset-bottom, 0px) + 150px);
     background: linear-gradient(to top, var(--bg-secondary) 0%, transparent 100%);
     pointer-events: none;
     z-index: 5;

@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Track } from '@definitions/track';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 
 interface UseTrackNavigationProps {
     minSwipeDistance?: number;
 }
 
 export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationProps = {}) {
-    const { playingTrack, playbackControls, queue } = usePlayer();
+    const { playingTrack, queue } = usePlayerState();
+    const { playbackControlsActions } = usePlayerActions();
 
     const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | null>(null);
     const [optimisticTrack, setOptimisticTrack] = useState<Track | null>(null);
@@ -67,7 +68,7 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
             if (queue[nextIndex]) {
                 setOptimisticTrack(queue[nextIndex]);
                 setSlideDirection('next');
-                playbackControls.onNext();
+                playbackControlsActions.onNext();
             }
         } else if (isRightSwipe) {
             let prevIndex = currentIndex - 1;
@@ -76,19 +77,19 @@ export function useTrackNavigation({ minSwipeDistance = 5 }: UseTrackNavigationP
             if (queue[prevIndex]) {
                 setOptimisticTrack(queue[prevIndex]);
                 setSlideDirection('prev');
-                playbackControls.onPrevious();
+                playbackControlsActions.onPrevious();
             }
         }
     };
 
     const handlePrevious = () => {
         setSlideDirection('prev');
-        playbackControls.onPrevious();
+        playbackControlsActions.onPrevious();
     };
 
     const handleNext = () => {
         setSlideDirection('next');
-        playbackControls.onNext();
+        playbackControlsActions.onNext();
     };
 
     const handleAnimationEnd = () => {

@@ -1,5 +1,5 @@
 import { Slider } from '@components/UI';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState } from '@context/PlayerContext';
 import { useSeekableProgress } from '@hooks/useSeekableProgress';
 import styles from '@styles/ProgressBar.module.css';
 
@@ -10,7 +10,7 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ className, onSeekStart, onSeekEnd }: ProgressBarProps) {
-    const { playingTrack } = usePlayer();
+    const { playingTrack } = usePlayerState();
 
     const {
         progress,

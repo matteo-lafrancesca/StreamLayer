@@ -34,19 +34,15 @@ export function useHlsLoader({
     const retryCountRef = useRef<number>(0);
     const authRetryCountRef = useRef<number>(0);
 
-    // Stable error callback ref
     const onErrorRef = useRef(onError);
     useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
-    // Stable success callback ref
     const onStreamReadyRef = useRef(onStreamReady);
     useEffect(() => { onStreamReadyRef.current = onStreamReady; }, [onStreamReady]);
 
-    // Stable Token Ref
     const accessTokenRef = useRef(accessToken);
     useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
 
-    // Constants
     const MAX_RETRIES = 2;
     const MAX_AUTH_RETRIES = 1;
 
@@ -54,7 +50,6 @@ export function useHlsLoader({
         const audio = audioElement;
         const retryTimeouts: number[] = [];
 
-        // Reset auth retry count for new track
         authRetryCountRef.current = 0;
 
         if (!audio || !trackId) {
@@ -70,7 +65,6 @@ export function useHlsLoader({
             return;
         }
 
-        // Include token for native playback
         const streamUrl = getTrackStreamUrl(trackId, accessTokenRef.current || undefined);
         Logger.info('[HLS] Loading stream:', streamUrl);
 
@@ -80,7 +74,6 @@ export function useHlsLoader({
             return;
         }
 
-        // Debounce HLS initialization
         const initHls = () => {
             if (Hls.isSupported()) {
                 if (hlsRef.current) hlsRef.current.destroy();
@@ -109,7 +102,6 @@ export function useHlsLoader({
                 });
 
                 hls.on(Hls.Events.ERROR, (_event, data) => {
-                    // Check for 401/403 on Network Error (Token expired)
                     if (data.type === Hls.ErrorTypes.NETWORK_ERROR && (data.response?.code === 401 || data.response?.code === 403)) {
                         if (authRetryCountRef.current < MAX_AUTH_RETRIES) {
                             Logger.info(`[HLS] Token 401 detected, refreshing... (Attempt ${authRetryCountRef.current + 1}/${MAX_AUTH_RETRIES})`);
@@ -164,6 +156,31 @@ export function useHlsLoader({
                 });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = streamUrl;
+
+                const handleNativeError = () => {
+                    const err = audio.error;
+                    if (err) {
+                        Logger.error('[HLS Native] Playback error', err);
+                        if (err.code === err.MEDIA_ERR_NETWORK && authRetryCountRef.current < MAX_AUTH_RETRIES) {
+                            Logger.info(`[HLS Native] Token refresh attempt... (${authRetryCountRef.current + 1}/${MAX_AUTH_RETRIES})`);
+                            authRetryCountRef.current++;
+
+                            tokenManager.refreshAccessToken().then((newToken) => {
+                                audio.src = getTrackStreamUrl(trackId, newToken)!;
+                                audio.load();
+                                audio.play().catch((err) => Logger.error('[HLS Native] Play failed:', err));
+                            }).catch((e) => {
+                                Logger.error('[HLS Native] Token refresh failed:', e);
+                                onErrorRef.current?.();
+                            });
+                        } else {
+                            onErrorRef.current?.();
+                        }
+                    }
+                };
+
+                audio.addEventListener('error', handleNativeError);
+                (audio as any)._nativeErrorHandler = handleNativeError;
             } else {
                 Logger.error('HLS is not supported in this browser');
             }
@@ -182,6 +199,10 @@ export function useHlsLoader({
             if (hlsRef.current) {
                 hlsRef.current.destroy();
                 hlsRef.current = null;
+            }
+            if (audio && (audio as any)._nativeErrorHandler) {
+                audio.removeEventListener('error', (audio as any)._nativeErrorHandler);
+                delete (audio as any)._nativeErrorHandler;
             }
         };
     }, [trackId, audioElement]);

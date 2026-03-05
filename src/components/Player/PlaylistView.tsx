@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { useAuth } from '@context/AuthContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
@@ -10,7 +10,8 @@ import { PlaylistTrackRow } from './PlaylistTrackRow';
 import styles from '@styles/PlayerViews.module.css';
 
 export function PlaylistView() {
-    const { playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist } = usePlayer();
+    const { playingTrack, isPlaying, playingFromPlaylist } = usePlayerState();
+    const { playTrackFromPlaylist, setIsPlaying } = usePlayerActions();
     const { selectedPlaylist, setCurrentView, setSelectedPlaylist: resetSelectedPlaylist } = usePlayerUI();
     const { accessToken } = useAuth();
     const { tracks, error } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);

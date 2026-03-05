@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { useBackGesture } from '@hooks/useBackGesture';
 
 interface NavStackProps {
@@ -6,9 +6,10 @@ interface NavStackProps {
     state: 'hidden' | 'active' | 'obscured';
     onBack?: () => void;
     zIndex: number;
+    onSwipeProgress?: (isSwiping: boolean) => void;
 }
 
-export function NavStack({ children, state, onBack, zIndex }: NavStackProps) {
+export function NavStack({ children, state, onBack, zIndex, onSwipeProgress }: NavStackProps) {
     const {
         handleTouchStart,
         handleTouchMove,
@@ -27,7 +28,13 @@ export function NavStack({ children, state, onBack, zIndex }: NavStackProps) {
         transform = 'translateX(0px)';
     }
 
+    const isSwiping = state === 'active' && (translateX > 0 || isAnimating);
     const isDragging = state === 'active' && translateX > 0 && !isAnimating;
+    useEffect(() => {
+        if (onSwipeProgress) {
+            onSwipeProgress(isSwiping);
+        }
+    }, [isSwiping, onSwipeProgress]);
 
     return (
         <div

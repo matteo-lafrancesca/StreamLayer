@@ -66,11 +66,18 @@ class TokenManager {
                 this.refreshToken = response.refresh_token;
                 this.notifyListeners();
                 return response.access_token;
-            } catch (error) {
+            } catch (error: any) {
                 Logger.error('[TokenManager] Failed to refresh token:', error);
-                this.accessToken = null;
-                this.refreshToken = null;
-                this.notifyListeners();
+
+                const isAuthError =
+                    (error?.status === 401 || error?.status === 403) ||
+                    (error instanceof Error && (error.message.includes('401') || error.message.includes('403')));
+
+                if (isAuthError) {
+                    this.accessToken = null;
+                    this.refreshToken = null;
+                    this.notifyListeners();
+                }
                 throw error;
             } finally {
                 this.refreshPromise = null;

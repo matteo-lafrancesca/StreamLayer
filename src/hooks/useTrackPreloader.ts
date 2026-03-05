@@ -53,9 +53,12 @@ export function useTrackPreloader(
  * Fetches HLS manifest and first segment to warm up browser cache.
  */
 async function preloadHls(trackId: number, accessToken: string) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     try {
         const streamUrl = getTrackStreamUrl(trackId, accessToken);
-        const manifestResponse = await fetch(streamUrl);
+        const manifestResponse = await fetch(streamUrl, { signal: controller.signal });
         if (!manifestResponse.ok) return;
 
         const manifestText = await manifestResponse.text();
@@ -64,10 +67,14 @@ async function preloadHls(trackId: number, accessToken: string) {
         if (nextUrl) {
             const resolvedUrl = new URL(nextUrl, manifestResponse.url).toString();
             const finalUrl = appendAuthToUrl(resolvedUrl, accessToken);
-            await fetch(finalUrl);
+            await fetch(finalUrl, { signal: controller.signal });
         }
 
     } catch (err) {
-        console.warn(`[Preloader] Failed to preload track ${trackId}`, err);
+        if ((err as Error).name !== 'AbortError') {
+            console.warn(`[Preloader] Failed to preload track ${trackId}`, err);
+        }
+    } finally {
+        clearTimeout(timeoutId);
     }
 }

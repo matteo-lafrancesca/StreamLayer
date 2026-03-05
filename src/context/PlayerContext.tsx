@@ -7,8 +7,10 @@ import { useQueueManager } from '@hooks/useQueueManager';
 import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
 import { useTrackPreloader } from '@hooks/useTrackPreloader';
 import { useTrackReporting } from '@hooks/useTrackReporting';
+import { useMediaSession } from '@hooks/useMediaSession';
 import { useAuth } from './AuthContext';
 import { usePlayerUI } from './PlayerUIContext';
+import { Logger } from '@utils/logger';
 
 interface PlaybackControls {
     isShuffled: boolean;
@@ -19,33 +21,38 @@ interface PlaybackControls {
     onRepeat: () => void;
 }
 
-interface PlayerContextType {
-    audioRef: RefObject<HTMLAudioElement | null>;
-
-    // Playback state
+interface PlayerStateContextType {
     playingTrack: Track | null;
-
-    playTrackFromPlaylist: (trackIndex: number, tracks?: Track[], options?: { shuffle?: boolean }) => void;
+    nextTrack: Track | null;
+    prevTrack: Track | null;
     isPlaying: boolean;
-    setIsPlaying: (isPlaying: boolean) => void;
     volume: number;
-    setVolume: (volume: number) => void;
-
     duration: number;
     isBuffering: boolean;
-
-    // Playlist logic
     playingFromPlaylist: Playlist | null;
-
-    // Queue state
     queue: Track[];
-    reorderQueue: (oldIndex: number, newIndex: number) => void;
-
-    // Playback controls
-    playbackControls: PlaybackControls;
+    playbackControlsState: {
+        isShuffled: boolean;
+        repeatMode: 'off' | 'all' | 'one';
+    };
 }
 
-const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
+interface PlayerActionsContextType {
+    audioRef: RefObject<HTMLAudioElement | null>;
+    playTrackFromPlaylist: (trackIndex: number, tracks?: Track[], options?: { shuffle?: boolean }) => void;
+    setIsPlaying: (isPlaying: boolean) => void;
+    setVolume: (volume: number) => void;
+    reorderQueue: (oldIndex: number, newIndex: number) => void;
+    playbackControlsActions: {
+        onShuffle: () => void;
+        onPrevious: () => void;
+        onNext: () => void;
+        onRepeat: () => void;
+    };
+}
+
+const PlayerStateContext = createContext<PlayerStateContextType | undefined>(undefined);
+const PlayerActionsContext = createContext<PlayerActionsContextType | undefined>(undefined);
 
 interface PlayerProviderProps {
     children: ReactNode;
@@ -57,34 +64,27 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
 
     const { tracks: playlistTracks } = usePlaylistTracksLazy(selectedPlaylist?.id, accessToken, selectedPlaylist?.nb_items);
 
-    // Queue manager
     const queueManager = useQueueManager({
         tracks: playlistTracks,
         initialTrack: selectedTrack,
     });
 
-    // Playback state
     const playingTrack = queueManager.currentTrack;
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(100);
 
-    // Queue generation state
     const [playingFromPlaylist, setPlayingFromPlaylist] = useState<Playlist | null>(null);
 
-    // Session Preloader
     useTrackPreloader(queueManager.queue, queueManager.currentIndex, accessToken);
 
-    // Audio Elements Reference
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Reporting
     const { handlePlay, handlePause, handleStop } = useTrackReporting({
         playingTrack,
         playingFromPlaylist,
         audioRef
     });
 
-    // Audio player with HLS support
     const nextTrack = queueManager.queue[queueManager.currentIndex + 1];
     const prevTrack = queueManager.queue[queueManager.currentIndex - 1];
     const audioPlayer = useAudioPlayer({
@@ -97,7 +97,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onEnded: () => {
             if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
                 audioPlayer.audioRef.current.currentTime = 0;
-                audioPlayer.audioRef.current.play().catch(console.error);
+                audioPlayer.audioRef.current.play().catch((err) => Logger.error('[Player] Repeat play failed', err));
                 if (!isPlaying) setIsPlaying(true);
             } else if (queueManager.canPlayNext) {
                 queueManager.playNext();
@@ -106,7 +106,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             }
         },
         onError: () => {
-            console.log('[PlayerContext] Track loading failed, skipping to next');
+            Logger.warn('[PlayerContext] Track loading failed, skipping to next');
             setIsPlaying(false);
 
             if (queueManager.canPlayNext) {
@@ -122,7 +122,6 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         audioRef.current = audioPlayer.audioRef.current;
     }, [audioPlayer.audioRef]);
 
-    // Playback controls
     const playbackControlsHook = usePlaybackControls({
         isShuffled: queueManager.isShuffled,
         repeatMode: queueManager.repeatMode,
@@ -158,7 +157,6 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         }
     }, [playlistTracks, queueManager.setQueue, selectedPlaylist]);
 
-    // Auto-update queue when all playlist tracks are loaded
     useEffect(() => {
         if (
             playingFromPlaylist &&
@@ -178,7 +176,6 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             playlistTracks.length === selectedPlaylist.nb_items &&
             queueManager.totalTracks < selectedPlaylist.nb_items
         ) {
-            console.log('[PlayerContext] All tracks loaded, updating queue with full playlist');
             const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
             if (currentTrackIndex >= 0) {
                 queueManager.setQueue(playlistTracks, currentTrackIndex, { keepState: true });
@@ -187,56 +184,101 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager.totalTracks, queueManager.currentTrack?.id, queueManager.setQueue]);
 
 
-
-    const playbackControls: PlaybackControls = useMemo(() => ({
-        isShuffled: playbackControlsHook.isShuffled,
-        repeatMode: playbackControlsHook.repeatMode,
+    const playbackControlsActions = useMemo(() => ({
         onShuffle: playbackControlsHook.handleShuffle,
         onPrevious: playbackControlsHook.handlePrevious,
         onNext: playbackControlsHook.handleNext,
         onRepeat: playbackControlsHook.handleRepeat,
-    }), [playbackControlsHook]);
+    }), [playbackControlsHook.handleShuffle, playbackControlsHook.handlePrevious, playbackControlsHook.handleNext, playbackControlsHook.handleRepeat]);
 
-    const contextValue = useMemo(() => ({
+    useMediaSession({
         playingTrack,
-
-        playTrackFromPlaylist,
         isPlaying,
-        setIsPlaying,
+        onPlay: () => setIsPlaying(true),
+        onPause: () => setIsPlaying(false),
+        onPrevious: playbackControlsActions.onPrevious,
+        onNext: playbackControlsActions.onNext,
+        onSeek: audioPlayer.seek,
+        audioRef: audioPlayer.audioRef
+    });
+
+    const stateValue = useMemo(() => ({
+        playingTrack,
+        nextTrack,
+        prevTrack,
+        isPlaying,
         volume,
-        setVolume,
-        audioRef: audioPlayer.audioRef,
         duration: audioPlayer.duration,
         isBuffering: audioPlayer.isBuffering,
-        queue: queueManager.queue,
-        playbackControls,
         playingFromPlaylist,
-        reorderQueue: queueManager.reorderQueue,
+        queue: queueManager.queue,
+        playbackControlsState: {
+            isShuffled: playbackControlsHook.isShuffled,
+            repeatMode: playbackControlsHook.repeatMode,
+        }
     }), [
         playingTrack,
-        playTrackFromPlaylist,
+        nextTrack,
+        prevTrack,
         isPlaying,
         volume,
-        audioPlayer.audioRef,
         audioPlayer.duration,
         audioPlayer.isBuffering,
-        queueManager.queue,
-        playbackControls,
         playingFromPlaylist,
-        queueManager.reorderQueue
+        queueManager.queue,
+        playbackControlsHook.isShuffled,
+        playbackControlsHook.repeatMode,
+    ]);
+
+    const actionsValue = useMemo(() => ({
+        audioRef: audioPlayer.audioRef,
+        playTrackFromPlaylist,
+        setIsPlaying,
+        setVolume,
+        reorderQueue: queueManager.reorderQueue,
+        playbackControlsActions,
+    }), [
+        audioPlayer.audioRef,
+        playTrackFromPlaylist,
+        queueManager.reorderQueue,
+        playbackControlsActions,
     ]);
 
     return (
-        <PlayerContext.Provider value={contextValue}>
-            {children}
-        </PlayerContext.Provider>
+        <PlayerActionsContext.Provider value={actionsValue}>
+            <PlayerStateContext.Provider value={stateValue}>
+                {children}
+            </PlayerStateContext.Provider>
+        </PlayerActionsContext.Provider>
     );
 }
 
-export function usePlayer() {
-    const context = useContext(PlayerContext);
+export function usePlayerState() {
+    const context = useContext(PlayerStateContext);
     if (context === undefined) {
-        throw new Error('usePlayer must be used within a PlayerProvider');
+        throw new Error('usePlayerState must be used within a PlayerProvider');
     }
     return context;
+}
+
+export function usePlayerActions() {
+    const context = useContext(PlayerActionsContext);
+    if (context === undefined) {
+        throw new Error('usePlayerActions must be used within a PlayerProvider');
+    }
+    return context;
+}
+
+export function usePlayer() {
+    const state = usePlayerState();
+    const actions = usePlayerActions();
+
+    return {
+        ...state,
+        ...actions,
+        playbackControls: {
+            ...state.playbackControlsState,
+            ...actions.playbackControlsActions
+        }
+    };
 }

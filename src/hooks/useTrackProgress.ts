@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { formatDuration } from '@utils/time';
 
 /**
  * Hook for local track progress without global re-renders.
  */
 export function useTrackProgress() {
-    const { audioRef, isPlaying } = usePlayer();
+    const { isPlaying } = usePlayerState();
+    const { audioRef } = usePlayerActions();
 
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);

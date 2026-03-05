@@ -3,7 +3,7 @@ import { IconButton } from '@components/UI';
 import { PLAYER_SIZES } from '@constants/playerSizes';
 import styles from '@styles/PlaybackControls.module.css';
 import type { PlaybackControlsProps } from '@definitions/player';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState } from '@context/PlayerContext';
 
 export function PlaybackControls({
     isPlaying,
@@ -14,7 +14,7 @@ export function PlaybackControls({
     onRepeat,
     variant = 'desktop'
 }: PlaybackControlsProps) {
-    const { playbackControls } = usePlayer();
+    const { playbackControlsState } = usePlayerState();
 
     const sizes = variant === 'mobile'
         ? {
@@ -34,8 +34,8 @@ export function PlaybackControls({
         <div className={`${styles.playbackControls} ${variant === 'mobile' ? styles.mobile : ''}`}>
             <IconButton
                 icon={<Shuffle size={sizes.shuffle} />}
-                className={`${styles.controlIconButton} ${playbackControls.isShuffled ? styles.active : styles.inactive}`}
-                title={playbackControls.isShuffled ? "Désactiver l'aléatoire" : "Activer l'aléatoire"}
+                className={`${styles.controlIconButton} ${playbackControlsState.isShuffled ? styles.active : styles.inactive}`}
+                title={playbackControlsState.isShuffled ? "Désactiver l'aléatoire" : "Activer l'aléatoire"}
                 onClick={onShuffle}
                 enlargeHitbox
             />
@@ -61,11 +61,11 @@ export function PlaybackControls({
                 enlargeHitbox
             />
             <IconButton
-                icon={playbackControls.repeatMode === 'one' ? <Repeat1 size={sizes.repeat} /> : <Repeat size={sizes.repeat} />}
-                className={`${styles.controlIconButton} ${playbackControls.repeatMode !== 'off' ? styles.active : styles.inactive}`}
+                icon={playbackControlsState.repeatMode === 'one' ? <Repeat1 size={sizes.repeat} /> : <Repeat size={sizes.repeat} />}
+                className={`${styles.controlIconButton} ${playbackControlsState.repeatMode !== 'off' ? styles.active : styles.inactive}`}
                 title={
-                    playbackControls.repeatMode === 'off' ? 'Activer la répétition' :
-                        playbackControls.repeatMode === 'all' ? 'Répéter le titre' :
+                    playbackControlsState.repeatMode === 'off' ? 'Activer la répétition' :
+                        playbackControlsState.repeatMode === 'all' ? 'Répéter le titre' :
                             'Désactiver la répétition'
                 }
                 onClick={onRepeat}

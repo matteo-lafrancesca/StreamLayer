@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 
 /**
@@ -12,7 +12,7 @@ import { usePlayerUI } from '@context/PlayerUIContext';
  */
 export function useMediaBarNavigation(isExpanded: boolean, onExpandToggle: () => void) {
     const { currentView, setCurrentView, selectedPlaylist, setSelectedPlaylist } = usePlayerUI();
-    const { playingFromPlaylist } = usePlayer();
+    const { playingFromPlaylist } = usePlayerState();
 
     /**
      * Handles opening the playlist/project view

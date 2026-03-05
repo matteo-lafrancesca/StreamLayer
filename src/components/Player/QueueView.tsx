@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { QueueTrackRow } from './QueueTrackRow';
 import styles from '@styles/PlayerViews.module.css';
@@ -20,7 +20,8 @@ import {
 import { compensateForTransforms, restrictToVerticalAxis, restrictToScrollContainer } from '@utils/dndModifiers';
 
 export function QueueView() {
-    const { queue, playTrackFromPlaylist, playingTrack, isPlaying, setIsPlaying, playingFromPlaylist, reorderQueue } = usePlayer();
+    const { queue, playingTrack, isPlaying, playingFromPlaylist } = usePlayerState();
+    const { playTrackFromPlaylist, setIsPlaying, reorderQueue } = usePlayerActions();
     const { selectedPlaylist, setIsDragging } = usePlayerUI();
 
     const sensors = useSensors(

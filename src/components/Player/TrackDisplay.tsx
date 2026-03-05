@@ -1,4 +1,4 @@
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState } from '@context/PlayerContext';
 import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { ScrollingText } from './ScrollingText';
 import styles from '@styles/TrackDisplay.module.css';
@@ -7,7 +7,7 @@ import styles from '@styles/TrackDisplay.module.css';
  * Shared component for cover and track info (Desktop/Mobile).
  */
 export function TrackDisplay() {
-    const { playingTrack } = usePlayer();
+    const { playingTrack } = usePlayerState();
 
     return (
         <div className={styles.mediaBarLeft}>

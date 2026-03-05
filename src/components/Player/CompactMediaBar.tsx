@@ -1,4 +1,4 @@
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { AlbumCoverOrPlaceholder } from './AlbumCoverOrPlaceholder';
 import { IconButton } from '@components/UI';
@@ -20,8 +20,10 @@ export function CompactMediaBar({ dragAttributes, dragListeners }: CompactMediaB
     const {
         playingTrack,
         isPlaying,
-        setIsPlaying
-    } = usePlayer();
+    } = usePlayerState();
+
+    const { setIsPlaying } = usePlayerActions();
+
     const { setIsCompact } = usePlayerUI();
 
     const handlePlayPause = (e: React.MouseEvent) => {

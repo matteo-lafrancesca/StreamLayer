@@ -1,8 +1,7 @@
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { useTrackNavigation } from '@hooks/useTrackNavigation';
 
-import { AuthenticatedImage } from './AuthenticatedImage';
 import { ScrollingText } from './ScrollingText';
 import { PlaybackControls } from './PlaybackControls';
 import { ProgressBar } from './ProgressBar';
@@ -22,10 +21,12 @@ export function TrackViewMobile() {
     const {
         playingTrack,
         isPlaying,
+    } = usePlayerState();
+
+    const {
         setIsPlaying,
-        playbackControls,
-        queue
-    } = usePlayer();
+        playbackControlsActions,
+    } = usePlayerActions();
 
     const {
         setIsSeeking,
@@ -55,10 +56,14 @@ export function TrackViewMobile() {
                     title="Fermer"
                 />
                 <div className={styles.headerInfo}>
-                    <span className={styles.headerLabel}>LECTURE À PARTIR DE</span>
-                    <span className={styles.headerContext}>
-                        {selectedPlaylist?.metadata?.title || 'Projets'}
-                    </span>
+                    {playingTrack && (
+                        <>
+                            <span className={styles.headerLabel}>LECTURE À PARTIR DE</span>
+                            <span className={styles.headerContext}>
+                                {selectedPlaylist?.metadata?.title || 'Projets'}
+                            </span>
+                        </>
+                    )}
                 </div>
                 <div style={{ width: PLAYER_SIZES.MOBILE.CHEVRON }} />
             </div>
@@ -101,10 +106,10 @@ export function TrackViewMobile() {
                     <PlaybackControls
                         isPlaying={isPlaying}
                         onPlayPause={() => setIsPlaying(!isPlaying)}
-                        onShuffle={playbackControls.onShuffle}
+                        onShuffle={playbackControlsActions.onShuffle}
                         onPrevious={handlePrevious}
                         onNext={handleNext}
-                        onRepeat={playbackControls.onRepeat}
+                        onRepeat={playbackControlsActions.onRepeat}
                         variant="mobile"
                     />
                 </div>
@@ -125,37 +130,6 @@ export function TrackViewMobile() {
                         <ListVideo size={20} />
                         <span>File d'attente</span>
                     </button>
-                </div>
-
-                <div style={{ width: 0, height: 0, opacity: 0, overflow: 'hidden', position: 'absolute' }}>
-                    {(() => {
-                        const currentIndex = queue.findIndex(t => t.id === playingTrack?.id);
-                        if (currentIndex === -1) return null;
-
-                        const nextTrack = queue[(currentIndex + 1) % queue.length];
-                        const prevTrack = queue[(currentIndex - 1 + queue.length) % queue.length];
-
-                        return (
-                            <>
-                                {nextTrack && (
-                                    <AuthenticatedImage
-                                        type="album"
-                                        id={nextTrack.id_album}
-                                        size="l"
-                                        alt="preload-next"
-                                    />
-                                )}
-                                {prevTrack && (
-                                    <AuthenticatedImage
-                                        type="album"
-                                        id={prevTrack.id_album}
-                                        size="l"
-                                        alt="preload-prev"
-                                    />
-                                )}
-                            </>
-                        );
-                    })()}
                 </div>
             </div>
         </div>

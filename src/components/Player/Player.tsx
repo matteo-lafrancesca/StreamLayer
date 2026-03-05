@@ -1,5 +1,6 @@
 import { PlayerDesktop } from './PlayerDesktop';
 import { PlayerMobile } from './PlayerMobile';
+import { PlayerImagePreloader } from './PlayerImagePreloader';
 import { useMediaQuery } from '@hooks/useMediaQuery';
 
 /**
@@ -9,6 +10,11 @@ import { useMediaQuery } from '@hooks/useMediaQuery';
 export function Player() {
     const isMobile = useMediaQuery('(max-width: 768px)');
 
-    return isMobile ? <PlayerMobile /> : <PlayerDesktop />;
+    return (
+        <>
+            <PlayerImagePreloader />
+            {isMobile ? <PlayerMobile /> : <PlayerDesktop />}
+        </>
+    );
 }
 

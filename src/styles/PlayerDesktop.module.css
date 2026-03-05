@@ -16,7 +16,6 @@
     width: var(--player-width-desktop);
     background: var(--bg-secondary);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-xl);
     overflow: hidden;
     position: relative;
     user-select: none;

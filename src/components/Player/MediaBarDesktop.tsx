@@ -1,4 +1,4 @@
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { useCompactMode } from '@hooks/useCompactMode';
 import { TrackDisplay } from './TrackDisplay';
@@ -18,11 +18,14 @@ import type { MediaBarDesktopProps } from '@definitions/player';
 export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopProps) {
     const {
         isPlaying,
-        setIsPlaying,
         volume,
+    } = usePlayerState();
+
+    const {
+        setIsPlaying,
         setVolume,
-        playbackControls,
-    } = usePlayer();
+        playbackControlsActions,
+    } = usePlayerActions();
 
     const {
         setIsSeeking,
@@ -84,10 +87,10 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                     <PlaybackControls
                         isPlaying={isPlaying}
                         onPlayPause={() => setIsPlaying(!isPlaying)}
-                        onShuffle={playbackControls.onShuffle}
-                        onPrevious={playbackControls.onPrevious}
-                        onNext={playbackControls.onNext}
-                        onRepeat={playbackControls.onRepeat}
+                        onShuffle={playbackControlsActions.onShuffle}
+                        onPrevious={playbackControlsActions.onPrevious}
+                        onNext={playbackControlsActions.onNext}
+                        onRepeat={playbackControlsActions.onRepeat}
                     />
                 </div>
             </div>

@@ -25,13 +25,30 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
 
         const config = ConfigManager.getConfig();
         const url = endpoint.startsWith('http') ? endpoint : `${config.apiBaseUrl}${endpoint}`;
-        const response = await fetch(url, { ...customOptions, headers });
 
-        if (response.status === 401 || response.status === 403) {
-            throw new ApiError(`Auth Error: ${response.statusText}`, response.status);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        try {
+            const response = await fetch(url, {
+                ...customOptions,
+                headers,
+                signal: controller.signal
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                throw new ApiError(`Auth Error: ${response.statusText}`, response.status);
+            }
+
+            return response;
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                throw new ApiError('Request Timeout', 408);
+            }
+            throw error;
+        } finally {
+            clearTimeout(timeoutId);
         }
-
-        return response;
     };
 
     if (accessToken || tokenManager.getAccessToken()) {

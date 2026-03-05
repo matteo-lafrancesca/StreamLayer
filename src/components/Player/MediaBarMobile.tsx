@@ -1,4 +1,4 @@
-import { usePlayer } from '@context/PlayerContext';
+import { usePlayerState, usePlayerActions } from '@context/PlayerContext';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { TrackDisplay } from './TrackDisplay';
 import { IconButton } from '@components/UI';
@@ -12,10 +12,8 @@ import type { MediaBarMobileProps } from '@definitions/player';
  * Simplified player bar with click-to-expand and thin bottom progress bar.
  */
 export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
-    const {
-        isPlaying,
-        setIsPlaying,
-    } = usePlayer();
+    const { isPlaying } = usePlayerState();
+    const { setIsPlaying } = usePlayerActions();
     const { setCurrentView, isExpanded, currentView } = usePlayerUI();
 
     const handleExpand = () => {
