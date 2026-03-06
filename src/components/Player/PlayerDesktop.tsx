@@ -1,8 +1,10 @@
+import React, { Suspense } from 'react';
 import { MediaBarDesktop } from './MediaBarDesktop';
 import { CompactMediaBar } from './CompactMediaBar';
-import { ViewRenderer } from './ViewRenderer';
 import { ExpandedPlayerHeader } from './ExpandedPlayerHeader';
 import { ProgressSlider } from './ProgressSlider';
+
+const ViewRenderer = React.lazy(() => import('./ViewRenderer').then(m => ({ default: m.ViewRenderer })));
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
 import { useDraggablePlayer } from '@hooks/useDraggablePlayer';
@@ -151,10 +153,12 @@ function PlayerDesktopContent({
                             )}
 
                             <div className={sharedStyles.expandableContentScroll}>
-                                <ViewRenderer
-                                    currentView={currentView}
-                                    setCurrentView={setCurrentView}
-                                />
+                                <Suspense fallback={<div className={sharedStyles.loadingPlaceholder} />}>
+                                    <ViewRenderer
+                                        currentView={currentView}
+                                        setCurrentView={setCurrentView}
+                                    />
+                                </Suspense>
                             </div>
                         </div>
 

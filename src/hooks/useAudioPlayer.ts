@@ -82,36 +82,72 @@ export function useAudioPlayer({
         historyRef.current = { next: nextTrackId, prev: prevTrackId };
     }, [nextTrackId, prevTrackId]);
 
+    // Store latest values to avoid re-attaching event listeners
+    const callbacksRef = useRef({ onEnded, onError, onPlay, onPause, onStop });
+    const activeIndexRef = useRef(activeIndex);
+
+    useEffect(() => {
+        callbacksRef.current = { onEnded, onError, onPlay, onPause, onStop };
+        activeIndexRef.current = activeIndex;
+    });
+
     const activeAudio = audioElements.current[activeIndex];
     const exposedRef = useRef<HTMLAudioElement | null>(activeAudio);
     exposedRef.current = activeAudio;
 
+    // Attach listeners ONCE
     useEffect(() => {
         const audios = audioElements.current!;
 
         const handlers = audios.map((audio, index) => {
-            const isForActive = index === activeIndex;
-
             const events = {
-                durationchange: () => isForActive && setDuration(audio.duration || 0),
-                play: () => isForActive && (setIsPlaying(true), setIsBuffering(false), onPlay?.()),
-                pause: () => isForActive && (setIsPlaying(false), onPause?.()),
-                waiting: () => isForActive && setIsBuffering(true),
-                playing: () => isForActive && setIsBuffering(false),
-                ended: () => isForActive && (setIsPlaying(false), onEnded?.(), onStop?.(audio.duration || 0)),
-                error: (e: Event) => isForActive && (Logger.error('[Audio] Player Error:', e), onError?.()),
+                durationchange: () => {
+                    if (index === activeIndexRef.current) setDuration(audio.duration || 0);
+                },
+                play: () => {
+                    if (index === activeIndexRef.current) {
+                        setIsPlaying(true);
+                        setIsBuffering(false);
+                        callbacksRef.current.onPlay?.();
+                    }
+                },
+                pause: () => {
+                    if (index === activeIndexRef.current) {
+                        setIsPlaying(false);
+                        callbacksRef.current.onPause?.();
+                    }
+                },
+                waiting: () => {
+                    if (index === activeIndexRef.current) setIsBuffering(true);
+                },
+                playing: () => {
+                    if (index === activeIndexRef.current) setIsBuffering(false);
+                },
+                ended: () => {
+                    if (index === activeIndexRef.current) {
+                        setIsPlaying(false);
+                        callbacksRef.current.onEnded?.();
+                        callbacksRef.current.onStop?.(audio.duration || 0);
+                    }
+                },
+                error: (e: Event) => {
+                    if (index === activeIndexRef.current) {
+                        Logger.error('[Audio] Player Error:', e);
+                        callbacksRef.current.onError?.();
+                    }
+                },
             };
 
-            Object.entries(events).forEach(([name, fn]) => audio.addEventListener(name, fn));
+            Object.entries(events).forEach(([name, fn]) => audio.addEventListener(name, fn as EventListener));
             return events;
         });
 
         return () => {
             audios.forEach((audio, index) => {
-                Object.entries(handlers[index]).forEach(([name, fn]) => audio.removeEventListener(name, fn));
+                Object.entries(handlers[index]).forEach(([name, fn]) => audio.removeEventListener(name, fn as EventListener));
             });
         };
-    }, [activeIndex, onEnded, onError, onPlay, onPause]);
+    }, []); // Empty dependency array: run once on mount
 
     const nextIndex = ((activeIndex + 1) % 3) as 0 | 1 | 2;
     const prevIndex = ((activeIndex + 2) % 3) as 0 | 1 | 2;

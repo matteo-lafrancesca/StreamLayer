@@ -33,16 +33,15 @@ export function useTrackProgress() {
 
     useEffect(() => {
         if (isPlaying) {
-            const loop = () => {
-                updateProgress();
-                rafRef.current = requestAnimationFrame(loop);
-            };
+            // Update immediately when playing starts
+            updateProgress();
 
-            rafRef.current = requestAnimationFrame(loop);
+            // Throttle state updates to 4 times per second (250ms) to save CPU and reduce re-renders
+            rafRef.current = window.setInterval(updateProgress, 250);
 
             return () => {
                 if (rafRef.current) {
-                    cancelAnimationFrame(rafRef.current);
+                    clearInterval(rafRef.current);
                 }
             };
         } else {

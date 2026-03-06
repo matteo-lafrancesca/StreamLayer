@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { MediaBarMobile } from './MediaBarMobile';
 import { TrackViewMobile } from './TrackViewMobile';
-import { PlaylistView } from './PlaylistView';
-import { ProjectView } from './ProjectView';
-import { QueueView } from './QueueView';
 import { NavStack } from './NavStack';
 import { ExpandedPlayerHeaderMobile } from './ExpandedPlayerHeaderMobile';
 import { BottomSheet } from './BottomSheet';
+
+const PlaylistView = React.lazy(() => import('./PlaylistView').then(m => ({ default: m.PlaylistView })));
+const ProjectView = React.lazy(() => import('./ProjectView').then(m => ({ default: m.ProjectView })));
+const QueueView = React.lazy(() => import('./QueueView').then(m => ({ default: m.QueueView })));
 import { ProgressSlider } from './ProgressSlider';
 import { usePlayerUI } from '@context/PlayerUIContext';
 import { usePlayerExpansion } from '@hooks/usePlayerExpansion';
@@ -81,7 +82,9 @@ export function PlayerMobile() {
                         setCurrentView={setCurrentView}
                     />
                     <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? 'calc(env(safe-area-inset-bottom, 0px) + 112px)' : 0 }}>
-                        {currentView === 'queue' ? <QueueView /> : <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />}
+                        <Suspense fallback={<div className={sharedStyles.loadingPlaceholder} />}>
+                            {currentView === 'queue' ? <QueueView /> : <ProjectView onPlaylistSelect={() => setCurrentView('playlist')} />}
+                        </Suspense>
                     </div>
                 </NavStack>
 
@@ -96,7 +99,9 @@ export function PlayerMobile() {
                         setCurrentView={setCurrentView}
                     />
                     <div className={`${sharedStyles.expandableContentScroll} ${styles.expandableContentScrollMobile}`} data-scrollable style={{ flex: 1, paddingBottom: showMiniPlayerOverSheet ? 'calc(env(safe-area-inset-bottom, 0px) + 112px)' : 0 }}>
-                        <PlaylistView />
+                        <Suspense fallback={<div className={sharedStyles.loadingPlaceholder} />}>
+                            <PlaylistView />
+                        </Suspense>
                     </div>
                 </NavStack>
 
