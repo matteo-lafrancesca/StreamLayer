@@ -14,6 +14,9 @@ interface UseAudioPlayerProps {
     onPlay?: () => void;
     onPause?: () => void;
     onStop?: (time: number) => void;
+    onSeeking?: () => void;
+    onSeeked?: () => void;
+    onFormatChange?: (format: 'low' | 'high') => void;
 }
 
 interface UseAudioPlayerReturn {
@@ -40,6 +43,9 @@ export function useAudioPlayer({
     onPlay,
     onPause,
     onStop,
+    onSeeking,
+    onSeeked,
+    onFormatChange,
 }: UseAudioPlayerProps): UseAudioPlayerReturn {
     const audioElements = useRef<[HTMLAudioElement, HTMLAudioElement, HTMLAudioElement] | null>(null);
     if (!audioElements.current) {
@@ -83,11 +89,11 @@ export function useAudioPlayer({
     }, [nextTrackId, prevTrackId]);
 
     // Store latest values to avoid re-attaching event listeners
-    const callbacksRef = useRef({ onEnded, onError, onPlay, onPause, onStop });
+    const callbacksRef = useRef({ onEnded, onError, onPlay, onPause, onStop, onSeeking, onSeeked });
     const activeIndexRef = useRef(activeIndex);
 
     useEffect(() => {
-        callbacksRef.current = { onEnded, onError, onPlay, onPause, onStop };
+        callbacksRef.current = { onEnded, onError, onPlay, onPause, onStop, onSeeking, onSeeked };
         activeIndexRef.current = activeIndex;
     });
 
@@ -129,6 +135,12 @@ export function useAudioPlayer({
                         callbacksRef.current.onEnded?.();
                         callbacksRef.current.onStop?.(audio.duration || 0);
                     }
+                },
+                seeking: () => {
+                    if (index === activeIndexRef.current) callbacksRef.current.onSeeking?.();
+                },
+                seeked: () => {
+                    if (index === activeIndexRef.current) callbacksRef.current.onSeeked?.();
                 },
                 error: (e: Event) => {
                     if (index === activeIndexRef.current) {
@@ -172,6 +184,9 @@ export function useAudioPlayer({
                 }
             }
         },
+        onFormatChange: (format) => {
+            if (activeIndex === 0) onFormatChange?.(format);
+        },
         priority: activeIndex === 0
     });
 
@@ -188,6 +203,9 @@ export function useAudioPlayer({
                 }
             }
         },
+        onFormatChange: (format) => {
+            if (activeIndex === 1) onFormatChange?.(format);
+        },
         priority: activeIndex === 1
     });
 
@@ -203,6 +221,9 @@ export function useAudioPlayer({
                     audioElements.current![2].play().catch(() => { });
                 }
             }
+        },
+        onFormatChange: (format) => {
+            if (activeIndex === 2) onFormatChange?.(format);
         },
         priority: activeIndex === 2
     });

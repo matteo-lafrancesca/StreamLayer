@@ -11,6 +11,7 @@ interface UseHlsLoaderProps {
     audioElement: HTMLAudioElement | null;
     onError: () => void;
     onStreamReady: () => void;
+    onFormatChange?: (format: 'low' | 'high') => void;
     priority?: boolean;
 }
 
@@ -28,6 +29,7 @@ export function useHlsLoader({
     audioElement,
     onError,
     onStreamReady,
+    onFormatChange,
     priority = false,
 }: UseHlsLoaderProps) {
     const hlsRef = useRef<Hls | null>(null);
@@ -39,6 +41,9 @@ export function useHlsLoader({
 
     const onStreamReadyRef = useRef(onStreamReady);
     useEffect(() => { onStreamReadyRef.current = onStreamReady; }, [onStreamReady]);
+
+    const onFormatChangeRef = useRef(onFormatChange);
+    useEffect(() => { onFormatChangeRef.current = onFormatChange; }, [onFormatChange]);
 
     const accessTokenRef = useRef(accessToken);
     useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
@@ -99,6 +104,15 @@ export function useHlsLoader({
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     retryCountRef.current = 0;
                     onStreamReadyRef.current();
+                });
+
+                hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+                    const level = hls.levels[data.level];
+                    if (level && level.bitrate) {
+                        const format = level.bitrate > 128000 ? 'high' : 'low';
+                        Logger.info(`[HLS] Level switched: ${level.bitrate} bps -> Format: ${format}`);
+                        onFormatChangeRef.current?.(format);
+                    }
                 });
 
                 hls.on(Hls.Events.ERROR, (_event, data) => {

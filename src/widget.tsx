@@ -17,7 +17,6 @@ export interface StreamLayerConfig {
     userApi: string;
     passwordApi: string;
     debug?: boolean;
-    apiUrl?: string;
     theme?: string | ThemeConfig;
     onReady?: () => void;
     onError?: (error: Error) => void;
@@ -41,8 +40,7 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
         apiKeyId,
         userApi,
         passwordApi,
-        debug,
-        apiUrl: _apiUrl,
+        debug = false,
         theme,
         onReady,
         onError
@@ -95,12 +93,20 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
 /**
  * Destroy a StreamLayer widget instance
  * @param containerId ID of the container to cleanup
+ * @param removeContainer Whether to remove the DOM container element as well
  */
-export function destroyStreamLayer(containerId: string = 'stream-layer-widget'): void {
+export function destroyStreamLayer(containerId: string = 'stream-layer-widget', removeContainer: boolean = false): void {
     const instance = instances.get(containerId);
     if (instance) {
         instance.unmount();
         instances.delete(containerId);
+
+        if (removeContainer) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.remove();
+            }
+        }
     }
 }
 
@@ -110,13 +116,12 @@ export default {
     StreamLayer
 };
 
-
 if (typeof document !== 'undefined') {
     try {
         const currentScript = document.currentScript as HTMLScriptElement;
         let scriptWithConfig: HTMLScriptElement | null = currentScript;
 
-        if (!scriptWithConfig) {
+        if (!scriptWithConfig || !scriptWithConfig.dataset.projectId) {
             const found = document.querySelector('script[data-project-id]') as HTMLScriptElement;
             if (found && (found.src.includes('stream-layer') || found.id === 'stream-layer-script')) {
                 scriptWithConfig = found;
@@ -125,52 +130,59 @@ if (typeof document !== 'undefined') {
 
         if (scriptWithConfig && scriptWithConfig.dataset.projectId) {
             console.log('[StreamLayer] Auto-initializing from script tag...');
-            const projectId = scriptWithConfig.dataset.projectId;
 
-            const containerId = scriptWithConfig.dataset.containerId || 'stream-layer-widget';
-            const apiBaseUrl = scriptWithConfig.dataset.apiBaseUrl || '';
-            const apiKeyId = scriptWithConfig.dataset.apiKeyId || '';
-            const userApi = scriptWithConfig.dataset.userApi || '';
-            const passwordApi = scriptWithConfig.dataset.passwordApi || '';
-            const debug = scriptWithConfig.dataset.debug === 'true';
+            const dataset = scriptWithConfig.dataset;
+            const projectId = dataset.projectId;
+            const containerId = dataset.containerId || 'stream-layer-widget';
 
-            console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);
+            // Extract attributes, safely allowing fallback aliases
+            const apiBaseUrl = dataset.apiBaseUrl || dataset.apiUrl;
+            const apiKeyId = dataset.apiKeyId;
+            const userApi = dataset.userApi;
+            const passwordApi = dataset.passwordApi;
+            const debug = dataset.debug === 'true';
 
-            const autoInit = () => {
-                let container = document.getElementById(containerId);
-
-                if (!container) {
-                    console.log(`[StreamLayer] Container #${containerId} not found, creating it automatically.`);
-                    container = document.createElement('div');
-                    container.id = containerId;
-
-                    if (scriptWithConfig && scriptWithConfig.parentNode) {
-                        scriptWithConfig.parentNode.insertBefore(container, scriptWithConfig.nextSibling);
-                    } else {
-                        document.body.appendChild(container);
-                    }
-                }
-
-                initStreamLayer({
-                    projectId,
-                    containerId,
-                    apiBaseUrl,
-                    apiKeyId,
-                    userApi,
-                    passwordApi,
-                    debug,
-                    onReady: () => console.log(`[StreamLayer] Widget auto-initialized (Project: ${projectId})`)
-                });
-            };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', autoInit);
+            if (!apiBaseUrl || !apiKeyId || !userApi || !passwordApi) {
+                console.error('[StreamLayer] Missing required API configuration in script tag.',
+                    'Ensure data-api-base-url, data-api-key-id, data-user-api, and data-password-api are provided.');
             } else {
-                autoInit();
+                console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);
+
+                const autoInit = () => {
+                    let container = document.getElementById(containerId);
+
+                    if (!container) {
+                        console.log(`[StreamLayer] Container #${containerId} not found, creating it automatically.`);
+                        container = document.createElement('div');
+                        container.id = containerId;
+
+                        if (scriptWithConfig && scriptWithConfig.parentNode) {
+                            scriptWithConfig.parentNode.insertBefore(container, scriptWithConfig.nextSibling);
+                        } else {
+                            document.body.appendChild(container);
+                        }
+                    }
+
+                    initStreamLayer({
+                        projectId,
+                        containerId,
+                        apiBaseUrl,
+                        apiKeyId,
+                        userApi,
+                        passwordApi,
+                        debug,
+                        onReady: () => console.log(`[StreamLayer] Widget auto-initialized (Project: ${projectId})`)
+                    });
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', autoInit);
+                } else {
+                    autoInit();
+                }
             }
         }
     } catch (e) {
         console.error('[StreamLayer] Auto-initialization error:', e);
     }
 }
-

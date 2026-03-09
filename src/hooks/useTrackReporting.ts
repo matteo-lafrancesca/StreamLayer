@@ -9,6 +9,7 @@ interface UseTrackReportingProps {
     playingTrack: Track | null;
     playingFromPlaylist: Playlist | null;
     audioRef: React.RefObject<HTMLAudioElement | null>;
+    format?: 'low' | 'high';
 }
 
 /**
@@ -17,26 +18,34 @@ interface UseTrackReportingProps {
 export function useTrackReporting({
     playingTrack,
     playingFromPlaylist,
-    audioRef
+    audioRef,
+    format = 'low'
 }: UseTrackReportingProps) {
     const { trackEvent } = useReporting();
     const lastTrackRef = useRef<Track | null>(null);
     const lastEventRef = useRef<{ id: string; status: ReportingStatus } | null>(null);
     const hasStartedRef = useRef<Record<string, boolean>>({});
 
+    // For authentic listening duration tracking
+    const startPositionRef = useRef<number | null>(null);
+    const accumulatedTimeRef = useRef<number>(0);
+
     useEffect(() => {
+        if (playingTrack?.id !== lastTrackRef.current?.id) {
+            // Track changed, reset accumulator
+            accumulatedTimeRef.current = 0;
+            startPositionRef.current = null;
+        }
         lastTrackRef.current = playingTrack;
     }, [playingTrack]);
 
     const handleReport = useCallback((track: Track, status: ReportingStatus, time: number) => {
-        // Dedup logic
         if (status === 'stopped' && lastEventRef.current?.id === String(track.id) && lastEventRef.current?.status === 'stopped') {
             return;
         }
 
         lastEventRef.current = { id: String(track.id), status };
 
-        // Determine device type
         let deviceType: 'web' | 'mobile' = 'web';
         try {
             const platform = Capacitor.getPlatform();
@@ -60,10 +69,10 @@ export function useTrackReporting({
             time: Math.floor(time),
             current_position: Math.floor(audioRef.current?.currentTime || 0),
             play_mode: isOnline ? 'online' : 'offline',
-            format: 'low',
+            format,
             territory_code: 'FR'
         });
-    }, [trackEvent, playingFromPlaylist, audioRef]);
+    }, [trackEvent, playingFromPlaylist, audioRef, format]);
 
     const handlePlay = useCallback(() => {
         if (!playingTrack) return;
@@ -77,32 +86,77 @@ export function useTrackReporting({
             status = 'resume';
         }
 
-        const time = status === 'started' ? 0 : currentTime;
+        // Always update start position reference
+        startPositionRef.current = currentTime;
+        const timeToReport = status === 'started' ? 0 : accumulatedTimeRef.current;
 
-        handleReport(playingTrack, status, time);
-    }, [playingTrack, handleReport, audioRef]);
+        handleReport(playingTrack, status, timeToReport);
+    }, [playingTrack, handleReport]);
 
     const handlePause = useCallback(() => {
         if (!playingTrack) return;
-        const currentTime = audioRef.current?.currentTime || 0;
-        handleReport(playingTrack, 'paused', currentTime);
-    }, [playingTrack, handleReport, audioRef]);
 
-    const handleStop = useCallback((time: number) => {
-        // Determine which track stopped
+        // Don't report pause if we just reported a stop for the same track
+        if (lastEventRef.current?.id === String(playingTrack.id) && lastEventRef.current?.status === 'stopped') {
+            return;
+        }
+
+        const currentTime = audioRef.current?.currentTime || 0;
+
+        let sessionDuration = 0;
+        if (startPositionRef.current !== null) {
+            sessionDuration = currentTime - startPositionRef.current;
+            startPositionRef.current = null;
+        }
+        // Mitigate negative duration if seeking backwards
+        accumulatedTimeRef.current += Math.max(0, sessionDuration);
+
+        handleReport(playingTrack, 'paused', accumulatedTimeRef.current);
+    }, [playingTrack, handleReport]);
+
+    const handleStop = useCallback(() => {
 
         const trackToReport = (playingTrack?.id !== lastTrackRef.current?.id)
             ? lastTrackRef.current
             : playingTrack;
 
         if (trackToReport) {
-            handleReport(trackToReport, 'stopped', time);
+            let sessionDuration = 0;
+            if (startPositionRef.current !== null) {
+                const currentTime = audioRef.current?.currentTime || 0;
+                sessionDuration = currentTime - startPositionRef.current;
+                startPositionRef.current = null;
+            }
+            accumulatedTimeRef.current += Math.max(0, sessionDuration);
+
+            handleReport(trackToReport, 'stopped', accumulatedTimeRef.current);
+            accumulatedTimeRef.current = 0;
         }
     }, [playingTrack, handleReport]);
+
+    const handleSeeking = useCallback(() => {
+        if (!playingTrack) return;
+
+        let sessionDuration = 0;
+        if (startPositionRef.current !== null) {
+            const currentTime = audioRef.current?.currentTime || 0;
+            sessionDuration = currentTime - startPositionRef.current;
+            startPositionRef.current = null;
+        }
+        accumulatedTimeRef.current += Math.max(0, sessionDuration);
+    }, [playingTrack, audioRef]);
+
+    const handleSeeked = useCallback(() => {
+        if (!playingTrack) return;
+        const currentTime = audioRef.current?.currentTime || 0;
+        startPositionRef.current = currentTime;
+    }, [playingTrack, audioRef]);
 
     return {
         handlePlay,
         handlePause,
-        handleStop
+        handleStop,
+        handleSeeking,
+        handleSeeked
     };
 }

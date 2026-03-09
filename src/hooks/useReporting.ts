@@ -5,10 +5,8 @@ import { Logger } from '@utils/logger';
 import { persistentCache } from '@cache/PersistentCache';
 import { ConfigManager } from '../config/ConfigManager';
 
-const FLUSH_INTERVAL = 30000; // 30 seconds
+const FLUSH_INTERVAL = 30000;
 const MAX_BATCH_SIZE = 50;
-const MAX_FAILED_BATCH_SIZE = 200;
-
 const OFFLINE_QUEUE_KEY = () => `reporting-queue-${ConfigManager.getConfig().apiBaseUrl}`;
 
 export function useReporting() {
@@ -44,7 +42,7 @@ export function useReporting() {
         } catch (error) {
             Logger.error('[Reporting] Flush failed, re-queuing items', error);
             const combined = [...items, ...queueRef.current];
-            queueRef.current = combined.slice(0, MAX_FAILED_BATCH_SIZE);
+            queueRef.current = combined;
             if (ConfigManager.isInitialized()) {
                 persistentCache.set('data', OFFLINE_QUEUE_KEY(), queueRef.current);
             }

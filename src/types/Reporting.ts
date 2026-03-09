@@ -5,11 +5,11 @@ export interface StatItem {
     container_type: 'list' | 'album' | 'search' | 'library';
     id_container: number;
     full: boolean;
-    creation_datetime: number; // UNIX timestamp in SECONDS
+    creation_datetime: number;
     device_type?: 'web' | 'mobile';
     online?: boolean;
     status: ReportingStatus;
-    time: number; // Duration listened / Position
+    time: number;
     format?: 'low' | 'high';
     current_position: number;
     play_mode?: 'online' | 'offline';

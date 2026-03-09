@@ -1,8 +1,8 @@
 import { type ReactNode, useMemo } from 'react';
-import { PlayerProvider } from '@context/PlayerContext';
+import { PlayerProvider } from '@context/PlayerProvider';
 import { ConfigManager } from '../config/ConfigManager';
-import { AuthProvider } from '@context/AuthContext';
-import { PlayerUIProvider } from '@context/PlayerUIContext';
+import { AuthProvider } from '@context/AuthProvider';
+import { PlayerUIProvider } from '@context/PlayerUIProvider';
 import { Player } from '@components/Player/Player';
 import { useBackButton } from '@hooks/useBackButton';
 import type { ThemeConfig } from '../types/Theme';
