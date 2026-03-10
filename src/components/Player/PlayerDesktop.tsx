@@ -164,7 +164,6 @@ function PlayerDesktopContent({
 
                         <div className={`
                             ${sharedStyles.mediaBarSection} 
-                            ${isExpanded ? styles.borderTop : ''}
                             ${currentView === 'queue' ? sharedStyles.mediaBarQueueMode : ''}
                         `}>
                             <MediaBarDesktop

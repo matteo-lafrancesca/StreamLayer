@@ -1,4 +1,12 @@
-# React + TypeScript + Vite
+# StreamLayer Widget
+
+This project contains the StreamLayer React widget.
+
+## Theming Documentation
+
+For details on how to use the modern, dynamic primary/secondary color theming system, please refer to the [THEMING.md](./THEMING.md) guide.
+
+---
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

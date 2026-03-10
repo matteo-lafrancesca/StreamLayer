@@ -24,7 +24,7 @@
 
 .progressBarTrack {
     height: 4px;
-    background: var(--color-gray-300);
+    background: var(--color-gray-200);
     border-radius: var(--radius-sm);
     position: relative;
     overflow: visible;

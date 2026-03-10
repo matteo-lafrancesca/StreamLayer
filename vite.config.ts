@@ -45,12 +45,7 @@ export default defineConfig({
     },
     assetsInlineLimit: 100000000, // Force inline of all assets
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') return 'stream-layer.css';
           return assetInfo.name || 'asset';

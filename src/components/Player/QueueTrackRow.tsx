@@ -11,7 +11,6 @@ interface QueueTrackRowProps {
     track: Track;
     onClick: () => void;
     isPlaying?: boolean;
-    isPlaying?: boolean;
     isPlayingState?: boolean;
     id?: string;
     isOverlay?: boolean;

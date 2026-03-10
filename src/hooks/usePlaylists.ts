@@ -22,6 +22,7 @@ interface UsePlaylistsResult {
     isLoadingMore: boolean;
     totalCount: number | null;
     refreshPlaylists: () => void;
+    forceRefresh: () => void;
 }
 
 interface UsePlaylistsOptions {
@@ -70,34 +71,32 @@ export function usePlaylists(
             if (cached) {
                 Logger.info('[usePlaylists] Cache hit:', cached.length);
                 setCachedPlaylists(cached);
-
-                // Background Revalidation
-                const isStale = playlistsCache.isStale(stableCacheKey, 5 * 60 * 1000);
-
-                if (isStale) {
-                    playlistsCache.fetchWithDeduplication(stableCacheKey, () =>
-                        authenticatedCall(async (token) => {
-                            Logger.info('[usePlaylists] Revalidating in background...');
-                            const response = await getPlaylists({
-                                projectId,
-                                limit: 1000,
-                                offset: 0,
-                                accessToken: token,
-                            });
-                            if (response.items && response.items.length > 0) {
-                                Logger.info('[usePlaylists] Revalidation success, updating cache');
-                                if (isSubscribed) {
-                                    setCachedPlaylists(response.items);
-                                }
-                                return response.items;
-                            }
-                            return cached;
-                        })
-                    ).catch((err) => {
-                        Logger.error('[usePlaylists] Revalidation failed:', err);
-                    });
-                }
             }
+
+            // Always Revalidate in background if we have a stable key
+            // This implements the SWR pattern: show cache, then fetch fresh
+            playlistsCache.fetchWithDeduplication(stableCacheKey, () =>
+                authenticatedCall(async (token) => {
+                    Logger.info('[usePlaylists] Revalidating in background...');
+                    const response = await getPlaylists({
+                        projectId,
+                        limit: 1000,
+                        offset: 0,
+                        accessToken: token,
+                    });
+
+                    if (response.items && response.items.length > 0) {
+                        Logger.info('[usePlaylists] Revalidation success, updating cache');
+                        if (isSubscribed) {
+                            setCachedPlaylists(response.items);
+                        }
+                        return response.items;
+                    }
+                    return cached || [];
+                })
+            ).catch((err) => {
+                Logger.error('[usePlaylists] Revalidation failed:', err);
+            });
         };
 
         checkCache();
@@ -120,11 +119,11 @@ export function usePlaylists(
                 return {
                     items: response.items,
                     total: response.count_item || response.items.length,
-                    // Fallback to items.length if count_item is not provided
                 };
             });
         },
         batchSize: 50,
+        // Only use pagination if cache is empty AND background revalidation hasn't finished yet
         enabled: !!paginationKey && cacheChecked && !cachedPlaylists,
     });
 
@@ -144,6 +143,10 @@ export function usePlaylists(
     }, [stableCacheKey, paginationKey, pagination.items, pagination.totalCount, pagination.hasMore, pagination.dataKey]);
 
     const refreshPlaylists = useCallback(() => {
+        setRefreshKey((prev: number) => prev + 1);
+    }, []);
+
+    const forceRefresh = useCallback(() => {
         if (stableCacheKey) {
             playlistsCache.delete(stableCacheKey);
         }
@@ -153,9 +156,10 @@ export function usePlaylists(
 
     useEffect(() => {
         if (autoRefresh || autoRefreshOption) {
-            refreshPlaylists();
+            // Trigger a revalidation, not a force clear
+            setRefreshKey((prev: number) => prev + 1);
         }
-    }, [autoRefresh, autoRefreshOption, refreshPlaylists]);
+    }, [autoRefresh, autoRefreshOption]);
 
     useEffect(() => {
         if (refreshTrigger && !previousRefreshTrigger.current) {
@@ -164,23 +168,16 @@ export function usePlaylists(
         previousRefreshTrigger.current = refreshTrigger;
     }, [refreshTrigger, refreshPlaylists]);
 
-    if (cachedPlaylists) {
-        return {
-            playlists: cachedPlaylists,
-            loading: false,
-            error: null,
-            isLoadingMore: false,
-            totalCount: cachedPlaylists.length,
-            refreshPlaylists,
-        };
-    }
+    const playlists = cachedPlaylists || (pagination.items.length > 0 ? pagination.items : null);
+    const isLoading = pagination.loading && !cacheChecked && !cachedPlaylists;
 
     return {
-        playlists: pagination.items.length > 0 ? pagination.items : null,
-        loading: pagination.loading && !cacheChecked,
+        playlists,
+        loading: isLoading,
         error: pagination.error,
         isLoadingMore: pagination.loadingMore,
-        totalCount: pagination.totalCount,
+        totalCount: playlists?.length ?? pagination.totalCount,
         refreshPlaylists,
+        forceRefresh,
     };
 }

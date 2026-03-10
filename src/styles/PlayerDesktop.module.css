@@ -32,10 +32,6 @@
     border: none !important;
 }
 
-/* Border top when expanded - Desktop specific */
-.borderTop::before {
-    background: var(--color-gray-300);
-}
 
 .isDragging {
     box-shadow: var(--shadow-2xl);

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Track } from '@definitions/track';
+import { getTrackCoverUrl, getTrackArtistsNames } from '@utils/track';
 
 interface UseMediaSessionProps {
     playingTrack: Track | null;
@@ -30,13 +31,13 @@ export function useMediaSession({
     useEffect(() => {
         if (!playingTrack || !('mediaSession' in navigator)) return;
 
-        const artists = playingTrack.artists?.map(a => a.name).join(', ') || 'Unknown Artist';
-        const coverUrl = playingTrack.cover_url || playingTrack.album?.cover_url;
+        const artists = getTrackArtistsNames(playingTrack) || 'Unknown Artist';
+        const coverUrl = getTrackCoverUrl(playingTrack, 'l');
 
         navigator.mediaSession.metadata = new MediaMetadata({
             title: playingTrack.title,
             artist: artists,
-            album: playingTrack.album?.title || '',
+            album: '',
             artwork: coverUrl ? [
                 { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
                 { src: coverUrl, sizes: '128x128', type: 'image/jpeg' },

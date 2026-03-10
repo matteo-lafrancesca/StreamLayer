@@ -2,10 +2,10 @@ import { StreamLayer } from '@components/StreamLayer';
 
 export interface AppProps {
   projectId?: string;
-  theme?: string;
+  theme?: { primary: string; secondary: string };
 }
 
-function App({ projectId = '34', theme = 'dark' }: AppProps) {
+function App({ projectId = '34', theme = { primary: '#ffffffff', secondary: '#000000ff' } }: AppProps) {
   return (
     <StreamLayer
       projectId={projectId}

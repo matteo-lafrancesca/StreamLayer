@@ -9,7 +9,7 @@
 
 .sliderTrack {
     height: 4px;
-    background: var(--color-gray-300);
+    background: var(--color-gray-200);
     border-radius: var(--radius-sm);
     position: relative;
     overflow: visible;
@@ -60,7 +60,7 @@
 .thinTrack {
     height: 2px;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
-    background: var(--color-gray-300);
+    background: var(--color-gray-200);
 }
 
 .thin {

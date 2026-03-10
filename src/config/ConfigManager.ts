@@ -3,7 +3,6 @@ export interface StreamLayerConfig {
     apiKeyId: string;
     userApi: string;
     passwordApi: string;
-    debug?: boolean;
 }
 
 let config: StreamLayerConfig | null = null;

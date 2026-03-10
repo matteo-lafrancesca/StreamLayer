@@ -16,8 +16,7 @@ export interface StreamLayerConfig {
     apiKeyId: string;
     userApi: string;
     passwordApi: string;
-    debug?: boolean;
-    theme?: string | ThemeConfig;
+    theme?: ThemeConfig;
     onReady?: () => void;
     onError?: (error: Error) => void;
 }
@@ -40,7 +39,6 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
         apiKeyId,
         userApi,
         passwordApi,
-        debug = false,
         theme,
         onReady,
         onError
@@ -70,7 +68,6 @@ export function initStreamLayer(config: StreamLayerConfig): () => void {
                         apiKeyId={apiKeyId}
                         userApi={userApi}
                         passwordApi={passwordApi}
-                        debug={debug}
                     />
                 </ErrorBoundary>
             </React.StrictMode>
@@ -129,30 +126,30 @@ if (typeof document !== 'undefined') {
         }
 
         if (scriptWithConfig && scriptWithConfig.dataset.projectId) {
-            console.log('[StreamLayer] Auto-initializing from script tag...');
-
             const dataset = scriptWithConfig.dataset;
-            const projectId = dataset.projectId;
+            const projectId = dataset.projectId as string;
             const containerId = dataset.containerId || 'stream-layer-widget';
 
-            // Extract attributes, safely allowing fallback aliases
             const apiBaseUrl = dataset.apiBaseUrl || dataset.apiUrl;
             const apiKeyId = dataset.apiKeyId;
             const userApi = dataset.userApi;
             const passwordApi = dataset.passwordApi;
-            const debug = dataset.debug === 'true';
+            const themePrimary = dataset.themePrimary;
+            const themeSecondary = dataset.themeSecondary;
+
+            const theme = (themePrimary || themeSecondary) ? {
+                ...(themePrimary && { primary: themePrimary }),
+                ...(themeSecondary && { secondary: themeSecondary })
+            } : undefined;
 
             if (!apiBaseUrl || !apiKeyId || !userApi || !passwordApi) {
                 console.error('[StreamLayer] Missing required API configuration in script tag.',
                     'Ensure data-api-base-url, data-api-key-id, data-user-api, and data-password-api are provided.');
             } else {
-                console.log(`[StreamLayer] Configuration found: Project=${projectId}, Container=${containerId}`);
-
                 const autoInit = () => {
                     let container = document.getElementById(containerId);
 
                     if (!container) {
-                        console.log(`[StreamLayer] Container #${containerId} not found, creating it automatically.`);
                         container = document.createElement('div');
                         container.id = containerId;
 
@@ -170,8 +167,7 @@ if (typeof document !== 'undefined') {
                         apiKeyId,
                         userApi,
                         passwordApi,
-                        debug,
-                        onReady: () => console.log(`[StreamLayer] Widget auto-initialized (Project: ${projectId})`)
+                        theme
                     });
                 };
 

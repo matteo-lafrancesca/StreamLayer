@@ -12,7 +12,7 @@
 }
 
 .row:hover {
-    background: var(--color-gray-300);
+    background: var(--color-gray-50);
 }
 
 .index {
@@ -101,11 +101,11 @@
 
 /* Currently playing track */
 .rowPlaying {
-    background: var(--color-gray-200);
+    background: var(--color-gray-100);
 }
 
 .rowPlaying:hover {
-    background: var(--color-gray-300);
+    background: var(--color-gray-200);
 }
 
 .rowPlaying .title {

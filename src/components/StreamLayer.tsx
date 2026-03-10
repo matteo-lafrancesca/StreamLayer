@@ -7,15 +7,14 @@ import { Player } from '@components/Player/Player';
 import { useBackButton } from '@hooks/useBackButton';
 import type { ThemeConfig } from '../types/Theme';
 import { generateThemeVariables } from '../utils/theme';
-import { themes, defaultTheme } from '../config/themes';
 
 export interface StreamLayerProps {
     /** StreamLayer project ID */
     projectId: string;
     /** App content with access to audio context */
     children?: ReactNode;
-    /** Optional theme configuration or theme name to override default styles */
-    theme?: string | ThemeConfig;
+    /** Optional theme configuration to override default styles */
+    theme?: ThemeConfig;
     /** API Base URL */
     apiBaseUrl: string;
     /** API Key ID */
@@ -24,8 +23,6 @@ export interface StreamLayerProps {
     userApi: string;
     /** API Password */
     passwordApi: string;
-    /** Enable console logs */
-    debug?: boolean;
 }
 
 /**
@@ -40,8 +37,7 @@ export function StreamLayer({
     apiBaseUrl,
     apiKeyId,
     userApi,
-    passwordApi,
-    debug = false
+    passwordApi
 }: StreamLayerProps) {
     useMemo(() => {
         if (!ConfigManager.isInitialized() || ConfigManager.getConfig().apiBaseUrl !== apiBaseUrl) {
@@ -49,22 +45,13 @@ export function StreamLayer({
                 apiBaseUrl,
                 apiKeyId,
                 userApi,
-                passwordApi,
-                debug
+                passwordApi
             });
         }
-    }, [apiBaseUrl, apiKeyId, userApi, passwordApi, debug]);
+    }, [apiBaseUrl, apiKeyId, userApi, passwordApi]);
 
     const themeStyles = useMemo(() => {
-        let themeConfig: ThemeConfig | undefined;
-
-        if (typeof theme === 'string') {
-            themeConfig = themes[theme] || defaultTheme;
-        } else {
-            themeConfig = theme;
-        }
-
-        return generateThemeVariables(themeConfig);
+        return generateThemeVariables(theme);
     }, [theme]);
 
     return (
