@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useSlider } from '@hooks/useSlider';
-import styles from '@styles/Slider.module.css';
+import { useSlider } from '@hooks/UI/useSlider';
+import styles from './Slider.module.css';
 
 export interface SliderProps {
     value: number;
@@ -13,8 +13,8 @@ export interface SliderProps {
 }
 
 /**
- * Draggable and clickable Slider component.
- * Implements optimistic UI to avoid lag during drag.
+ * Composant Slider interactif (glissière).
+ * Implémente une UI optimiste pour éviter les latences pendant le drag.
  */
 export function Slider({ value, onChange, variant = 'default', showThumb = true, className = '', onDragStart, onDragEnd }: SliderProps) {
     const [localValue, setLocalValue] = useState(value);
@@ -30,21 +30,27 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
         setLocalValue(value);
     }
 
-    const fillClasses = [styles.sliderFill, variant === 'spotify' ? styles.spotify : '', variant === 'thin' ? styles.thin : '']
-        .filter(Boolean)
-        .join(' ');
+    const fillClasses = `
+        ${styles.sliderFill} 
+        ${variant === 'spotify' ? styles.spotify : ''} 
+        ${variant === 'thin' ? styles.thin : ''}
+    `.trim().replace(/\s+/g, ' ');
 
-    const thumbClasses = [styles.sliderThumb, variant === 'spotify' ? styles.spotify : '']
-        .filter(Boolean)
-        .join(' ');
+    const thumbClasses = `
+        ${styles.sliderThumb} 
+        ${variant === 'spotify' ? styles.spotify : ''}
+    `.trim().replace(/\s+/g, ' ');
 
-    const containerClasses = [styles.sliderContainer, variant === 'thin' ? styles.thinContainer : '', className]
-        .filter(Boolean)
-        .join(' ');
+    const containerClasses = `
+        ${styles.sliderContainer} 
+        ${variant === 'thin' ? styles.thinContainer : ''} 
+        ${className}
+    `.trim().replace(/\s+/g, ' ');
 
-    const trackClasses = [styles.sliderTrack, variant === 'thin' ? styles.thinTrack : '']
-        .filter(Boolean)
-        .join(' ');
+    const trackClasses = `
+        ${styles.sliderTrack} 
+        ${variant === 'thin' ? styles.thinTrack : ''}
+    `.trim().replace(/\s+/g, ' ');
 
     return (
         <div

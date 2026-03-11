@@ -29,7 +29,7 @@ export const PlayerUIContext = createContext<PlayerUIContextType | undefined>(un
 export function usePlayerUI() {
     const context = useContext(PlayerUIContext);
     if (context === undefined) {
-        throw new Error('usePlayerUI must be used within a PlayerUIProvider');
+        throw new Error('usePlayerUI doit être utilisé à l\'intérieur d\'un PlayerUIProvider');
     }
     return context;
 }

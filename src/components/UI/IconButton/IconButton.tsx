@@ -10,11 +10,10 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 /**
- * Icon button component with hit area enlargement option.
- * @param size - Button size ('md' or 'lg').
- * @param icon - Icon to display.
- * @param enlargeHitbox - If true, enlarges clickable area without visual shift.
- * @param className - Additional CSS classes.
+ * Composant bouton d'icône.
+ * @param size - Taille du bouton ('md' ou 'lg').
+ * @param icon - Icône à afficher.
+ * @param enlargeHitbox - Si vrai, agrandit la zone cliquable sans changer l'aspect visuel.
  */
 export function IconButton({
     size = 'md',
@@ -23,14 +22,12 @@ export function IconButton({
     className = '',
     ...props
 }: IconButtonProps) {
-    const classes = [
-        'sl-icon-btn',
-        size === 'lg' ? 'sl-icon-btn-lg' : '',
-        enlargeHitbox ? 'sl-icon-btn-hitbox' : '',
-        className,
-    ]
-        .filter(Boolean)
-        .join(' ');
+    const classes = `
+        sl-icon-btn 
+        ${size === 'lg' ? 'sl-icon-btn-lg' : ''} 
+        ${enlargeHitbox ? 'sl-icon-btn-hitbox' : ''} 
+        ${className}
+    `.trim().replace(/\s+/g, ' ');
 
     return (
         <button className={classes} {...props}>

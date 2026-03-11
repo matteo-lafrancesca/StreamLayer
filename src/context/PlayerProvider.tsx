@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import type { Track } from '@definitions/track';
 import type { Playlist } from '@definitions/playlist';
-import { usePlaybackControls } from '@hooks/usePlaybackControls';
-import { useAudioPlayer } from '@hooks/useAudioPlayer';
-import { useQueueManager } from '@hooks/useQueueManager';
-import { usePlaylistTracksLazy } from '@hooks/usePlaylistTracksLazy';
-import { useTrackPreloader } from '@hooks/useTrackPreloader';
-import { useTrackReporting } from '@hooks/useTrackReporting';
-import { useMediaSession } from '@hooks/useMediaSession';
+import { usePlaybackControls } from '@hooks/Player/usePlaybackControls';
+import { useAudioPlayer } from '@hooks/Audio/useAudioPlayer';
+import { useQueueManager } from '@hooks/Player/useQueueManager';
+import { usePlaylistTracksLazy } from '@hooks/Data/usePlaylistTracksLazy';
+import { useTrackPreloader } from '@hooks/Player/useTrackPreloader';
+import { useTrackReporting } from '@hooks/Reporting/useTrackReporting';
+import { useMediaSession } from '@hooks/Audio/useMediaSession';
 import { useAuth } from './AuthContext';
 import { usePlayerUI } from './PlayerUIContext';
-import { Logger } from '@utils/logger';
+import { Logger } from '@utils/system';
 import { PlayerStateContext, PlayerActionsContext } from './PlayerContext';
 
 interface PlayerProviderProps {
@@ -58,7 +58,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onEnded: () => {
             if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
                 audioPlayer.audioRef.current.currentTime = 0;
-                audioPlayer.audioRef.current.play().catch((err) => Logger.error('[Player] Repeat play failed', err));
+                audioPlayer.audioRef.current.play().catch((err) => Logger.error('[Player] Erreur répétition', err));
                 if (!isPlaying) setIsPlaying(true);
             } else if (queueManager.canPlayNext) {
                 queueManager.playNext();
@@ -67,7 +67,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             }
         },
         onError: () => {
-            Logger.warn('[PlayerContext] Track loading failed, skipping to next');
+            Logger.warn('[PlayerContext] Échec chargement piste, passage à la suivante');
             setIsPlaying(false);
 
             if (queueManager.canPlayNext) {

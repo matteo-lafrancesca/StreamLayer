@@ -56,30 +56,6 @@
       ],
       "@definitions/*": [
         "./src/types/*"
-      ],
-      "player": [
-        "./src/types/player"
-      ],
-      "track": [
-        "./src/types/track"
-      ],
-      "album": [
-        "./src/types/album"
-      ],
-      "playlist": [
-        "./src/types/playlist"
-      ],
-      "artist": [
-        "./src/types/artist"
-      ],
-      "genre": [
-        "./src/types/genre"
-      ],
-      "label": [
-        "./src/types/label"
-      ],
-      "rights": [
-        "./src/types/rights"
       ]
     }
   },

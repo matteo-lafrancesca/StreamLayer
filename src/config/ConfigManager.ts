@@ -7,17 +7,18 @@ export interface StreamLayerConfig {
 
 let config: StreamLayerConfig | null = null;
 
+// Gestionnaire de configuration
 export const ConfigManager = {
-    setConfig(newConfig: StreamLayerConfig) {
+    setConfig: (newConfig: StreamLayerConfig) => {
         config = newConfig;
     },
-    getConfig(): StreamLayerConfig {
+
+    getConfig: (): StreamLayerConfig => {
         if (!config) {
-            throw new Error('StreamLayer configuration has not been initialized. Please ensure StreamLayer component is mounted with the required props.');
+            throw new Error('StreamLayer non initialisé (ConfigManager)');
         }
         return config;
     },
-    isInitialized(): boolean {
-        return config !== null;
-    }
+
+    isInitialized: () => !!config
 };

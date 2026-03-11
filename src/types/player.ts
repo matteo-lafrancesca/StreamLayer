@@ -1,28 +1,31 @@
-/**
- * Type definitions for Player components
- */
+import { type CoverSize } from '@services/api/covers';
 
 /**
- * MediaBar props for Desktop (includes isExpanded).
+ * Configuration du thème dynamique.
  */
+export interface ThemeConfig {
+    /** Couleur d'ambiance (fond) */
+    primary?: string;
+    /** Couleur d'action (boutons, barres) */
+    secondary?: string;
+}
+
+/**
+ * Définitions de types pour les composants du Player.
+ */
+
+/** Propriétés de la barre média Bureau */
 export interface MediaBarDesktopProps {
     isExpanded: boolean;
     onExpandToggle: () => void;
 }
 
-/**
- * MediaBar props for Mobile.
- */
+/** Propriétés de la barre média Mobile */
 export interface MediaBarMobileProps {
     onExpandToggle: () => void;
 }
 
-/**
- * @deprecated Use MediaBarDesktopProps or MediaBarMobileProps instead
- * Generic MediaBar props (backwards compatibility).
- */
-export type MediaBarProps = MediaBarDesktopProps;
-
+/** Propriétés des contrôles de lecture */
 export interface PlaybackControlsProps {
     isPlaying: boolean;
     onPlayPause: () => void;
@@ -33,6 +36,7 @@ export interface PlaybackControlsProps {
     variant?: 'desktop' | 'mobile';
 }
 
+/** Propriétés de la barre de progression */
 export interface ProgressBarProps {
     progress: number;
     currentTime: string;
@@ -42,24 +46,18 @@ export interface ProgressBarProps {
     onSeekEnd?: () => void;
 }
 
+/** Propriétés du contrôle de volume */
 export interface VolumeControlProps {
     volume: number;
     onVolumeChange: (volume: number) => void;
 }
 
+/** Propriétés du texte défilant */
 export interface ScrollingTextProps {
     text: string;
     className?: string;
     speed?: number;
 }
 
-export interface PlaylistViewProps {
-}
-
-export interface ProjectViewProps {
-    onPlaylistSelect: () => void;
-}
-
-import { type CoverSize } from '@services/api/covers';
-
+/** Alias pour la taille des couvertures */
 export type ImageSize = CoverSize;

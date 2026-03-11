@@ -1,0 +1,96 @@
+/* Styles de l'affichage du titre */
+
+.mediaBarLeft {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    justify-content: flex-start;
+
+    width: 25%;
+    min-width: 0;
+    max-width: 25%;
+    flex-shrink: 1;
+}
+
+.trackInfoLarge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+.trackTitleLarge {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.trackArtist {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.coverSmall {
+    width: var(--player-cover-sm);
+    height: var(--player-cover-sm);
+    border-radius: var(--radius-md);
+}
+
+/* Tablette Compacte */
+@media (max-width: 992px) {
+    .trackInfoLarge {
+        flex: 1;
+    }
+}
+
+/* Styles Mobile */
+@media (max-width: 750px) {
+
+    /* Utilisation de l'espacement par défaut de desktop */
+    .mediaBarLeft {
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        width: auto;
+    }
+
+    /* Conserver la même taille de pochette que sur desktop */
+    .coverSmall {
+        flex-shrink: 0;
+    }
+
+    .trackInfoLarge {
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        gap: 2px;
+    }
+
+    .trackTitleLarge {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+    }
+
+    .trackArtist {
+        font-size: 13px;
+    }
+}
+
+/* Écrans Très Petits (Extra Small) */
+@media (max-width: 400px) {
+    .coverSmall {
+        width: 56px;
+        height: 56px;
+    }
+
+    .trackTitleLarge {
+        font-size: var(--font-size-sm);
+    }
+
+    .trackArtist {
+        font-size: 11px;
+    }
+}

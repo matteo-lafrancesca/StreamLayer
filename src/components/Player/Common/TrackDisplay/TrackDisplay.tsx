@@ -1,0 +1,33 @@
+import { usePlayerState } from '@context/PlayerContext';
+import { AlbumCoverOrPlaceholder } from '../AlbumCoverOrPlaceholder';
+import { ScrollingText } from '../ScrollingText';
+import styles from './TrackDisplay.module.css';
+
+/**
+ * Shared component for cover and track info (Desktop/Mobile).
+ */
+export function TrackDisplay() {
+    const { playingTrack } = usePlayerState();
+
+    return (
+        <div className={styles.mediaBarLeft}>
+            <AlbumCoverOrPlaceholder
+                track={playingTrack}
+                size="s"
+                className={styles.coverSmall}
+            />
+            <div className={styles.trackInfoLarge}>
+                <ScrollingText
+                    text={playingTrack?.title || ''}
+                    className={styles.trackTitleLarge}
+                    speed={20}
+                />
+                <ScrollingText
+                    text={playingTrack?.artists?.map(a => a.name).join(', ') || ''}
+                    className={styles.trackArtist}
+                    speed={16}
+                />
+            </div>
+        </div>
+    );
+}

@@ -1,6 +1,6 @@
 const DB_NAME = 'StreamLayerCache';
 const DB_VERSION = 1;
-import { Logger } from '../utils/logger';
+import { Logger } from '@utils/system';
 
 export type StoreName = 'images' | 'data';
 

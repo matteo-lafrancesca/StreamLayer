@@ -1,50 +1,30 @@
-/**
- * Generic hook for caching images (Blobs)
- * Replaces useDebouncedImage with cleaner implementation
- */
-
 import { useState, useEffect, useRef } from 'react';
-import { getCachedImage, setCachedImage } from '@cache/imageCache';
-import { persistentCache } from '@cache/PersistentCache';
+import { Logger } from '@utils/system';
+import { getCachedBlobUrl, setCachedBlobUrl } from '@cache/blobUrlCache';
+import { imageBlobCache } from '@cache/managers';
 
 export interface UseCachedImageOptions {
-    /** Unique cache key */
     key: string | null;
-    /** Function to fetch image URL */
     fetcher: () => Promise<string>;
-    /** Whether to enable fetching (default: true) */
     enabled?: boolean;
-    /** Debounce delay in ms (default: 200) */
     debounce?: number;
 }
 
-/**
- * Generic hook for caching images
- * Strategy: Memory (blob URL) → Disk (IndexedDB Blob) → Network
- * 
- * @example
- * const imageUrl = useCachedImage({
- *   key: `album-${albumId}-${size}`,
- *   fetcher: () => getAlbumCover(albumId, size, token),
- * });
- */
+// Hook pour la gestion du cache des images
+// Stratégie : Mémoire (Blob URL) → Disque (IndexedDB) → Réseau
 export function useCachedImage({
     key,
     fetcher,
     enabled = true,
     debounce = 200,
 }: UseCachedImageOptions): string | null {
-    // Initialize from memory cache for instant render
     const [blobUrl, setBlobUrl] = useState<string | null>(() => {
         if (!enabled || !key) return null;
-        return getCachedImage(key);
+        return getCachedBlobUrl(key);
     });
 
-    // Store fetcher in ref to avoid it triggering useEffect on every render
     const fetcherRef = useRef(fetcher);
-    useEffect(() => {
-        fetcherRef.current = fetcher;
-    }, [fetcher]);
+    useEffect(() => { fetcherRef.current = fetcher; }, [fetcher]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -54,52 +34,31 @@ export function useCachedImage({
             return;
         }
 
-        // 1. Check Memory Cache (synchronous)
-        const cached = getCachedImage(key);
+        const cached = getCachedBlobUrl(key);
         if (cached) {
             setBlobUrl(cached);
             return;
         }
 
-        // 2. Schedule Async Load (Disk → Network)
         const timeoutId = setTimeout(async () => {
             try {
-                // A. Check Disk Cache (IndexedDB)
-                const storedBlob = await persistentCache.get<Blob>('images', key);
-
-                if (!isSubscribed) return;
-
-                if (storedBlob) {
-                    // Found in disk, create blob URL
-                    const url = URL.createObjectURL(storedBlob);
-                    setCachedImage(key, url);
-                    setBlobUrl(url);
-                    return;
-                }
-
-                // B. Fetch from Network (use ref to get latest fetcher)
-                const url = await fetcherRef.current();
-
-                if (!isSubscribed) return;
-
-                // C. Persist to Disk
-                try {
+                // Récupération via CacheManager (gère le disque et la déduplication)
+                const blob = await imageBlobCache.fetchWithDeduplication(key, async () => {
+                    const url = await fetcherRef.current();
                     const response = await fetch(url);
-                    const blob = await response.blob();
-                    await persistentCache.set('images', key, blob);
-                } catch (err) {
-                    console.warn(`[useCachedImage] Failed to persist ${key}:`, err);
-                }
+                    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+                    return await response.blob();
+                });
 
                 if (!isSubscribed) return;
 
-                // D. Cache in Memory
-                setCachedImage(key, url);
-                setBlobUrl(url);
+                const finalUrl = URL.createObjectURL(blob);
+                setCachedBlobUrl(key, finalUrl);
+                setBlobUrl(finalUrl);
 
             } catch (error) {
                 if (!isSubscribed) return;
-                console.error(`[useCachedImage] Load failed for ${key}:`, error);
+                Logger.error(`[useCachedImage] Échec du chargement pour ${key} :`, error);
                 setBlobUrl(null);
             }
         }, debounce);
@@ -108,7 +67,7 @@ export function useCachedImage({
             isSubscribed = false;
             clearTimeout(timeoutId);
         };
-    }, [enabled, key, debounce]); // Removed 'fetcher' from dependencies
+    }, [enabled, key, debounce]);
 
     return blobUrl;
 }

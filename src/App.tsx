@@ -5,7 +5,7 @@ export interface AppProps {
   theme?: { primary: string; secondary: string };
 }
 
-function App({ projectId = '34', theme = { primary: '#ffffffff', secondary: '#000000ff' } }: AppProps) {
+function App({ projectId = '34', theme = { primary: '#0c0a09', secondary: '#2dd4bf' } }: AppProps) {
   return (
     <StreamLayer
       projectId={projectId}
@@ -15,7 +15,6 @@ function App({ projectId = '34', theme = { primary: '#ffffffff', secondary: '#00
       userApi={import.meta.env.VITE_USER_API}
       passwordApi={import.meta.env.VITE_PASSWORD_API}
     >
-      {/* Votre contenu d'application ici */}
     </StreamLayer>
   );
 }

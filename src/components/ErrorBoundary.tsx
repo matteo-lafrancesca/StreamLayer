@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react';
-import { Logger } from '@utils/logger';
+import { Logger } from '@utils/system';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -12,8 +12,8 @@ interface ErrorBoundaryState {
 }
 
 /**
- * ErrorBoundary intercepts React rendering errors in its child tree
- * and displays a fallback UI instead of crashing the whole host application.
+ * ErrorBoundary intercepte les erreurs de rendu React dans ses composants enfants
+ * et affiche une UI de repli au lieu de faire planter l'application hôte.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     constructor(props: ErrorBoundaryProps) {

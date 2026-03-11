@@ -12,7 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
- * Button component with multiple variants and sizes.
+ * Composant bouton générique avec variantes et tailles prédéfinies.
  */
 export function Button({
     variant = 'secondary',
@@ -22,15 +22,13 @@ export function Button({
     className = '',
     ...props
 }: ButtonProps) {
-    const classes = [
-        'sl-btn',
-        `sl-btn-${variant}`,
-        size !== 'md' ? `sl-btn-${size}` : '',
-        pill ? 'sl-btn-pill' : '',
-        className,
-    ]
-        .filter(Boolean)
-        .join(' ');
+    const classes = `
+        sl-btn 
+        sl-btn-${variant} 
+        ${size !== 'md' ? `sl-btn-${size}` : ''} 
+        ${pill ? 'sl-btn-pill' : ''} 
+        ${className}
+    `.trim().replace(/\s+/g, ' ');
 
     return (
         <button className={classes} {...props}>

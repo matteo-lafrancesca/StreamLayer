@@ -1,17 +1,9 @@
-/**
- * Unified Cache Manager
- * Provides a single interface for managing both memory and persistent (IndexedDB) caches.
- */
-
 import { persistentCache, type StoreName } from './PersistentCache';
 import { ConfigManager } from '../config/ConfigManager';
 
 export interface CacheOptions {
-    /** Time-to-live in milliseconds (default: 7 days) */
     ttl?: number;
-    /** Maximum items in memory cache (default: 100) */
     maxItems?: number;
-    /** Whether to persist to IndexedDB (default: true) */
     persist?: boolean;
 }
 
@@ -21,7 +13,7 @@ interface CacheEntry<T> {
 }
 
 /**
- * Generic Cache Manager with Memory (Map) + Disk (IndexedDB) layers
+ * Gestionnaire de cache à deux niveaux : Mémoire (Map) et Disque (IndexedDB).
  */
 export class CacheManager<T> {
     private memoryCache: Map<string, CacheEntry<T>> = new Map();
@@ -33,7 +25,7 @@ export class CacheManager<T> {
     constructor(storeName: StoreName, options: CacheOptions = {}) {
         this.storeName = storeName;
         this.options = {
-            ttl: options.ttl ?? 7 * 24 * 60 * 60 * 1000, // 7 days
+            ttl: options.ttl ?? 7 * 24 * 60 * 60 * 1000,
             maxItems: options.maxItems ?? 100,
             persist: options.persist ?? true,
         };
@@ -44,15 +36,13 @@ export class CacheManager<T> {
         return `${this.keyPrefix}${key}`;
     }
 
-    /**
-     * Get value from cache (Memory → Disk)
-     */
     async get(key: string): Promise<T | null> {
         const internalKey = this.getInternalKey(key);
 
         const memEntry = this.memoryCache.get(internalKey);
         if (memEntry) {
             if (Date.now() - memEntry.timestamp < this.options.ttl) {
+                // LRU: move to end
                 this.memoryCache.delete(internalKey);
                 this.memoryCache.set(internalKey, memEntry);
                 return memEntry.value;
@@ -76,9 +66,6 @@ export class CacheManager<T> {
         return null;
     }
 
-    /**
-     * Set value in cache (Memory + Disk)
-     */
     async set(key: string, value: T, options?: { skipPersist?: boolean }): Promise<void> {
         const internalKey = this.getInternalKey(key);
         const entry: CacheEntry<T> = {
@@ -88,9 +75,7 @@ export class CacheManager<T> {
 
         if (this.memoryCache.size >= this.options.maxItems && !this.memoryCache.has(internalKey)) {
             const oldestKey = this.memoryCache.keys().next().value;
-            if (oldestKey) {
-                this.memoryCache.delete(oldestKey);
-            }
+            if (oldestKey) this.memoryCache.delete(oldestKey);
         }
 
         this.memoryCache.set(internalKey, entry);
@@ -102,9 +87,6 @@ export class CacheManager<T> {
         }
     }
 
-    /**
-     * Delete from cache
-     */
     async delete(key: string): Promise<void> {
         const internalKey = this.getInternalKey(key);
         this.memoryCache.delete(internalKey);
@@ -113,9 +95,6 @@ export class CacheManager<T> {
         }
     }
 
-    /**
-     * Clear all cache
-     */
     async clear(): Promise<void> {
         this.memoryCache.clear();
         if (this.options.persist) {
@@ -123,17 +102,12 @@ export class CacheManager<T> {
         }
     }
 
-    /**
-     * Check if key exists in memory cache
-     */
     has(key: string): boolean {
         return this.memoryCache.has(this.getInternalKey(key));
     }
 
     /**
-     * Check if a cache entry is stale (older than staleTime)
-     * @param key - Cache key
-     * @param staleTime - Time in ms before entry is considered stale
+     * Vérifie si une entrée est plus ancienne que staleTime (ms).
      */
     isStale(key: string, staleTime: number): boolean {
         const entry = this.memoryCache.get(this.getInternalKey(key));
@@ -142,17 +116,25 @@ export class CacheManager<T> {
     }
 
     /**
-     * Deduplicate in-flight requests
-     * If a request is already in progress, return the same promise
+     * Accès synchrone au cache mémoire uniquement.
+     */
+    getMemoryValue(key: string): T | null {
+        const entry = this.memoryCache.get(this.getInternalKey(key));
+        if (entry && Date.now() - entry.timestamp < this.options.ttl) {
+            return entry.value;
+        }
+        return null;
+    }
+
+    /**
+     * Évite les requêtes réseau en double pour une même clé.
      */
     async fetchWithDeduplication(
         key: string,
         fetcher: () => Promise<T>
     ): Promise<T> {
         const inFlight = this.inFlightRequests.get(key);
-        if (inFlight) {
-            return inFlight;
-        }
+        if (inFlight) return inFlight;
 
         const promise = fetcher()
             .then((result) => {
@@ -168,9 +150,6 @@ export class CacheManager<T> {
     }
 }
 
-/**
- * Create a cache manager instance
- */
 export function createCacheManager<T>(
     storeName: StoreName,
     options?: CacheOptions

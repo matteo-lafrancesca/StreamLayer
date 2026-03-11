@@ -1,0 +1,78 @@
+import { useAuth } from '@context/AuthContext';
+import { usePlayerUI } from '@context/PlayerUIContext';
+import { usePlaylists } from '@hooks/Data/usePlaylists';
+import { getPlaylistDisplayInfo } from '@utils/player';
+import { AuthenticatedImage } from '../../Common/AuthenticatedImage';
+import type { Playlist } from '@definitions/playlist';
+import styles from '../../../../styles/PlayerViews.module.css';
+
+interface ProjectViewProps {
+    onPlaylistSelect: () => void;
+}
+
+export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
+    const { projectId } = useAuth();
+    const { setSelectedPlaylist, isExpanded } = usePlayerUI();
+    const { playlists, loading, error } = usePlaylists({
+        projectId,
+        autoRefresh: true,
+        refreshTrigger: isExpanded
+    });
+
+    if (loading) {
+        return (
+            <div className={styles.statusMessage}>
+                Chargement des playlists...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={styles.errorMessage}>
+                Erreur lors du chargement des playlists
+            </div>
+        );
+    }
+
+    const handlePlaylistClick = (playlist: Playlist) => {
+        setSelectedPlaylist(playlist);
+        onPlaylistSelect();
+    };
+
+    return (
+        <div className={styles.scrollContainer}>
+            <div className={styles.contentGrid}>
+                {playlists?.map((playlist) => {
+                    const displayInfo = getPlaylistDisplayInfo(playlist, 'm');
+
+                    return (
+                        <div
+                            key={playlist.id}
+                            onClick={() => handlePlaylistClick(playlist)}
+                            className={styles.playlistCard}
+                        >
+                            <AuthenticatedImage
+                                type="playlist"
+                                id={playlist.id}
+                                size="m"
+                                alt={displayInfo.title}
+                                className={styles.coverPlaylist}
+                            />
+
+                            <div className={styles.playlistInfo}>
+                                <div className={styles.playlistTitle}>
+                                    {displayInfo.title}
+                                </div>
+                                <div className={styles.playlistMeta}>
+                                    {displayInfo.nbTracks} titres
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+

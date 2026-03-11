@@ -1,3 +1,5 @@
+/* Styles du module Slider */
+
 .sliderContainer {
     position: relative;
     cursor: pointer;
@@ -7,7 +9,7 @@
 
 .sliderTrack {
     height: 4px;
-    background: var(--color-gray-300);
+    background: var(--color-gray-200);
     border-radius: var(--radius-sm);
     position: relative;
     overflow: visible;
@@ -15,7 +17,7 @@
 
 .sliderFill {
     height: 100%;
-    background: var(--color-black);
+    background: var(--color-slider);
     border-radius: var(--radius-sm);
     transition: width 0.1s ease;
     position: relative;
@@ -28,7 +30,7 @@
     transform: translateY(-50%);
     width: 12px;
     height: 12px;
-    background: var(--color-black);
+    background: var(--color-slider);
     border: 2px solid var(--color-white);
     border-radius: var(--radius-round);
     box-shadow: var(--shadow-sm);
@@ -50,21 +52,40 @@
     background: var(--color-spotify-green);
 }
 
-/* Thin variant for mobile progress bar */
+/* Variante fine (Thin) pour la barre de progression mobile */
 .thinContainer {
     padding: 0;
 }
 
 .thinTrack {
     height: 2px;
-    border-top-left-radius: var(--radius-sm);
-    border-top-right-radius: var(--radius-sm);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
     background: var(--color-gray-200);
 }
 
 .thin {
     height: 2px;
-    border-top-left-radius: var(--radius-sm);
-    border-top-right-radius: var(--radius-sm);
-    background: var(--color-black);
+    border-radius: 0 0 0 var(--radius-md);
+    background: var(--color-slider);
+}
+
+/* Animation "respiration" (Breathing) pour l'état de chargement - Global pour fonctionner à travers les modules */
+:global {
+    @keyframes breathing {
+
+        0%,
+        100% {
+            background-color: var(--color-gray-300);
+        }
+
+        50% {
+            background-color: var(--color-white);
+        }
+    }
+}
+
+/* Applique l'animation lorsque le parent a la classe loading ou disabled */
+:global(.loading) .sliderTrack,
+:global(.disabled) .sliderTrack {
+    animation: breathing 1s ease-in-out infinite;
 }

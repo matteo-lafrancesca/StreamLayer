@@ -1,24 +1,19 @@
 import { apiFetch } from './client';
-import type { ReportPayload, StatItem } from '@definitions/../types/Reporting';
+import { Logger } from '@utils/system';
+import type { StatItem } from '@definitions/reporting';
 
-/**
- * Sends a batch of reporting stats to the API.
- */
+// Envoie un lot de statistiques au serveur
 export async function sendStats(items: StatItem[]): Promise<void> {
     if (items.length === 0) return;
-
-    const payload: ReportPayload = { items };
 
     try {
         await apiFetch('/stats', {
             method: 'POST',
-            body: JSON.stringify(payload),
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            body: JSON.stringify({ items }),
+            headers: { 'Content-Type': 'application/json' },
         });
     } catch (error) {
-        console.error('[Reporting] Failed to send stats:', error);
+        Logger.error('[Reporting] Erreur lors de l\'envoi des stats :', error);
         throw error;
     }
 }

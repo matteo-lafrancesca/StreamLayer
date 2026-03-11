@@ -1,4 +1,4 @@
-/* Player Views CSS (Playlist/Project) */
+/* CSS des Vues du Lecteur (Playlist/Projet) */
 
 .trackCard {
     display: flex;
@@ -36,7 +36,7 @@
     width: 100%;
 }
 
-/* Responsive: 2 columns for smaller screens */
+/* Responsif : 2 colonnes pour les écrans plus petits */
 @media (max-width: 600px) {
     .contentGrid {
         grid-template-columns: repeat(2, 1fr);
@@ -137,8 +137,8 @@
     container-name: playlist-container;
 }
 
-/* On mobile, we use the parent (data-scrollable) for scrolling to avoid double-scrolling issues 
-   and allow the BottomSheet swipe-to-dismiss to work correctly. */
+/* Sur mobile, nous utilisons le parent (data-scrollable) pour le défilement afin d'éviter les problèmes de double défilement
+   et permettre au geste de fermeture du BottomSheet de fonctionner correctement. */
 @media (max-width: 768px) {
     .scrollContainer {
         overflow-y: visible;
@@ -185,7 +185,7 @@
     opacity: 1;
 }
 
-/* Queue sections */
+/* Sections de la file d'attente */
 .queueSection {
     margin-bottom: var(--spacing-xl);
 }
@@ -200,7 +200,7 @@
     margin: 0;
 }
 
-/* Loading more indicator */
+/* Indicateur de chargement supplémentaire */
 .loadingMore {
     padding: var(--spacing-lg);
     text-align: center;

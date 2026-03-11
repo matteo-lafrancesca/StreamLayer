@@ -1,8 +1,8 @@
-import type { Artist } from './artist';
-import type { Genre } from './genre';
-import type { Label } from './label';
-import type { Rights } from './rights';
+import { type Artist, type Genre, type Label, type Rights } from './metadata';
 
+/**
+ * Représente un album musical.
+ */
 export interface Album {
     id: number;
     title: string;
@@ -20,4 +20,3 @@ export interface Album {
     artists: Artist[];
     rights: Rights;
 }
-

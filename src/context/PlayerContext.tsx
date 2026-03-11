@@ -39,7 +39,7 @@ export const PlayerActionsContext = createContext<PlayerActionsContextType | und
 export function usePlayerState() {
     const context = useContext(PlayerStateContext);
     if (context === undefined) {
-        throw new Error('usePlayerState must be used within a PlayerProvider');
+        throw new Error('usePlayerState doit être utilisé à l\'intérieur d\'un PlayerProvider');
     }
     return context;
 }
@@ -47,11 +47,14 @@ export function usePlayerState() {
 export function usePlayerActions() {
     const context = useContext(PlayerActionsContext);
     if (context === undefined) {
-        throw new Error('usePlayerActions must be used within a PlayerProvider');
+        throw new Error('usePlayerActions doit être utilisé à l\'intérieur d\'un PlayerProvider');
     }
     return context;
 }
 
+/**
+ * Hook combiné pour accéder à tout le player (State + Actions)
+ */
 export function usePlayer() {
     const state = usePlayerState();
     const actions = usePlayerActions();

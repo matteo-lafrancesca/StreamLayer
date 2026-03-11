@@ -3,27 +3,17 @@ import type { Track } from '@definitions/track';
 import { fetchJson } from './client';
 import { ConfigManager } from '../../config/ConfigManager';
 
-/**
- * Generates HLS streaming URL for a track.
- * @param trackId - Track ID.
- * @param accessToken - Optional access token (added as query param).
- * @returns HLS manifest URL (.m3u8).
- */
+// Génère l'URL de streaming HLS pour une piste
 export function getTrackStreamUrl(trackId: number, accessToken?: string): string {
     const config = ConfigManager.getConfig();
     const baseUrl = `${config.apiBaseUrl}/tracks/${trackId}/hls`;
-    if (accessToken) {
-        return `${baseUrl}?authorization=${encodeURIComponent(accessToken)}`;
-    }
-    return baseUrl;
+    
+    return accessToken 
+        ? `${baseUrl}?authorization=${encodeURIComponent(accessToken)}` 
+        : baseUrl;
 }
 
-/**
- * Fetches track info by ID.
- * @param trackId - Track ID.
- * @param accessToken - Optional access token.
- * @returns Complete track info.
- */
+// Récupère les informations d'une piste par son ID
 export async function getTrackInfo(trackId: number, accessToken?: string): Promise<Track> {
     return fetchJson<Track>(`/tracks/${trackId}`, { accessToken });
 }

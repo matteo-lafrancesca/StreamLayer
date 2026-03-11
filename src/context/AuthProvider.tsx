@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { useAuthTokens } from '@hooks/useAuthTokens';
+import { useAuthTokens } from '@hooks/Auth/useAuthTokens';
 import { AuthContext } from './AuthContext';
 
 interface AuthProviderProps {

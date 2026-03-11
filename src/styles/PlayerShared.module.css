@@ -1,7 +1,7 @@
-/* Player Shared CSS - Styles communs entre Desktop et Mobile */
+/* CSS Partagé du Lecteur - Styles communs entre Desktop et Mobile */
 
 /* ========================================
-   Media Bar Section
+   Section du contrôle média (Media Bar)
    ======================================== */
 
 .mediaBarSection {
@@ -34,7 +34,7 @@
 }
 
 /* ========================================
-   Expandable Content
+   Contenu extensible (Expandable Content)
    ======================================== */
 
 .expandableContent {
@@ -52,7 +52,7 @@
     background: var(--bg-secondary);
 }
 
-/* Standalone state classes for proper CSS Module export */
+/* Classes d'état indépendantes pour l'exportation correcte des modules CSS */
 .collapsed {
     opacity: 0;
     pointer-events: none;
@@ -70,7 +70,7 @@
 }
 
 /* ========================================
-   Progress Slider (used in collapsed mode)
+   Curseur de progression (utilisé en mode réduit)
    ======================================== */
 
 .progressSlider {
@@ -82,7 +82,7 @@
     z-index: 20;
 }
 
-/* Queue Panel - 40% width attached to right */
+/* Panneau de file d'attente - 40% de largeur attaché à droite */
 .queuePanel {
     position: absolute;
     top: 0;
@@ -99,7 +99,7 @@
     flex-direction: column;
     overflow: hidden;
 
-    /* Animation - removed transform to avoid containing block issues */
+    /* Animation - transform supprimé pour éviter les problèmes de bloc de contenu */
     transition: opacity var(--transition-base);
 }
 

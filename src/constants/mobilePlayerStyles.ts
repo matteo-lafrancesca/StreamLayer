@@ -1,7 +1,4 @@
-/**
- * Mobile player styles
- * Static styles for the mobile player (no dynamic computation needed)
- */
+// Styles fixes pour le lecteur mobile (positionnement, apparence de la bulle)
 export const MOBILE_PLAYER_STYLES = {
     container: {
         position: 'fixed' as const,

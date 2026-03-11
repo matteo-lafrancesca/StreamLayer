@@ -1,7 +1,4 @@
-/**
- * Player size constants
- * Centralized constants for all player dimensions and icon sizes
- */
+// Dimensions et tailles des icônes pour les versions Desktop et Mobile
 export const PLAYER_SIZES = {
     DESKTOP: {
         COLLAPSED_HEIGHT: 72,

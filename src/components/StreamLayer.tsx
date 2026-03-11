@@ -4,31 +4,30 @@ import { ConfigManager } from '../config/ConfigManager';
 import { AuthProvider } from '@context/AuthProvider';
 import { PlayerUIProvider } from '@context/PlayerUIProvider';
 import { Player } from '@components/Player/Player';
-import { useBackButton } from '@hooks/useBackButton';
-import type { ThemeConfig } from '../types/Theme';
-import { generateThemeVariables } from '../utils/theme';
+import { useBackButton } from '@hooks/Player/useBackButton';
+import type { ThemeConfig } from '../types/metadata';
+import { generateThemeVariables } from '../utils/ui';
 
 export interface StreamLayerProps {
-    /** StreamLayer project ID */
+    /** ID du projet StreamLayer */
     projectId: string;
-    /** App content with access to audio context */
+    /** Contenu de l'application ayant accès au contexte audio */
     children?: ReactNode;
-    /** Optional theme configuration to override default styles */
+    /** Configuration optionnelle du thème pour surcharger les styles par défaut */
     theme?: ThemeConfig;
-    /** API Base URL */
+    /** URL de base de l'API */
     apiBaseUrl: string;
-    /** API Key ID */
+    /** ID de la clé API */
     apiKeyId: string;
-    /** API User Logic */
+    /** Identifiant utilisateur API */
     userApi: string;
-    /** API Password */
+    /** Mot de passe API */
     passwordApi: string;
 }
 
 /**
- * StreamLayer root component.
- * Encapsulates audio logic and player UI.
- * Wrap your app or content with this component.
+ * Composant racine de StreamLayer.
+ * Encapsule la logique audio et l'UI du player.
  */
 export function StreamLayer({
     projectId,

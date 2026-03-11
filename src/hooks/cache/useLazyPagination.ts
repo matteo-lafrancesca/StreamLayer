@@ -1,9 +1,8 @@
-/**
- * Generic hook for lazy pagination
- * Extracts pagination logic from usePlaylistTracksLazy
- */
+// Hook générique pour la pagination paresseuse (lazy pagination)
+// Extrait la logique de chargement par lots pour de meilleures performances initiales
 
 import { useState, useEffect, useRef } from 'react';
+import { Logger } from '@utils/system';
 
 export interface UseLazyPaginationOptions<T> {
     /** Unique key for this pagination instance */
@@ -28,17 +27,7 @@ export interface UseLazyPaginationResult<T> {
     dataKey: string | number | null;
 }
 
-/**
- * Generic hook for lazy pagination
- * Loads data in batches for fast initial render
- * 
- * @example
- * const { items, loading, loadingMore } = useLazyPagination({
- *   key: playlistId,
- *   fetcher: (offset, limit) => getPlaylistTracks({ playlistId, offset, limit }),
- *   batchSize: 10,
- * });
- */
+// Gère le chargement progressif des données en arrière-plan
 export function useLazyPagination<T>({
     key,
     fetcher,
@@ -110,8 +99,8 @@ export function useLazyPagination<T>({
                 }
             } catch (err) {
                 if (!cancelled) {
-                    console.error('[useLazyPagination] Load error:', err);
-                    setError(err instanceof Error ? err : new Error('Error loading data'));
+                    Logger.error('[useLazyPagination] Erreur de chargement :', err);
+                    setError(err instanceof Error ? err : new Error('Erreur de chargement des données'));
                     setLoading(false);
                     setLoadingMore(false);
                 }

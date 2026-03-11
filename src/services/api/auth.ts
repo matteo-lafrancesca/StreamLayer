@@ -5,20 +5,14 @@ interface TokenResponse {
     refresh_token: string;
 }
 
-/**
- * Fetches initial tokens (access & refresh).
- * @param projectId - Project ID.
- * @returns Access and refresh tokens.
- */
+// Récupère les tokens initiaux (access & refresh)
 export async function getInitialTokens(projectId: string): Promise<TokenResponse> {
     const config = ConfigManager.getConfig();
     const url = `${config.apiBaseUrl}/projects/${projectId}/token?apikey_id=${config.apiKeyId}`;
 
     const response = await fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             login: config.userApi,
             password: config.passwordApi,
@@ -26,18 +20,13 @@ export async function getInitialTokens(projectId: string): Promise<TokenResponse
     });
 
     if (!response.ok) {
-        throw new Error(`Error fetching tokens: ${response.status}`);
+        throw new Error(`Erreur lors de la récupération des tokens (Status: ${response.status})`);
     }
 
     return await response.json();
 }
 
-/**
- * Refreshes tokens using refresh_token.
- * @param projectId - Project ID.
- * @param refreshToken - Current refresh token.
- * @returns New access and refresh tokens.
- */
+// Rafraîchit les tokens avec le refresh_token
 export async function refreshTokens(projectId: string, refreshToken: string): Promise<TokenResponse> {
     const config = ConfigManager.getConfig();
     const url = `${config.apiBaseUrl}/projects/${projectId}/token`;
@@ -51,7 +40,7 @@ export async function refreshTokens(projectId: string, refreshToken: string): Pr
     });
 
     if (!response.ok) {
-        throw new Error(`Error refreshing tokens: ${response.status}`);
+        throw new Error(`Erreur lors du rafraîchissement des tokens (Status: ${response.status})`);
     }
 
     return await response.json();

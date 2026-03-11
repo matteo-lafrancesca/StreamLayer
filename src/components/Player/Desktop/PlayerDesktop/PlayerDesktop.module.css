@@ -1,0 +1,40 @@
+/* Styles du lecteur Desktop */
+
+.playerContainer {
+    position: fixed;
+    /* Position par défaut (En bas au centre) - écrasée par les styles inline lors du drag/snap */
+    bottom: 20px;
+    left: 50%;
+    margin-left: calc(var(--player-width-desktop) / -2);
+    z-index: var(--z-player);
+    /* Pas de transition par défaut sur les propriétés de position pour permettre des mises à jour instantanées lors du drag/drop */
+}
+
+
+
+.player {
+    width: var(--player-width-desktop);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    /* Redimensionnement fluide pour la largeur/hauteur */
+    transition: width var(--transition-base), height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s;
+}
+
+/* .playerCompact { } */
+
+.playerTransparent {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+
+.isDragging {
+    box-shadow: var(--shadow-2xl);
+    cursor: grabbing;
+    z-index: calc(var(--z-player) + 10);
+}

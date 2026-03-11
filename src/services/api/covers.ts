@@ -9,24 +9,14 @@ const COVER_DIMENSIONS: Record<CoverSize, { width: number; height: number }> = {
     l: { width: 500, height: 500 },
 };
 
-/**
- * Generates album cover URL.
- * @param albumId - Album ID.
- * @param size - Cover size ('s', 'm', or 'l').
- * @returns Album cover URL.
- */
+// Génère l'URL de la couverture d'un album
 export function getAlbumCoverUrl(albumId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
     const config = ConfigManager.getConfig();
     return `${config.apiBaseUrl}/albums/${albumId}/cover.jpg?height=${height}&width=${width}`;
 }
 
-/**
- * Generates playlist cover URL.
- * @param playlistId - Playlist ID.
- * @param size - Cover size ('s', 'm', or 'l').
- * @returns Playlist cover URL.
- */
+// Génère l'URL de la couverture d'une playlist
 export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): string {
     const { width, height } = COVER_DIMENSIONS[size];
     const config = ConfigManager.getConfig();
@@ -35,10 +25,7 @@ export function getPlaylistCoverUrl(playlistId: number, size: CoverSize = 'm'): 
 
 const inFlightRequests = new Map<string, Promise<string>>();
 
-/**
- * Generic helper to fetch cover with deduplication.
- * Returns a URL (string) instead of Blob to share reference.
- */
+// Helper interne pour charger une couverture avec dédoublonnement des requêtes
 async function fetchCoverWithDeduplication(
     key: string,
     url: string,
@@ -48,12 +35,10 @@ async function fetchCoverWithDeduplication(
         return inFlightRequests.get(key)!;
     }
 
-    const promise = apiFetch(url, {
-        accessToken,
-    })
+    const promise = apiFetch(url, { accessToken })
         .then(async (response) => {
             if (!response.ok) {
-                throw new Error(`Error loading cover: ${response.status}`);
+                throw new Error(`Erreur chargement couverture : ${response.status}`);
             }
             const blob = await response.blob();
             return URL.createObjectURL(blob);
@@ -66,14 +51,7 @@ async function fetchCoverWithDeduplication(
     return promise;
 }
 
-/**
- * Fetches album cover with authentication.
- * Handles deduplication of concurrent requests.
- * @param albumId - Album ID.
- * @param size - Cover size.
- * @param accessToken - Access token.
- * @returns Image URL (string).
- */
+// Récupère la couverture d'un album avec authentification
 export async function fetchAlbumCover(
     albumId: number,
     size: CoverSize,
@@ -84,14 +62,7 @@ export async function fetchAlbumCover(
     return fetchCoverWithDeduplication(key, url, accessToken);
 }
 
-/**
- * Fetches playlist cover with authentication.
- * Handles deduplication of concurrent requests.
- * @param playlistId - Playlist ID.
- * @param size - Cover size.
- * @param accessToken - Access token.
- * @returns Image URL (string).
- */
+// Récupère la couverture d'une playlist avec authentification
 export async function fetchPlaylistCover(
     playlistId: number,
     size: CoverSize,

@@ -1,25 +1,15 @@
-/**
- * Generic hook for caching data (JSON)
- * Replaces useDataFetcher with a cleaner, more maintainable implementation
- */
-
 import { useState, useEffect, useRef } from 'react';
+import { Logger } from '@utils/system';
 import { createCacheManager, type CacheManager, type CacheOptions } from '@cache/CacheManager';
 import { cacheFirst, staleWhileRevalidate } from '@cache/cacheStrategies';
-import { useApi } from '../useApi';
+import { useApi } from '../Auth/useApi';
 
 export interface UseCachedDataOptions<T> extends CacheOptions {
-    /** Unique cache key */
     key: string | number | null;
-    /** Function to fetch data (receives access token) */
     fetcher: (token: string) => Promise<T>;
-    /** Whether to enable fetching (default: true) */
     enabled?: boolean;
-    /** Access token (optional, will use AuthContext if not provided) */
     accessToken?: string | null;
-    /** Shared cache manager instance (optional, creates new if not provided) */
     cacheManager?: CacheManager<T>;
-    /** Cache strategy: 'cache-first' (default) or 'stale-while-revalidate' */
     strategy?: 'cache-first' | 'stale-while-revalidate';
 }
 
@@ -27,11 +17,9 @@ export interface UseCachedDataResult<T> {
     data: T | null;
     loading: boolean;
     error: Error | null;
-    /** Manually refetch data */
     refetch: () => void;
 }
 
-// Global cache managers (one per data type)
 const cacheManagers = new Map<string, CacheManager<any>>();
 
 function getCacheManager<T>(namespace: string, options?: CacheOptions): CacheManager<T> {
@@ -41,15 +29,8 @@ function getCacheManager<T>(namespace: string, options?: CacheOptions): CacheMan
     return cacheManagers.get(namespace)!;
 }
 
-/**
- * Generic hook for caching any JSON data
- * 
- * @example
- * const { data, loading, error } = useCachedData({
- *   key: playlistId,
- *   fetcher: (token) => getPlaylistTracks({ playlistId, token }),
- * });
- */
+// Hook générique pour la mise en cache de données JSON
+// Gère les stratégies Cache-First (cache d'abord) et Stale-While-Revalidate (revalidation en arrière-plan)
 export function useCachedData<T>({
     key,
     fetcher,
@@ -60,24 +41,16 @@ export function useCachedData<T>({
     ...cacheOptions
 }: UseCachedDataOptions<T>): UseCachedDataResult<T> {
     const { authenticatedCall } = useApi(providedAccessToken);
-
-    // 1. Get Cache Manager (Static)
     const cacheManager = providedCacheManager ?? getCacheManager<T>('default', cacheOptions);
 
-    // 2. Synchronous check to avoid flicker on first render
     const [data, setData] = useState<T | null>(() => {
         if (!enabled || key === null) return null;
-        // This only works for memory cache, but it's enough to avoid most flickers
-        // @ts-ignore - reaching into memoryCache for sync check if possible
-        const memEntry = cacheManager.memoryCache?.get(String(key));
-        return memEntry ? memEntry.value : null;
+        return cacheManager.getMemoryValue(String(key));
     });
 
     const [loading, setLoading] = useState(() => {
         if (!enabled || key === null) return false;
-        // If we have memory data, we are NOT loading initially (we might revalidate later)
-        // @ts-ignore
-        return !cacheManager.memoryCache?.has(String(key));
+        return cacheManager.getMemoryValue(String(key)) === null;
     });
 
     const [error, setError] = useState<Error | null>(null);
@@ -99,10 +72,7 @@ export function useCachedData<T>({
         let cancelled = false;
 
         const loadData = async () => {
-            // Only set loading if we don't already have data from a previous render
-            // or if it's an explicit re-fetch
-            const hasData = !!data;
-            if (!hasData) setLoading(true);
+            if (!data) setLoading(true);
             setError(null);
 
             try {
@@ -131,23 +101,18 @@ export function useCachedData<T>({
                 }
             } catch (err) {
                 if (!cancelled) {
-                    console.error('[useCachedData] Error:', err);
-                    setError(err instanceof Error ? err : new Error('Unknown error'));
+                    Logger.error('[useCachedData] Erreur :', err);
+                    setError(err instanceof Error ? err : new Error('Erreur inconnue'));
                     setLoading(false);
                 }
             }
         };
 
         loadData();
-
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [key, enabled, cacheManager, refetchTrigger]);
 
-    const refetch = () => {
-        setRefetchTrigger((prev) => prev + 1);
-    };
+    const refetch = () => setRefetchTrigger((prev) => prev + 1);
 
     return { data, loading, error, refetch };
 }

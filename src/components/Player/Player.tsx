@@ -1,20 +1,18 @@
-import { PlayerDesktop } from './PlayerDesktop';
-import { PlayerMobile } from './PlayerMobile';
-import { PlayerImagePreloader } from './PlayerImagePreloader';
-import { useMediaQuery } from '@hooks/useMediaQuery';
+import { useMediaQuery } from '@hooks/UI/useMediaQuery';
+import { PlayerMobile } from './Mobile/PlayerMobile';
+import { PlayerDesktop } from './Desktop/PlayerDesktop';
 
 /**
- * Player Component Router.
- * Renders both players (Desktop/Mobile) handling visibility via CSS.
+ * Composant dispatcher principal du Player.
+ * Alterne entre la version Mobile et Desktop en fonction de la largeur de l'écran.
  */
 export function Player() {
+    // Utilise une media query pour détecter le mode mobile (max-width: 768px)
     const isMobile = useMediaQuery('(max-width: 768px)');
 
-    return (
-        <>
-            <PlayerImagePreloader />
-            {isMobile ? <PlayerMobile /> : <PlayerDesktop />}
-        </>
-    );
-}
+    if (isMobile) {
+        return <PlayerMobile />;
+    }
 
+    return <PlayerDesktop />;
+}

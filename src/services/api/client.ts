@@ -1,5 +1,5 @@
-import { tokenManager } from '@services/tokenManager';
-import { ApiError } from '@definitions/../types/ApiError';
+import { tokenManager } from './tokenManager';
+import { ApiError } from '@definitions/api';
 
 import { ConfigManager } from '../../config/ConfigManager';
 
@@ -7,10 +7,7 @@ interface FetchOptions extends RequestInit {
     accessToken?: string;
 }
 
-/**
- * Low-level helper for API requests.
- * Uses tokenManager to handle auth if a token is provided.
- */
+// Helper de bas niveau pour les appels API
 export async function apiFetch(endpoint: string, options: FetchOptions = {}): Promise<Response> {
     const { accessToken, ...customOptions } = options;
 
@@ -37,15 +34,10 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
             });
 
             if (response.status === 401 || response.status === 403) {
-                throw new ApiError(`Auth Error: ${response.statusText}`, response.status);
+                throw new ApiError(`Erreur Auth : ${response.statusText}`, response.status);
             }
 
             return response;
-        } catch (error: any) {
-            if (error.name === 'AbortError') {
-                throw new ApiError('Request Timeout', 408);
-            }
-            throw error;
         } finally {
             clearTimeout(timeoutId);
         }
@@ -58,9 +50,7 @@ export async function apiFetch(endpoint: string, options: FetchOptions = {}): Pr
     return await performFetch();
 }
 
-/**
- * Generic helper for JSON API requests.
- */
+// Helper générique pour les appels API JSON
 export async function fetchJson<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const headers = {
         'Content-Type': 'application/json',
@@ -71,7 +61,7 @@ export async function fetchJson<T>(endpoint: string, options: FetchOptions = {})
 
     if (!response.ok) {
         throw new ApiError(
-            `API Error: ${response.statusText}`,
+            `Erreur API : ${response.statusText}`,
             response.status
         );
     }
