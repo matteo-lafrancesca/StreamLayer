@@ -42,12 +42,12 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
 
     return (
         <div className={styles.scrollContainer}>
-            <div className={styles.contentGrid}>
+            <ul className={styles.contentGrid}>
                 {playlists?.map((playlist) => {
                     const displayInfo = getPlaylistDisplayInfo(playlist, 'm');
 
                     return (
-                        <div
+                        <li
                             key={playlist.id}
                             onClick={() => handlePlaylistClick(playlist)}
                             className={styles.playlistCard}
@@ -68,10 +68,10 @@ export function ProjectView({ onPlaylistSelect }: ProjectViewProps) {
                                     {displayInfo.nbTracks} titres
                                 </div>
                             </div>
-                        </div>
+                        </li>
                     );
                 })}
-            </div>
+            </ul>
         </div>
     );
 }

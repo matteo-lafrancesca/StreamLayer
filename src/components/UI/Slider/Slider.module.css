@@ -5,6 +5,12 @@
     cursor: pointer;
     user-select: none;
     padding: 8px 0;
+    outline: none;
+}
+
+.sliderContainer:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-slider);
+    border-radius: var(--radius-sm);
 }
 
 .sliderTrack {

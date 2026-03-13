@@ -41,11 +41,23 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
         touchAction: 'none' as const,
     } : style;
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
+        }
+    };
+
     return (
-        <div
+        <li
             ref={setNodeRef}
             style={finalStyle}
             className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''} ${!isOverlay && isDragging ? styles.isDragging : ''} ${isOverlay ? styles.overlay : ''}`}
+            onClick={onClick}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+            role="button"
+            aria-label={`Lire ${track.title}`}
         >
             {!isPlaying && (
                 <div
@@ -64,7 +76,7 @@ function QueueTrackRowComponent({ track, onClick, isPlaying = false, id, isOverl
                 className={styles.trackInfo} 
                 onClick={onClick}
             />
-        </div>
+        </li>
     );
 }
 

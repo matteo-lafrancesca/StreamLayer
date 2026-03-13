@@ -1,12 +1,8 @@
 /**
  * StreamLayer Widget - Scoped Styles
  * Base styles scoped to .sl-root for widget isolation
- * LOAD THIS FILE FIRST!
  */
 
-/* ==========================================================================
-   1. ISOLATION ROOT
-   ========================================================================== */
 .sl-root {
   box-sizing: border-box;
 
@@ -26,18 +22,13 @@
   border: 0;
 }
 
-/* ==========================================================================
-   2. TARGETED NORMALIZATION (Scoped)
-   ========================================================================== */
 
-/* 2.1 Box Sizing */
 .sl-root *,
 .sl-root *::before,
 .sl-root *::after {
   box-sizing: border-box;
 }
 
-/* 2.2 Layout & Block elements */
 .sl-root body,
 .sl-root h1,
 .sl-root h2,
@@ -53,7 +44,6 @@
   margin: 0;
 }
 
-/* 2.3 Typography Defaults (scoped) */
 .sl-root h1,
 .sl-root h2,
 .sl-root h3,
@@ -64,7 +54,6 @@
   font-weight: inherit;
 }
 
-/* 2.4 Lists */
 .sl-root ul,
 .sl-root ol {
   list-style: none;
@@ -72,7 +61,6 @@
   padding: 0;
 }
 
-/* 2.5 Images & Inteactive */
 .sl-root img,
 .sl-root picture,
 .sl-root video,
@@ -86,7 +74,6 @@
   max-width: 100%;
 }
 
-/* 2.6 Buttons */
 .sl-root button {
   background: none;
   border: none;
@@ -97,7 +84,6 @@
   margin: 0;
 }
 
-/* 2.7 Inputs & Textareas */
 .sl-root input,
 .sl-root textarea,
 .sl-root select,
@@ -107,7 +93,6 @@
   line-height: var(--line-height-base, 1.5);
 }
 
-/* 2.8 Links */
 .sl-root a {
   text-decoration: none;
   color: inherit;

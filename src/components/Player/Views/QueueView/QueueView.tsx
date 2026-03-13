@@ -78,14 +78,16 @@ export function QueueView() {
             {currentTrack && (
                 <div className={styles.queueSection}>
                     <h3 className={styles.sectionTitle}>Titre en cours de lecture</h3>
-                    <QueueTrackRow
-                        track={currentTrack}
-                        onClick={() => {
-                            setIsPlaying(!isPlaying);
-                        }}
-                        isPlaying={true}
-                        isPlayingState={isPlaying}
-                    />
+                    <ul className={styles.tracksList} style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        <QueueTrackRow
+                            track={currentTrack}
+                            onClick={() => {
+                                setIsPlaying(!isPlaying);
+                            }}
+                            isPlaying={true}
+                            isPlayingState={isPlaying}
+                        />
+                    </ul>
                 </div>
             )}
 
@@ -117,19 +119,21 @@ export function QueueView() {
                             items={upcomingTracks.map(t => t.id.toString())}
                             strategy={verticalListSortingStrategy}
                         >
-                            {upcomingTracks.map((track) => {
-                                const realIndex = queue.findIndex(t => t === track);
-                                return (
-                                    <QueueTrackRow
-                                        key={track.id}
-                                        id={track.id.toString()}
-                                        track={track}
-                                        onClick={() => playTrackFromPlaylist(realIndex, queue)}
-                                        isPlaying={false}
-                                        isPlayingState={false}
-                                    />
-                                );
-                            })}
+                            <ul className={styles.tracksList} style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {upcomingTracks.map((track) => {
+                                    const realIndex = queue.findIndex(t => t === track);
+                                    return (
+                                        <QueueTrackRow
+                                            key={track.id}
+                                            id={track.id.toString()}
+                                            track={track}
+                                            onClick={() => playTrackFromPlaylist(realIndex, queue)}
+                                            isPlaying={false}
+                                            isPlayingState={false}
+                                        />
+                                    );
+                                })}
+                            </ul>
                         </SortableContext>
                     </div>
 

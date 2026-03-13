@@ -11,6 +11,7 @@
     /* For dnd-kit transform */
     background: var(--bg-secondary);
     touch-action: pan-y;
+    list-style: none; /* Reset pour li */
 }
 
 .row:hover {

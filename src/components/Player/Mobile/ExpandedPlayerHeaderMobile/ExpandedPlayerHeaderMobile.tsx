@@ -65,8 +65,8 @@ export function ExpandedPlayerHeaderMobile({
     };
 
     return (
-        <div className={styles.expandedPlayerHeader}>
+        <header className={styles.expandedPlayerHeader}>
             {renderHeaderContent()}
-        </div>
+        </header>
     );
 }

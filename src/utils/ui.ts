@@ -3,7 +3,7 @@ import type { ThemeConfig } from '@definitions/metadata';
 import type { CSSProperties } from 'react';
 
 /**
- * Utilitaires liés à l'interface utilisateur (Thème, Drag & Drop).
+ * Utilitaires liés à l'interface utilisateur.
  */
 
 // --- DRAG & DROP (DND-KIT) ---

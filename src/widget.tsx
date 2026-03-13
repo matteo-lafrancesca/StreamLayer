@@ -7,7 +7,7 @@ import '@styles/styles.css';
 import '@styles/design-tokens.css';
 import '@styles/utilities.css';
 
-import type { ThemeConfig } from './types/Theme';
+import type { ThemeConfig } from './types/theme';
 
 export interface StreamLayerConfig {
     projectId: string;
@@ -134,13 +134,23 @@ if (typeof document !== 'undefined') {
             const apiKeyId = dataset.apiKeyId;
             const userApi = dataset.userApi;
             const passwordApi = dataset.passwordApi;
+            const themeRaw = dataset.theme;
             const themePrimary = dataset.themePrimary;
             const themeSecondary = dataset.themeSecondary;
 
-            const theme = (themePrimary || themeSecondary) ? {
-                ...(themePrimary && { primary: themePrimary }),
-                ...(themeSecondary && { secondary: themeSecondary })
-            } : undefined;
+            let theme: { primary?: string; secondary?: string } | undefined;
+            if (themeRaw) {
+                try {
+                    theme = JSON.parse(themeRaw);
+                } catch {
+                    console.error('[StreamLayer] Invalid JSON in data-theme attribute.');
+                }
+            } else if (themePrimary || themeSecondary) {
+                theme = {
+                    ...(themePrimary && { primary: themePrimary }),
+                    ...(themeSecondary && { secondary: themeSecondary }),
+                };
+            }
 
             if (!apiBaseUrl || !apiKeyId || !userApi || !passwordApi) {
                 console.error('[StreamLayer] Missing required API configuration in script tag.',

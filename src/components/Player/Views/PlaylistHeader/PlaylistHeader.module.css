@@ -3,7 +3,7 @@
 .header {
     display: flex;
     gap: var(--spacing-xl);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
 }
 

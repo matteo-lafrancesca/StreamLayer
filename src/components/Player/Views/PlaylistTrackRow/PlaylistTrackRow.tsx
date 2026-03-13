@@ -19,8 +19,22 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
     const displayInfo = getTrackDisplayInfo(track, 's');
     const { album } = useAlbum(track.id_album);
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
+        }
+    };
+
     return (
-        <div className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} onClick={onClick}>
+        <li 
+            className={`${styles.row} ${isPlaying ? styles.rowPlaying : ''}`} 
+            onClick={onClick}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+            role="button"
+            aria-label={`Lire ${track.title} par ${track.artists?.map(a => a.name).join(', ')}`}
+        >
             <div className={styles.index}>
                 <div className={styles.indexContent}>
                     {isPlaying && isPlayingState ? (
@@ -47,7 +61,7 @@ function PlaylistTrackRowComponent({ track, index, onClick, isPlaying = false, i
             </div>
 
             <div className={styles.duration}>{displayInfo.duration}</div>
-        </div>
+        </li>
     );
 }
 

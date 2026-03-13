@@ -7,7 +7,6 @@ import { getAlbumCoverUrl, getPlaylistCoverUrl, type CoverSize } from '@services
  * Utilitaires liés à l'affichage du lecteur, des pistes, des albums et des playlists.
  */
 
-// --- FORMATAGE DU TEMPS ---
 
 /**
  * Formate une durée en secondes au format mm:ss (ex: 3:45).

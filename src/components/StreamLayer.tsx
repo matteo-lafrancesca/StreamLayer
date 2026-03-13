@@ -7,6 +7,7 @@ import { Player } from '@components/Player/Player';
 import { useBackButton } from '@hooks/Player/useBackButton';
 import type { ThemeConfig } from '../types/metadata';
 import { generateThemeVariables } from '../utils/ui';
+import { useKeyboardShortcuts } from '@hooks/UI/useKeyboardShortcuts';
 
 export interface StreamLayerProps {
     /** ID du projet StreamLayer */
@@ -59,6 +60,7 @@ export function StreamLayer({
                 <PlayerUIProvider>
                     <BackButtonHandler />
                     <PlayerProvider>
+                        <AccessibilityLayer />
                         {children}
                         <Player />
                     </PlayerProvider>
@@ -66,6 +68,11 @@ export function StreamLayer({
             </AuthProvider>
         </div>
     );
+}
+
+function AccessibilityLayer() {
+    useKeyboardShortcuts();
+    return null;
 }
 
 function BackButtonHandler() {

@@ -62,7 +62,7 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
     };
 
     return (
-        <div
+        <footer
             className={styles.mediaBar}
             onClick={handleMainClick}
             title={isExpanded && currentView !== 'queue' ? "Réduire" : "Ouvrir le lecteur"}
@@ -122,6 +122,6 @@ export function MediaBarDesktop({ isExpanded, onExpandToggle }: MediaBarDesktopP
                     />
                 </div>
             </div>
-        </div>
+        </footer>
     );
 }

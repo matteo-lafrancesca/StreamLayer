@@ -31,7 +31,11 @@ export function PlaybackControls({
         };
 
     return (
-        <div className={`${styles.playbackControls} ${variant === 'mobile' ? styles.mobile : ''}`}>
+        <div 
+            className={`${styles.playbackControls} ${variant === 'mobile' ? styles.mobile : ''}`}
+            role="toolbar"
+            aria-label="Contrôles de lecture"
+        >
             <IconButton
                 icon={<Shuffle size={sizes.shuffle} />}
                 className={`${styles.controlIconButton} ${playbackControlsState.isShuffled ? styles.active : styles.inactive}`}

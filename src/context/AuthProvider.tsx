@@ -8,7 +8,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ projectId, children }: AuthProviderProps) {
-    const { accessToken, refreshToken, setAccessToken, setRefreshToken, isLoading } = useAuthTokens({ projectId });
+    const { accessToken, refreshToken, setAccessToken, setRefreshToken, isLoading, error } = useAuthTokens({ projectId });
 
     if (isLoading) {
         return null;
@@ -22,6 +22,7 @@ export function AuthProvider({ projectId, children }: AuthProviderProps) {
                 setAccessToken,
                 refreshToken,
                 setRefreshToken,
+                error,
             }}
         >
             {children}

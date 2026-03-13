@@ -47,7 +47,7 @@ export function TrackViewMobile() {
 
     return (
         <div className={styles.trackViewMobile}>
-            <div className={styles.header}>
+            <header className={styles.header}>
                 <IconButton
                     icon={<ChevronDown size={PLAYER_SIZES.MOBILE.CHEVRON} />}
                     onClick={() => setIsExpanded(false)}
@@ -65,7 +65,7 @@ export function TrackViewMobile() {
                     )}
                 </div>
                 <div style={{ width: PLAYER_SIZES.MOBILE.CHEVRON }} />
-            </div>
+            </header>
 
             <div className={styles.trackContent} data-scrollable>
                 <div
@@ -81,7 +81,7 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                <div className={styles.trackInfo}>
+                <section className={styles.trackInfo}>
                     <ScrollingText
                         text={playingTrack?.title || ''}
                         className={styles.trackTitle}
@@ -92,7 +92,7 @@ export function TrackViewMobile() {
                         className={styles.trackArtist}
                         speed={16}
                     />
-                </div>
+                </section>
 
                 <div className={styles.progressSection}>
                     <ProgressBar
@@ -113,7 +113,7 @@ export function TrackViewMobile() {
                     />
                 </div>
 
-                <div className={styles.navigationFooter}>
+                <nav className={styles.navigationFooter}>
                     <button
                         className={styles.navButton}
                         onClick={() => setCurrentView(selectedPlaylist ? 'playlist' : 'project')}
@@ -129,7 +129,7 @@ export function TrackViewMobile() {
                         <ListVideo size={20} />
                         <span>File d'attente</span>
                     </button>
-                </div>
+                </nav>
             </div>
         </div>
     );

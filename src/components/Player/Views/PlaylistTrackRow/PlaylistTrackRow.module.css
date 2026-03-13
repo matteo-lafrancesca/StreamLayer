@@ -9,6 +9,7 @@
     cursor: pointer;
     transition: background var(--transition-base);
     align-items: center;
+    list-style: none; /* Reset pour li */
 }
 
 .row:hover {

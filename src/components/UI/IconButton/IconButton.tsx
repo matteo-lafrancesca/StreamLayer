@@ -30,7 +30,11 @@ export function IconButton({
     `.trim().replace(/\s+/g, ' ');
 
     return (
-        <button className={classes} {...props}>
+        <button 
+            className={classes} 
+            aria-label={props['aria-label'] || props.title}
+            {...props}
+        >
             {icon}
         </button>
     );

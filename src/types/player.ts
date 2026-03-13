@@ -1,14 +1,6 @@
 import { type CoverSize } from '@services/api/covers';
 
-/**
- * Configuration du thème dynamique.
- */
-export interface ThemeConfig {
-    /** Couleur d'ambiance (fond) */
-    primary?: string;
-    /** Couleur d'action (boutons, barres) */
-    secondary?: string;
-}
+export type { ThemeConfig } from './theme';
 
 /**
  * Définitions de types pour les composants du Player.

@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), cssInjectedByJs()],
   css: {
     modules: {
-      generateScopedName: 'sl-[name]__[local]___[hash:base64:5]',
+      generateScopedName: 'sl-[name]__[local]',
     }
   },
   resolve: {
@@ -38,6 +38,7 @@ export default defineConfig({
     assetsInlineLimit: 100000000, // Force inline of all assets
     rollupOptions: {
       output: {
+        inlineDynamicImports: true,
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') return 'stream-layer.css';
           return assetInfo.name || 'asset';

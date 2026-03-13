@@ -109,7 +109,7 @@ export function PlaylistView() {
 
             <PlaylistTableHeader />
 
-            <div className={styles.tracksList}>
+            <ol className={styles.tracksList}>
                 {tracks.map((track, index) => {
                     const isCurrentTrack = playingTrack?.id === track.id;
                     return (
@@ -131,7 +131,7 @@ export function PlaylistView() {
                         />
                     );
                 })}
-            </div>
+            </ol>
         </div>
     );
 }

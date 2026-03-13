@@ -26,6 +26,28 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
 
     const { ref, handleMouseDown, handleTouchStart, isDragging } = useSlider(handleSliderChange, onDragStart, onDragEnd);
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            handleSliderChange(Math.min(100, localValue + 5));
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            handleSliderChange(Math.max(0, localValue - 5));
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            handleSliderChange(0);
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            handleSliderChange(100);
+        } else if (e.key === 'PageUp') {
+            e.preventDefault();
+            handleSliderChange(Math.min(100, localValue + 10));
+        } else if (e.key === 'PageDown') {
+            e.preventDefault();
+            handleSliderChange(Math.max(0, localValue - 10));
+        }
+    };
+
     if (!isDragging && localValue !== value) {
         setLocalValue(value);
     }
@@ -58,6 +80,12 @@ export function Slider({ value, onChange, variant = 'default', showThumb = true,
             className={containerClasses}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+            role="slider"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(localValue)}
         >
             <div className={trackClasses}>
                 <div className={fillClasses} style={{ width: `${localValue}%` }}>

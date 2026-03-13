@@ -58,7 +58,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onEnded: () => {
             if (queueManager.repeatMode === 'one' && audioPlayer.audioRef.current) {
                 audioPlayer.audioRef.current.currentTime = 0;
-                audioPlayer.audioRef.current.play().catch((err) => Logger.error('[Player] Erreur répétition', err));
+                audioPlayer.audioRef.current.play().catch((err) => Logger.error('[Player] Error repeating', err));
                 if (!isPlaying) setIsPlaying(true);
             } else if (queueManager.canPlayNext) {
                 queueManager.playNext();
@@ -67,12 +67,8 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             }
         },
         onError: () => {
-            Logger.warn('[PlayerContext] Échec chargement piste, passage à la suivante');
             setIsPlaying(false);
-
-            if (queueManager.canPlayNext) {
-                queueManager.playNext();
-            }
+            if (queueManager.canPlayNext) queueManager.playNext();
         },
         onPlay: handlePlay,
         onPause: handlePause,
@@ -82,7 +78,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         onFormatChange: setStreamFormat,
     });
 
-    // Synchronize the ref immediately after useAudioPlayer is called
+    // Synchronisation de la ref pour useTrackReporting
     audioRef.current = audioPlayer.audioRef.current;
 
     const playbackControlsHook = usePlaybackControls({
@@ -94,14 +90,12 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
             if (currentTime > 5) {
                 audioPlayer.seek(0);
                 if (!isPlaying && playingTrack) setIsPlaying(true);
+            } else if (queueManager.canPlayPrevious) {
+                queueManager.playPrevious();
+                if (!isPlaying) setIsPlaying(true);
             } else {
-                if (queueManager.canPlayPrevious) {
-                    queueManager.playPrevious();
-                    if (!isPlaying) setIsPlaying(true);
-                } else {
-                    audioPlayer.seek(0);
-                    if (!isPlaying && playingTrack) setIsPlaying(true);
-                }
+                audioPlayer.seek(0);
+                if (!isPlaying && playingTrack) setIsPlaying(true);
             }
         },
         onNext: () => {
@@ -120,31 +114,21 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
         }
     }, [playlistTracks, queueManager.setQueue, selectedPlaylist]);
 
+    // Synchronisation de la file d'attente quand de nouveaux titres sont chargés (lazy loading)
     useEffect(() => {
-        if (
-            playingFromPlaylist &&
-            playlistTracks &&
-            selectedPlaylist?.id === playingFromPlaylist.id &&
-            selectedPlaylist?.nb_items &&
-            playlistTracks.length < selectedPlaylist.nb_items
-        ) {
-            return;
-        }
+        const isCurrentPlaylist = playingFromPlaylist && selectedPlaylist?.id === playingFromPlaylist.id;
+        if (!isCurrentPlaylist || !playlistTracks || !selectedPlaylist?.nb_items) return;
 
-        if (
-            playingFromPlaylist &&
-            playlistTracks &&
-            selectedPlaylist?.id === playingFromPlaylist.id &&
-            selectedPlaylist?.nb_items &&
-            playlistTracks.length === selectedPlaylist.nb_items &&
-            queueManager.totalTracks < selectedPlaylist.nb_items
-        ) {
-            const currentTrackIndex = playlistTracks.findIndex(t => t.id === queueManager.currentTrack?.id);
-            if (currentTrackIndex >= 0) {
-                queueManager.setQueue(playlistTracks, currentTrackIndex, { keepState: true });
+        // Si on a chargé de nouveaux titres mais que la file d'attente n'est pas à jour
+        if (playlistTracks.length > queueManager.totalTracks) {
+            const currentTrackId = queueManager.currentTrack?.id;
+            const newIndex = playlistTracks.findIndex(t => t.id === currentTrackId);
+            
+            if (newIndex >= 0) {
+                queueManager.setQueue(playlistTracks, newIndex, { keepState: true });
             }
         }
-    }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager.totalTracks, queueManager.currentTrack?.id, queueManager.setQueue]);
+    }, [playlistTracks, playingFromPlaylist, selectedPlaylist, queueManager]);
 
 
     const playbackControlsActions = useMemo(() => ({

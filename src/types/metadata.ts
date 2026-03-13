@@ -48,8 +48,4 @@ export interface Rights {
     offline: boolean;
 }
 
-/** Configuration du thème pour surcharger les couleurs */
-export interface ThemeConfig {
-    primary?: string;
-    secondary?: string;
-}
+export type { ThemeConfig } from './theme';

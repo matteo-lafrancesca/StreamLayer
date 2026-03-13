@@ -3,7 +3,6 @@
  * Classes CSS réutilisables pour éviter la duplication
  */
 
-/* ========== BUTTONS ========== */
 
 .sl-btn {
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -74,7 +73,6 @@
     font-size: var(--font-size-xs);
 }
 
-/* ========== ICON BUTTONS ========== */
 
 .sl-icon-btn {
     background: none;
@@ -102,7 +100,6 @@
     margin: calc(-1 * var(--hitbox-padding));
 }
 
-/* ========== CARDS ========== */
 
 .sl-card {
     background: var(--bg-secondary);
@@ -134,7 +131,6 @@
     padding: var(--spacing-lg);
 }
 
-/* ========== CONTAINERS ========== */
 
 .sl-container-flex {
     display: flex;
@@ -177,7 +173,6 @@
     gap: var(--spacing-xl);
 }
 
-/* ========== TEXT UTILITIES ========== */
 
 .sl-text-truncate {
     overflow: hidden;
@@ -208,7 +203,6 @@
     background-clip: text;
 }
 
-/* Font sizes */
 .sl-text-xs {
     font-size: var(--font-size-xs);
 }
@@ -233,7 +227,6 @@
     font-size: var(--font-size-2xl);
 }
 
-/* Font weights */
 .sl-font-light {
     font-weight: var(--font-weight-light);
 }
@@ -258,7 +251,6 @@
     font-weight: var(--font-weight-extrabold);
 }
 
-/* ========== IMAGES ========== */
 
 .sl-cover-sm {
     width: var(--player-cover-sm);
@@ -278,7 +270,6 @@
     border-radius: var(--radius-round);
 }
 
-/* ========== GRADIENTS ========== */
 
 .sl-gradient-primary {
     background: var(--gradient-primary);
@@ -292,7 +283,6 @@
     background: var(--gradient-accent);
 }
 
-/* ========== SHADOWS ========== */
 
 .sl-shadow-sm {
     box-shadow: var(--shadow-sm);
@@ -310,7 +300,6 @@
     box-shadow: var(--shadow-xl);
 }
 
-/* ========== BORDERS ========== */
 
 .sl-border-radius-sm {
     border-radius: var(--radius-sm);
@@ -336,7 +325,6 @@
     border-radius: var(--radius-pill);
 }
 
-/* ========== HOVER EFFECTS ========== */
 
 .sl-hover-lift {
     transition: var(--transition-transform);
@@ -362,8 +350,6 @@
     opacity: 0.6;
 }
 
-/* ========== BACKGROUNDS ========== */
-
 .sl-bg-primary {
     background-color: var(--bg-primary);
 }
@@ -376,7 +362,6 @@
     background-color: var(--bg-dark);
 }
 
-/* ========== UTILITIES DIVERSES ========== */
 
 .sl-no-select {
     user-select: none;
@@ -399,7 +384,6 @@
     position: absolute;
 }
 
-/* ========== ANIMATIONS PRÉDÉFINIES ========== */
 
 @keyframes sl-fade-in {
     from {

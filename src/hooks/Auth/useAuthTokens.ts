@@ -11,6 +11,7 @@ interface UseAuthTokensReturn {
     accessToken: string | null;
     refreshToken: string | null;
     isLoading: boolean;
+    error: Error | null;
     setAccessToken: (token: string | null) => void;
     setRefreshToken: (token: string | null) => void;
 }
@@ -19,6 +20,7 @@ interface UseAuthTokensReturn {
 export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensReturn {
     const [accessToken, setAccessToken] = useState<string | null>(tokenManager.getAccessToken());
     const [refreshToken, setRefreshToken] = useState<string | null>(tokenManager.getRefreshToken());
+    const [error, setError] = useState<Error | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -29,12 +31,18 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
             setRefreshToken(tokenManager.getRefreshToken());
         });
 
+        // Réinitialisation de l'erreur au changement de projectId
+        setError(null);
+        setIsLoading(true);
+
         getInitialTokens(projectId)
             .then((tokens) => {
                 tokenManager.setTokens(tokens.access_token, tokens.refresh_token);
+                setError(null);
             })
-            .catch((error) => {
-                Logger.error('Erreur lors de la récupération des tokens :', error);
+            .catch((err) => {
+                Logger.error('Erreur lors de la récupération des tokens :', err);
+                setError(err instanceof Error ? err : new Error(String(err)));
             })
             .finally(() => {
                 setIsLoading(false);
@@ -49,6 +57,7 @@ export function useAuthTokens({ projectId }: UseAuthTokensProps): UseAuthTokensR
         accessToken,
         refreshToken,
         isLoading,
+        error,
         setAccessToken,
         setRefreshToken,
     };

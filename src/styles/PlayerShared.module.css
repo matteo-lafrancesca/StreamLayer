@@ -11,23 +11,15 @@
     right: 0;
     padding: var(--spacing-md) var(--spacing-lg);
     height: var(--player-collapsed-height);
-    background: var(--bg-secondary);
+    background: color-mix(in srgb, var(--bg-secondary), transparent 15%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 10;
-
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 }
 
-.mediaBarSection::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: var(--spacing-lg);
-    right: var(--spacing-lg);
-    height: 1px;
-    background: transparent;
-    transition: background-color var(--transition-base);
-    transition: background-color var(--transition-base);
-}
+
 
 .mediaBarQueueMode {
     border-top-left-radius: var(--radius-md) !important;

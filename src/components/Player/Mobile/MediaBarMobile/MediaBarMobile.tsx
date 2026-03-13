@@ -24,7 +24,7 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
     };
 
     return (
-        <div
+        <footer
             className={styles.mediaBarMobile}
             onClick={handleExpand}
         >
@@ -45,6 +45,6 @@ export function MediaBarMobile({ onExpandToggle }: MediaBarMobileProps) {
                     enlargeHitbox
                 />
             </div>
-        </div>
+        </footer>
     );
 }

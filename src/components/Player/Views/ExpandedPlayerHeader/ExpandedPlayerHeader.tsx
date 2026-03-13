@@ -22,7 +22,7 @@ export function ExpandedPlayerHeader({
 }: ExpandedPlayerHeaderProps) {
 
     return (
-        <div className={styles.expandedPlayerHeader}>
+        <header className={styles.expandedPlayerHeader}>
             <div className={styles.leftSection}>
                 {currentView === 'playlist' && (
                     <button
@@ -47,6 +47,6 @@ export function ExpandedPlayerHeader({
                     enlargeHitbox
                 />
             </div>
-        </div>
+        </header>
     );
 }

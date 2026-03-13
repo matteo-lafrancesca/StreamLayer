@@ -2,7 +2,6 @@ import { apiFetch } from './client';
 import { Logger } from '@utils/system';
 import type { StatItem } from '@definitions/reporting';
 
-// Envoie un lot de statistiques au serveur
 export async function sendStats(items: StatItem[]): Promise<void> {
     if (items.length === 0) return;
 
@@ -13,7 +12,7 @@ export async function sendStats(items: StatItem[]): Promise<void> {
             headers: { 'Content-Type': 'application/json' },
         });
     } catch (error) {
-        Logger.error('[Reporting] Erreur lors de l\'envoi des stats :', error);
+        Logger.error('[Reporting] Failed to send stats:', error);
         throw error;
     }
 }

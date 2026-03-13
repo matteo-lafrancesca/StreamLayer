@@ -6,6 +6,7 @@ export interface AuthContextType {
     setAccessToken: (token: string | null) => void;
     refreshToken: string | null;
     setRefreshToken: (token: string | null) => void;
+    error: Error | null;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

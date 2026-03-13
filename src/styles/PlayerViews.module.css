@@ -31,9 +31,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, 160px);
     gap: var(--spacing-lg);
-    padding: var(--spacing-md);
+    padding: 0 var(--spacing-md) var(--spacing-md);
     justify-content: center;
     width: 100%;
+    list-style: none;
+    margin: 0;
 }
 
 /* Responsif : 2 colonnes pour les écrans plus petits */
@@ -132,13 +134,11 @@
 .scrollContainer {
     flex: 1;
     overflow-y: auto;
-    padding: var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
     container-type: inline-size;
     container-name: playlist-container;
 }
 
-/* Sur mobile, nous utilisons le parent (data-scrollable) pour le défilement afin d'éviter les problèmes de double défilement
-   et permettre au geste de fermeture du BottomSheet de fonctionner correctement. */
 @media (max-width: 768px) {
     .scrollContainer {
         overflow-y: visible;
@@ -157,6 +157,9 @@
 .tracksList {
     display: flex;
     flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .sectionHeader {

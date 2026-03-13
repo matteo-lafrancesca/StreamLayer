@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { playlistsCache } from '@cache/managers';
 import { useLazyPagination } from '../cache/useLazyPagination';
 import { useApi } from '../Auth/useApi';
+import { useAuth } from '@context/AuthContext';
 import { Logger } from '@utils/system';
 
 interface UsePlaylistsResult {
@@ -38,9 +39,11 @@ export function usePlaylists(
     const previousRefreshTrigger = useRef(refreshTrigger);
 
     const { authenticatedCall } = useApi();
+    const { error: authError } = useAuth();
 
     const [cachedPlaylists, setCachedPlaylists] = useState<Playlist[] | null>(null);
     const [cacheChecked, setCacheChecked] = useState(false);
+    const [swrError, setSwrError] = useState<Error | null>(null);
 
     const stableCacheKey = projectId ? `playlists-${projectId}` : null;
     const paginationKey = projectId ? `playlists-${projectId}-${refreshKey}` : null;
@@ -49,6 +52,7 @@ export function usePlaylists(
         if (!stableCacheKey) {
             setCachedPlaylists(null);
             setCacheChecked(false);
+            setSwrError(null);
             return;
         }
 
@@ -76,12 +80,18 @@ export function usePlaylists(
                     });
 
                     if (response.items && response.items.length > 0) {
-                        if (isSubscribed) setCachedPlaylists(response.items);
+                        if (isSubscribed) {
+                            setCachedPlaylists(response.items);
+                            setSwrError(null);
+                        }
                         return response.items;
                     }
                     return cached || [];
                 })
-            ).catch((err) => Logger.error('[usePlaylists] Échec revalidation :', err));
+            ).catch((err) => {
+                Logger.error('[usePlaylists] Échec revalidation :', err);
+                if (isSubscribed) setSwrError(err instanceof Error ? err : new Error(String(err)));
+            });
         };
 
         checkCache();
@@ -125,11 +135,13 @@ export function usePlaylists(
 
     const refreshPlaylists = useCallback(() => {
         setRefreshKey((prev: number) => prev + 1);
+        setSwrError(null);
     }, []);
 
     const forceRefresh = useCallback(() => {
         if (stableCacheKey) playlistsCache.delete(stableCacheKey);
         setCachedPlaylists(null);
+        setSwrError(null);
         setRefreshKey((prev: number) => prev + 1);
     }, [stableCacheKey]);
 
@@ -142,13 +154,15 @@ export function usePlaylists(
         previousRefreshTrigger.current = refreshTrigger;
     }, [refreshTrigger, refreshPlaylists]);
 
-    const playlists = cachedPlaylists || (pagination.items.length > 0 ? pagination.items : null);
+    // L'erreur est prioritaire sur les données si elle est présente (même avec du cache)
+    const error = authError || swrError || pagination.error;
+    const playlists = error ? null : (cachedPlaylists || (pagination.items.length > 0 ? pagination.items : null));
     const isLoading = pagination.loading && !cacheChecked && !cachedPlaylists;
 
     return {
         playlists,
         loading: isLoading,
-        error: pagination.error,
+        error,
         isLoadingMore: pagination.loadingMore,
         totalCount: playlists?.length ?? pagination.totalCount,
         refreshPlaylists,
