@@ -4,12 +4,10 @@
   "private": true,
   "type": "module",
   "main": "./dist/stream-layer.umd.js",
-  "module": "./dist/stream-layer.es.js",
   "types": "./dist/widget.d.ts",
   "exports": {
     ".": {
       "types": "./dist/widget.d.ts",
-      "import": "./dist/stream-layer.es.js",
       "require": "./dist/stream-layer.umd.js"
     },
     "./style.css": "./dist/stream-layer.css"

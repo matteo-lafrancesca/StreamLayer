@@ -32,7 +32,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/widget.tsx'),
       name: 'StreamLayer',
-      formats: ['umd', 'es'],
+      formats: ['umd'],
       fileName: (format) => `stream-layer.${format}.js`
     },
     assetsInlineLimit: 100000000, // Force inline of all assets
